@@ -23,6 +23,15 @@ export const broadcasts = {
   askAfter: (name: string) => `${name} 씨 안부 한 번 물어보기 좋은 날씨네요.`,
 } as const;
 
+/** 이장 한마디 (방송 라인이 아닌 말풍선) */
+export const ijangLines = {
+  sheetNew: '대충 적어도 됩니다. 이장도 대충 읽습니다.',
+  sheetEdit: '고쳐도 됩니다. 이미 심은 작물은 그대로입니다.',
+  sheetTooOld: '그날 기록은 이제 장부에 굳었습니다. 7일 지난 기록은 못 고칩니다.',
+  sheetNoBackfill: '지난날 빈칸은 비워 둡니다. 오늘 것만 적으시면 됩니다.',
+  noNeighbors: '아직 등록한 이웃이 없습니다. 이웃 탭에서 등록하면 여기 뜹니다.',
+} as const;
+
 /** 폭풍 방송은 "아아, 이장입니다." 머리말 없이 그대로 쓴다 */
 export function withPrefix(body: string): string {
   return body === broadcasts.storm ? body : `${BROADCAST_PREFIX} ${body}`;

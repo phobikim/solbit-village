@@ -1,10 +1,13 @@
 // 7a 마을 (메인). 단계 2: 목업 데이터로 정적 화면.
 
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { today as getToday } from '../../src/domain/day';
 import { mockVillage } from '../../src/mocks/village';
+import { useRecords } from '../../src/state/records';
 import { VillageScene } from '../../src/ui/characters';
 import { BroadcastLine } from '../../src/ui/components/BroadcastLine';
 import { IndexCard } from '../../src/ui/components/IndexCard';
@@ -14,6 +17,15 @@ import { colors, fonts, radius } from '../../src/ui/theme';
 
 export default function VillageScreen() {
   const v = mockVillage;
+  const today = getToday();
+  const recordedToday = useRecords((s) => !!s.byDate[today]);
+  const loadDay = useRecords((s) => s.loadDay);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadDay(today).catch((e) => console.warn('[records] load failed', e));
+    }, [loadDay, today]),
+  );
   return (
     <SafeAreaView edges={['top']} style={styles.root}>
       <View style={styles.header}>
@@ -42,7 +54,11 @@ export default function VillageScreen() {
         ))}
       </View>
 
-      <PrimaryButton label="오늘 기록하기" onPress={() => router.push('/record')} style={styles.cta} />
+      <PrimaryButton
+        label={recordedToday ? '오늘 기록 고치기' : '오늘 기록하기'}
+        onPress={() => router.push('/record')}
+        style={styles.cta}
+      />
     </SafeAreaView>
   );
 }

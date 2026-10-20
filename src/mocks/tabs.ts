@@ -3,39 +3,13 @@
 
 import type { Closeness, Relation } from '../copy/labels.ko';
 import type { DayKey } from '../domain/day';
-import type { IndexKind, Weather } from '../domain/types';
-import type { NpcHair, SoliMood } from '../ui/characters';
+import type { IndexKind } from '../domain/types';
+import type { NpcHair } from '../ui/characters';
 
 // ── 7b 기록 ─────────────────────────────────────────────────────────────
 
-export type MockDayRecord = {
-  date: DayKey;
-  mood: SoliMood;
-  work: 1 | 2 | 3;
-  note: string;
-  weather: Weather;
-};
-
-const W: Weather[] = [
-  'sun', 'cloud', 'cloud', 'sun', 'over', 'rain', 'rain', 'over', 'cloud', 'sun',
-  'sun', 'cloud', 'over', 'storm', 'rain', 'over', 'cloud', 'sun', 'rain', 'cloud',
-];
-
-/** 날짜별 날씨 (2026-10-01 ~ 10-20) */
-export const mockWeatherByDay: Record<DayKey, Weather> = Object.fromEntries(
-  W.map((w, i) => [`2026-10-${String(i + 1).padStart(2, '0')}`, w]),
-);
-
 /** 행사 날짜 (달력 현수막 표시) */
 export const mockEventDays: DayKey[] = ['2026-10-27', '2026-11-04', '2026-11-19'];
-
-export const mockRecords: MockDayRecord[] = [
-  { date: '2026-10-20', mood: 'normal', work: 3, note: '야근. 저녁은 편의점 김밥', weather: 'cloud' },
-  { date: '2026-10-19', mood: 'tired', work: 3, note: '회의 네 개. 목이 쉼', weather: 'rain' },
-  { date: '2026-10-18', mood: 'happy', work: 1, note: '늦잠 자고 냇가 산책', weather: 'sun' },
-  { date: '2026-10-17', mood: 'normal', work: 1, note: '엄마랑 장 보러 감', weather: 'cloud' },
-  { date: '2026-10-16', mood: 'happy', work: 2, note: '하준이랑 통화, 퇴근 후 산책', weather: 'over' },
-];
 
 // ── 7c 이웃 ─────────────────────────────────────────────────────────────
 
