@@ -1,0 +1,116 @@
+// 지수 4개 (SPEC 3장). 지수는 날씨처럼 오르내린다. 레벨·작물에는 영향을 주지 않는다.
+// SPEC 3장 [확정] 2026-10-20 — 최근 7일 기록 기준, 0~100. 값 조정은 이 파일의 상수만 바꾸면 된다.
+
+import { addDays, daysBetween, type DayKey } from './day';
+import type { Condition, DayRecord, IndexKind, WorkLevel } from './types';
+
+/** 최근 며칠을 볼지 */
+export const INDEX_WINDOW_DAYS = 7;
+
+const CONDITION_SCORE: Record<Condition, number> = { 1: 0, 2: 50, 3: 100 };
+const WORK_SCORE: Record<WorkLevel, number> = { 1: 20, 2: 55, 3: 90 };
+
+/** 관계: 최근 7일 연락이 이만큼이면 연락 수 점수 만점 */
+export const RELATION_FULL_CONTACTS = 5;
+
+/** 이웃 연락 주기별 "충족" 기준 (일) */
+export const FREQUENCY_WINDOW_DAYS = { often: 7, sometimes: 30, rarely: 90 } as const;
+export type Frequency = keyof typeof FREQUENCY_WINDOW_DAYS;
+
+export type IndexNeighbor = { id: string; frequency: Frequency; lastContact: DayKey | null };
+
+export type Indices = Record<IndexKind, number | null>;
+
+/** end 포함 최근 n일 기록 (end에서 i일 전 → i) */
+function windowRecords(records: Readonly<Record<DayKey, DayRecord>>, end: DayKey, n: number) {
+  const out: { ago: number; r: DayRecord }[] = [];
+  for (let i = 0; i < n; i++) {
+    const r = records[addDays(end, -i)];
+    if (r) out.push({ ago: i, r });
+  }
+  return out;
+}
+
+/** 건강: 컨디션 점수의 가중 평균. 최근일일수록 무겁다 (오늘 7 … 6일 전 1). */
+export function healthIndex(records: Readonly<Record<DayKey, DayRecord>>, end: DayKey): number | null {
+  const w = windowRecords(records, end, INDEX_WINDOW_DAYS);
+  if (!w.length) return null;
+  let sum = 0;
+  let weight = 0;
+  for (const { ago, r } of w) {
+    const k = INDEX_WINDOW_DAYS - ago;
+    sum += CONDITION_SCORE[r.condition] * k;
+    weight += k;
+  }
+  return Math.round(sum / weight);
+}
+
+/** 일: 일 강도 점수 평균. 높을수록 주의 신호. */
+export function workIndex(records: Readonly<Record<DayKey, DayRecord>>, end: DayKey): number | null {
+  const w = windowRecords(records, end, INDEX_WINDOW_DAYS);
+  if (!w.length) return null;
+  return Math.round(w.reduce((a, { r }) => a + WORK_SCORE[r.work], 0) / w.length);
+}
+
+/**
+ * 관계: 최근 7일 연락 수 점수와 이웃별 연락 주기 충족 비율의 평균.
+ * 등록한 이웃이 없으면 null.
+ */
+export function relationIndex(
+  records: Readonly<Record<DayKey, DayRecord>>,
+  neighbors: readonly IndexNeighbor[],
+  end: DayKey,
+): number | null {
+  if (!neighbors.length) return null;
+  const contacts = windowRecords(records, end, INDEX_WINDOW_DAYS).reduce((a, { r }) => a + r.contacts.length, 0);
+  const countScore = Math.min(1, contacts / RELATION_FULL_CONTACTS);
+  const met = neighbors.filter(
+    (n) => n.lastContact !== null && daysBetween(n.lastContact, end) < FREQUENCY_WINDOW_DAYS[n.frequency],
+  ).length;
+  const freqScore = met / neighbors.length;
+  return Math.round(100 * (countScore + freqScore) / 2);
+}
+
+/** 여가: 최근 7일 중 여가 기록이 있는 날 비율 */
+export function leisureIndex(records: Readonly<Record<DayKey, DayRecord>>, end: DayKey): number | null {
+  const w = windowRecords(records, end, INDEX_WINDOW_DAYS);
+  if (!w.length) return null;
+  const days = w.filter(({ r }) => r.leisure.length > 0).length;
+  return Math.round((100 * days) / INDEX_WINDOW_DAYS);
+}
+
+export function computeIndices(
+  records: Readonly<Record<DayKey, DayRecord>>,
+  neighbors: readonly IndexNeighbor[],
+  end: DayKey,
+): Indices {
+  return {
+    health: healthIndex(records, end),
+    work: workIndex(records, end),
+    relation: relationIndex(records, neighbors, end),
+    leisure: leisureIndex(records, end),
+  };
+}
+
+// ── 상태 문구 단계 (문구 자체는 copy/labels.ko.ts) ──────────────────────
+
+export type WorkBand = 'easy' | 'normal' | 'busy' | 'overtime';
+export function workBand(v: number): WorkBand {
+  return v >= 80 ? 'overtime' : v >= 60 ? 'busy' : v >= 35 ? 'normal' : 'easy';
+}
+
+export type RelationBand = 'bestFriend' | 'lively' | 'normal' | 'quiet';
+export function relationBand(v: number, hasBestFriend: boolean): RelationBand {
+  if (hasBestFriend) return 'bestFriend';
+  return v >= 60 ? 'lively' : v >= 30 ? 'normal' : 'quiet';
+}
+
+export type LeisureBand = 'full' | 'half' | 'bud' | 'none';
+export function leisureBand(v: number): LeisureBand {
+  return v >= 70 ? 'full' : v >= 40 ? 'half' : v > 0 ? 'bud' : 'none';
+}
+
+/** 일 과열 기준 (등불·방송) */
+export const WORK_OVERHEAT = 80;
+/** 여가 부족 기준 (방송) */
+export const LEISURE_LOW = 20;

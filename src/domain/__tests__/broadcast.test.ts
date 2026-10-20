@@ -1,0 +1,92 @@
+import { broadcasts, broadcastText } from '../../copy/broadcasts.ko';
+import { eul, iga } from '../../copy/josa';
+import { selectBroadcast, type BroadcastContext } from '../broadcast';
+import { bestFriendOf, villageVisitors } from '../neighbors';
+import { byDate, rec } from '../__fixtures__/records';
+
+const base: BroadcastContext = {
+  weather: 'sun',
+  leveledUpToday: false,
+  autoHarvestedToday: null,
+  visitorFromYesterday: null,
+  workIndex: 30,
+  leisureIndex: 60,
+  recentRecordCount: 5,
+  todayRecordOnly: false,
+  bestFriendName: null,
+  ripeCount: 0,
+};
+
+describe('방송 선택', () => {
+  it('폭풍이면 무조건 개그 없는 짧은 방송', () => {
+    const s = selectBroadcast({ ...base, weather: 'storm', leveledUpToday: true, visitorFromYesterday: '하준' });
+    expect(s).toEqual({ kind: 'storm' });
+    expect(broadcastText(s)).toBe('...오늘은 방송 안 합니다. 푹 쉬세요. 이상.');
+  });
+
+  it('우선순위: 레벨업 > 자동 수확 > 이웃 방문 > 일 과열 > 여가 부족', () => {
+    expect(selectBroadcast({ ...base, leveledUpToday: true, autoHarvestedToday: 'potato' }).kind).toBe('villageLevelUp');
+    expect(selectBroadcast({ ...base, autoHarvestedToday: 'potato', visitorFromYesterday: '하준' }).kind).toBe('autoHarvest');
+    expect(selectBroadcast({ ...base, visitorFromYesterday: '하준', workIndex: 90 }).kind).toBe('neighborVisit');
+    expect(selectBroadcast({ ...base, workIndex: 90, leisureIndex: 0 }).kind).toBe('workOverheat');
+    expect(selectBroadcast({ ...base, leisureIndex: 10 }).kind).toBe('leisureLow');
+  });
+
+  it('여가 부족은 기록이 3일 이상 있을 때만', () => {
+    expect(selectBroadcast({ ...base, leisureIndex: 0, recentRecordCount: 1 }).kind).toBe('quiet');
+  });
+
+  it('그 밖: 기록만 한 날 > 익은 작물 > 흐림 > 단짝 > 조용', () => {
+    expect(selectBroadcast({ ...base, todayRecordOnly: true, ripeCount: 2 }).kind).toBe('recordOnly');
+    expect(selectBroadcast({ ...base, ripeCount: 2, weather: 'rain' })).toEqual({ kind: 'ripe', count: 2 });
+    expect(selectBroadcast({ ...base, weather: 'over', bestFriendName: '서연' }).kind).toBe('cloudy');
+    expect(selectBroadcast({ ...base, bestFriendName: '서연' })).toEqual({ kind: 'bestFriend', name: '서연' });
+    expect(selectBroadcast(base).kind).toBe('quiet');
+  });
+
+  it('문구: 머리말과 조사', () => {
+    expect(broadcastText({ kind: 'autoHarvest', crop: 'strawberry' })).toBe(
+      '아아, 이장입니다. 밭이 꽉 차서 제일 오래된 딸기를 대신 땄습니다. 창고에 넣어놨습니다.',
+    );
+    expect(broadcastText({ kind: 'autoHarvest', crop: 'mushroom' })).toContain('버섯을 대신');
+    expect(broadcastText({ kind: 'neighborVisit', name: '하준' })).toBe(`아아, 이장입니다. ${broadcasts.neighborVisit('하준')}`);
+  });
+
+  it('조사', () => {
+    expect(eul('감자')).toBe('감자를');
+    expect(eul('커피콩')).toBe('커피콩을');
+    expect(iga('버섯')).toBe('버섯이');
+    expect(iga('해바라기')).toBe('해바라기가');
+  });
+});
+
+describe('이웃: 단짝 · 마을 방문', () => {
+  const c = (id: string, method: 'call' | 'meet' | 'message' = 'call') => ({ neighborId: id, method });
+
+  it('이번 달 연락이 가장 많은 이웃이 단짝, 같으면 최근', () => {
+    const records = byDate(
+      rec('2026-10-02', { contacts: [c('a'), c('b')] }),
+      rec('2026-10-05', { contacts: [c('b')] }),
+      rec('2026-10-09', { contacts: [c('a')] }),
+      rec('2026-09-30', { contacts: [c('z'), c('z')] }),
+    );
+    expect(bestFriendOf(records, { year: 2026, month: 10 })).toBe('a');
+    expect(bestFriendOf({}, { year: 2026, month: 10 })).toBeNull();
+  });
+
+  it('어제 연락한 이웃이 먼저(만남 우선), 남으면 최근 많이 연락한 이웃', () => {
+    const records = byDate(
+      rec('2026-10-19', { contacts: [c('b', 'message'), c('a', 'meet')] }),
+      rec('2026-10-15', { contacts: [c('c'), c('d')] }),
+      rec('2026-10-12', { contacts: [c('c')] }),
+    );
+    const active = new Set(['a', 'b', 'c', 'd']);
+    expect(villageVisitors(records, '2026-10-20', active)).toEqual(['a', 'b']);
+    expect(villageVisitors(records, '2026-10-20', active, 3)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('보관한(목록에 없는) 이웃은 오지 않는다', () => {
+    const records = byDate(rec('2026-10-19', { contacts: [c('gone', 'meet')] }));
+    expect(villageVisitors(records, '2026-10-20', new Set(['a']))).toEqual([]);
+  });
+});

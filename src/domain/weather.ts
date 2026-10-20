@@ -1,5 +1,5 @@
 // 컨디션 → 날씨 5단계 (SPEC 3장).
-// TODO: SPEC 3장 [미정] — 아래 값은 SPEC의 [제안] 그대로다. 2주 써보기(단계 7) 후 사용자와 조정.
+// SPEC 3장 [확정] 2026-10-20 — 최근 3일 컨디션 점수 평균 매핑. 값 조정은 이 파일의 상수만 바꾸면 된다.
 
 import { addDays, type DayKey } from './day';
 import type { Condition, Weather } from './types';
@@ -31,6 +31,19 @@ export function weatherOn(day: DayKey, conditionByDay: Readonly<Record<DayKey, C
     if (c !== undefined) scores.push(c);
   }
   return weatherFromScore(scores.reduce((a, b) => a + b, 0) / scores.length);
+}
+
+/**
+ * 지금 마을 날씨. 오늘 포함 최근 3일 중 기록 있는 날 평균 (오늘 기록이 없어도 된다).
+ * 최근 3일 기록이 하나도 없으면 null.
+ */
+export function weatherNow(today: DayKey, conditionByDay: Readonly<Record<DayKey, Condition>>): Weather | null {
+  const scores: number[] = [];
+  for (let i = 0; i < WEATHER_WINDOW_DAYS; i++) {
+    const c = conditionByDay[addDays(today, -i)];
+    if (c !== undefined) scores.push(c);
+  }
+  return scores.length ? weatherFromScore(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
 }
 
 export function isRainy(w: Weather | null): boolean {
