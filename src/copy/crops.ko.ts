@@ -60,3 +60,10 @@ export function seedChip(
 export const AUTO_HARVEST_LINE = '대신 땄습니다. 창고에 넣어놨습니다.';
 export const autoHarvestDesc = (oldCrop: string, newCrop: string, eul: (w: string) => string) =>
   `밭이 꽉 차서 제일 오래된 ${eul(oldCrop)} 따고 ${eul(newCrop)} 심었습니다.`;
+
+// ── 직접 수확 결과 ──────────────────────────────────────────────────────
+
+export const HARVEST_ACTION = '수확하기';
+export const HARVEST_LINE = '잘 익었네요. 창고에 넣어 두겠습니다.';
+export const HARVEST_LEVEL_UP_LINE = '농사 실력이 늘었습니다. 이장은 긴장하고 있습니다.';
+export const harvestTitle = (n: number) => `${n}개 수확`;

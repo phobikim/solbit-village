@@ -13,7 +13,7 @@ import {
 } from '../copy/labels.ko';
 import { selectBroadcast } from '../domain/broadcast';
 import { fieldSlots, ripePlantings } from '../domain/crops';
-import { addDays, type DayKey, yearMonthOf } from '../domain/day';
+import { addDays, timeOfDayAt, type DayKey, yearMonthOf } from '../domain/day';
 import {
   computeIndices,
   INDEX_WINDOW_DAYS,
@@ -50,9 +50,11 @@ export type VillageView = {
   scene: VillageSceneParams;
   indices: IndexCardView[];
   recordedToday: boolean;
+  /** 익은 작물이 있는 칸 (탭해서 수확) */
+  ripeSlots: number[];
 };
 
-export function useVillageView(today: DayKey): VillageView {
+export function useVillageView(today: DayKey, now: Date): VillageView {
   const byDate = useRecords((s) => s.byDate);
   const neighbors = useNeighbors((s) => s.list);
   const farm = useFarm();
@@ -81,7 +83,8 @@ export function useVillageView(today: DayKey): VillageView {
 
     const level = levelFromXp(farm.totalXp);
     const levelBefore = levelFromXp(farm.totalXp - farm.xpGainedToday).level;
-    const ripe = ripePlantings(farm.active, today).length;
+    const ripeList = ripePlantings(farm.active, today);
+    const ripe = ripeList.length;
 
     let recent = 0;
     for (let i = 0; i < INDEX_WINDOW_DAYS; i++) if (byDate[addDays(today, -i)]) recent++;
@@ -100,8 +103,7 @@ export function useVillageView(today: DayKey): VillageView {
     });
 
     const scene: VillageSceneParams = {
-      // TODO: 낮/밤 전환 시각은 SPEC [미정] — 결정 전까지 시안(7a)대로 밤
-      timeOfDay: 'night',
+      timeOfDay: timeOfDayAt(now),
       weather: weather ?? 'cloud',
       plots: fieldSlots(farm.active, today),
       soliMood: latest ? MOOD[latest.condition] : 'normal',
@@ -132,6 +134,13 @@ export function useVillageView(today: DayKey): VillageView {
       },
     ];
 
-    return { level, broadcast: broadcastText(situation), scene, indices, recordedToday: !!todayRec };
-  }, [byDate, neighbors, farm, today]);
+    return {
+      level,
+      broadcast: broadcastText(situation),
+      scene,
+      indices,
+      recordedToday: !!todayRec,
+      ripeSlots: ripeList.map((p) => p.slot),
+    };
+  }, [byDate, neighbors, farm, today, now]);
 }

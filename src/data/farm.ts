@@ -3,7 +3,7 @@
 
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import { cropFor, planSeed, type Planting } from '../domain/crops';
+import { cropFor, planSeed, ripePlantings, type Planting } from '../domain/crops';
 import { dayKeyOf, type DayKey } from '../domain/day';
 import type { CropKind, DayRecord } from '../domain/types';
 import { xpDelta, xpForRecord } from '../domain/village';
@@ -122,4 +122,34 @@ export function commitDayRecord(record: DayRecord, today: DayKey, now = Date.now
       result.xpGained = delta;
     }
   }).then(() => result);
+}
+
+// ── 직접 수확 ───────────────────────────────────────────────────────────
+
+export type HarvestResult = {
+  /** 이번에 딴 작물 (오래된 순) */
+  crops: CropKind[];
+  totalBefore: number;
+  totalAfter: number;
+};
+
+/** 밭의 익은 작물을 전부 수확한다. 익은 게 없으면 빈 결과. */
+export function harvestRipe(today: DayKey): Promise<HarvestResult> {
+  const result: HarvestResult = { crops: [], totalBefore: 0, totalAfter: 0 };
+  return writeTx(async (db) => {
+    const stat = await db.getFirstAsync<{ total_harvested: number }>('SELECT total_harvested FROM harvest_stat WHERE id = 1');
+    result.totalBefore = stat?.total_harvested ?? 0;
+    for (const p of ripePlantings(await activePlantingsOn(db), today)) {
+      await harvestTx(db, p, today, false);
+      result.crops.push(p.crop);
+    }
+    result.totalAfter = result.totalBefore + result.crops.length;
+  }).then(() => result);
+}
+
+/** 기록한 날 수 (7d '기록 n일째') */
+export async function countRecordDays(): Promise<number> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<{ n: number }>('SELECT COUNT(*) AS n FROM day_record');
+  return row?.n ?? 0;
 }

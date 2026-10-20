@@ -26,6 +26,10 @@ export const broadcasts = {
   weeklySummaryWorkHeavy: '솔이 씨 4주 치 정리했습니다. 일만 열심히 하셨네요.',
   ripe: (n: number) => `밭에 다 익은 작물이 ${n}개 있습니다. 안 따도 안 시듭니다. 그냥 알려드립니다.`,
   quiet: '오늘도 마을은 조용합니다. 별일 없는 게 제일입니다.',
+  weeklySummary: '솔이 씨 4주 치 정리했습니다. 대체로 무사했습니다.',
+  weeklySummaryEmpty: '4주 치 정리하려 했는데 적힌 게 별로 없습니다. 천천히 하셔도 됩니다.',
+  neighborsQuiet: '이웃 장부는 조용합니다. 조용한 것도 평화입니다.',
+  neighborsEmpty: '아직 이웃이 없습니다. 주민등록은 이장이 알아서 하겠습니다.',
   askAfter: (name: string) => `${name} 씨 안부 한 번 물어보기 좋은 날씨네요.`,
 } as const;
 

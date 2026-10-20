@@ -1,10 +1,11 @@
 // 7a 마을 (메인). 기록·밭·경험치를 SQLite에서 읽어 마을을 그린다.
 
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { HARVEST_ACTION } from '../../src/copy/crops.ko';
 import { VILLAGE_NAME, VILLAGE_TAGLINE } from '../../src/copy/labels.ko';
 import { today as getToday } from '../../src/domain/day';
 import { useFarm } from '../../src/state/farm';
@@ -25,10 +26,33 @@ export default function VillageScreen() {
   const loadRange = useRecords((s) => s.loadRange);
   const loadFarm = useFarm((s) => s.load);
   const loadNeighbors = useNeighbors((s) => s.load);
-  const v = useVillageView(today);
+  const harvest = useFarm((s) => s.harvest);
+  const [now, setNow] = useState(() => new Date());
+  const [harvesting, setHarvesting] = useState(false);
+  const v = useVillageView(today, now);
+
+  /** 익은 작물 전부 수확 → 수확 결과 */
+  const onHarvest = async () => {
+    if (harvesting) return;
+    setHarvesting(true);
+    try {
+      const r = await harvest();
+      if (r.crops.length) {
+        router.push({
+          pathname: '/harvest-result',
+          params: { crops: r.crops.join(','), before: String(r.totalBefore), after: String(r.totalAfter) },
+        });
+      }
+    } catch (e) {
+      console.warn('[harvest] failed', e);
+    } finally {
+      setHarvesting(false);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
+      setNow(new Date());
       const { from, to } = villageRange(today);
       Promise.all([loadRange(from, to), loadFarm(), loadNeighbors()]).catch((e) =>
         console.warn('[village] load failed', e),
@@ -51,11 +75,15 @@ export default function VillageScreen() {
         <LevelBar current={v.level.into} goal={v.level.needed} />
       </View>
 
-      <BroadcastLine message={v.broadcast} time={timeLabel(new Date())} />
+      <BroadcastLine
+        message={v.broadcast}
+        time={timeLabel(now)}
+        action={v.ripeSlots.length ? { label: HARVEST_ACTION, onPress: onHarvest } : undefined}
+      />
 
-      {/* 마을 무대: 탭해서 기록하는 장치는 두지 않는다 (CLAUDE.md 규칙 5) */}
+      {/* 마을 무대: 탭해서 기록하는 장치는 없다 (규칙 5). 익은 작물 칸만 눌러 수확한다. */}
       <View style={styles.scene}>
-        <VillageScene {...v.scene} />
+        <VillageScene scene={v.scene} ripeSlots={v.ripeSlots} onRipePress={onHarvest} />
       </View>
 
       <View style={styles.indices}>

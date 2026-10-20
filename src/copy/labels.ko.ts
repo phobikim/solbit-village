@@ -1,6 +1,6 @@
 // 화면에 반복해서 쓰는 짧은 이름표. 방송 문구는 broadcasts.ko.ts.
 
-import type { LeisureBand, RelationBand, WorkBand } from '../domain/indices';
+import type { LeisureBand, RelationBand, TrendBand, WorkBand } from '../domain/indices';
 import type { Weather } from '../domain/types';
 
 export const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'] as const;
@@ -30,16 +30,15 @@ export const RELATION_LABEL: Record<Relation, string> = {
 };
 
 /**
- * 가까움 단계 이름. 낮은 단계도 경고처럼 보이지 않게 쓴다 (CLAUDE.md 규칙 6).
- * 단계 계산식은 SPEC 7장 [미정].
+ * 가까움 단계 이름 (SPEC 7장). 규칙은 src/domain/neighbors.ts.
+ * '안부 묻기 좋은 이웃'은 목록 맨 아래 따로 둔다.
  */
 export const CLOSENESS_LABEL = {
   close: '가까움',
   normal: '보통',
-  sometimes: '가끔',
+  distant: '뜸함',
 } as const;
 
-export type Closeness = keyof typeof CLOSENESS_LABEL;
 
 // ── 지수 카드 상태 문구 (단계는 src/domain/indices.ts) ─────────────────
 
@@ -80,3 +79,14 @@ export const RELATION_NO_NEIGHBORS = '이웃 없음';
 
 export const VILLAGE_NAME = '솔빛 마을';
 export const VILLAGE_TAGLINE = '아직 망하진 않음';
+
+export const TREND_LABEL: Record<TrendBand, string> = {
+  up: '계속 오름',
+  slightlyUp: '조금 오름',
+  flat: '그대로',
+  slightlyDown: '살짝 하락',
+  down: '하락',
+  unknown: '기록 부족',
+};
+
+export const ASK_AFTER_TITLE = '안부 묻기 좋은 이웃';

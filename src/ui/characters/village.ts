@@ -67,10 +67,10 @@ const NIGHT: Palette = {
   window: '#FFE14D',
 };
 
-// 낮 색은 시안 village(낮) 팔레트에서 가져옴. 낮 무대 시안은 따로 없다.
+// 낮 색은 시안 village(낮) 팔레트에서 가져옴. 하늘 아래쪽은 낮 배경 토큰 #EAF6FF (SPEC 3장 낮/밤 확정).
 const DAY: Palette = {
   s1: '#7FCBFF',
-  s2: '#D8F2FF',
+  s2: '#EAF6FF',
   hill: '#9BE38A',
   ground: '#74D068',
   yard: '#A6E38E',
@@ -87,7 +87,9 @@ const DAY: Palette = {
   window: '#BFEBFF',
 };
 
-const PLOT_X = [10, 34.8, 59.6, 84.4, 109.2] as const;
+/** 밭 5칸의 왼쪽 x (viewBox 좌표). 칸 너비 23, 작물 포함 세로 160~206. */
+export const PLOT_X = [10, 34.8, 59.6, 84.4, 109.2] as const;
+export const PLOT_HIT = { width: 23, top: 160, bottom: 206 } as const;
 
 function escapeXml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

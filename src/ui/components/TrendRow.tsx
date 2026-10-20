@@ -9,28 +9,27 @@ import { indexColor } from './IndexCard';
 
 const LABEL: Record<IndexKind, string> = { health: '건강', work: '일', relation: '관계', leisure: '여가' };
 
-type Props = { kind: IndexKind; values: readonly number[]; summary: string };
+/** values: 오래된 주 → 이번 주, 기록 없는 주는 null */
+type Props = { kind: IndexKind; values: readonly (number | null)[]; summary: string };
 
 const VB_W = 140;
 const VB_H = 44;
 const PAD = 10;
 
-/** 0~100 값을 꺾은선 path로. 위가 높은 값. */
-function linePath(values: readonly number[]): string {
-  if (values.length === 0) return '';
+/** 0~100 값을 꺾은선 path로. 위가 높은 값. 기록 없는 주(null)는 건너뛰고 잇는다. */
+function linePath(values: readonly (number | null)[]): string {
   const step = values.length > 1 ? (VB_W - PAD * 2) / (values.length - 1) : 0;
-  return values
-    .map((v, i) => {
-      const x = PAD + step * i;
-      const y = VB_H - 4 - (Math.min(100, Math.max(0, v)) / 100) * (VB_H - 8);
-      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`;
-    })
-    .join(' ');
+  const pts = values
+    .map((v, i) => (v === null ? null : { x: PAD + step * i, y: VB_H - 4 - (Math.min(100, Math.max(0, v)) / 100) * (VB_H - 8) }))
+    .filter((p): p is { x: number; y: number } => p !== null);
+  if (pts.length === 1) pts.push({ x: pts[0].x + 0.1, y: pts[0].y });
+  return pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
 }
 
 export function TrendRow({ kind, values, summary }: Props) {
   // 일 지수는 이번 주 값으로 색을 정한다 (높을수록 빨강)
-  const col = indexColor(kind, values[values.length - 1] ?? 0);
+  const last = [...values].reverse().find((v): v is number => v !== null);
+  const col = last === undefined ? colors.textMuted : indexColor(kind, last);
   return (
     <View style={styles.row} accessibilityLabel={`${LABEL[kind]} ${summary}`}>
       <Text style={styles.label}>{LABEL[kind]}</Text>

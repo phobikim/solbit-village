@@ -1,47 +1,65 @@
-// 7c 이웃. 단계 2: 목업 데이터로 정적 화면.
-// 정렬은 가까운 순. 오래 연락 안 한 이웃은 맨 아래 "안부 묻기 좋은 이웃"에 차분하게 둔다 (SPEC 7장).
+// 7c 이웃. 가까운 순, 단짝, 맨 아래 "안부 묻기 좋은 이웃" (SPEC 7장).
 
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { broadcasts } from '../../src/copy/broadcasts.ko';
-import { RELATION_LABEL } from '../../src/copy/labels.ko';
-import { mockAskAfter, mockNeighbors } from '../../src/mocks/tabs';
-import { mockBroadcasts } from '../../src/mocks/village';
-import { Npc } from '../../src/ui/characters';
+import { ASK_AFTER_TITLE, RELATION_LABEL } from '../../src/copy/labels.ko';
+import { today as getToday, yearMonthOf } from '../../src/domain/day';
+import { useNeighbors } from '../../src/state/neighbors';
+import { useRecords } from '../../src/state/records';
+import { useNeighborsView } from '../../src/state/tabViews';
+import { Face } from '../../src/ui/characters';
+import { NEIGHBOR_COLORS } from '../../src/ui/characters/neighbors';
 import { Avatar } from '../../src/ui/components/Avatar';
 import { NeighborCard } from '../../src/ui/components/NeighborCard';
 import { RoundButton } from '../../src/ui/components/RoundButton';
 import { Screen } from '../../src/ui/components/Screen';
 import { colors, fonts } from '../../src/ui/theme';
 
+const timeLabel = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+
 export default function NeighborsScreen() {
-  const total = mockNeighbors.length + mockAskAfter.length;
+  const today = getToday();
+  const loadNeighbors = useNeighbors((s) => s.load);
+  const loadMonth = useRecords((s) => s.loadMonth);
+  const v = useNeighborsView(today);
+
+  useFocusEffect(
+    useCallback(() => {
+      Promise.all([loadNeighbors(), loadMonth(yearMonthOf(today), true)]).catch((e) =>
+        console.warn('[neighbors] load failed', e),
+      );
+    }, [loadNeighbors, loadMonth, today]),
+  );
+
   const addNeighbor = () => router.push('/neighbor-new');
+  const openNeighbor = (id: string) => router.push({ pathname: '/neighbor-new', params: { id } });
 
   const right = (
     <View style={styles.headerRight}>
       <Text style={styles.sortText}>
-        가까운 순 · <Text style={styles.sortNum}>{total}</Text>명
+        가까운 순 · <Text style={styles.sortNum}>{v.total}</Text>명
       </Text>
       <RoundButton icon="plus" size={40} accessibilityLabel="이웃 등록" onPress={addNeighbor} />
     </View>
   );
 
   return (
-    <Screen title="이웃" broadcast={mockBroadcasts.neighbors} right={right}>
+    <Screen title="이웃" broadcast={{ message: v.broadcast, time: timeLabel(new Date()) }} right={right}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {mockNeighbors.map((n) => (
-          <NeighborCard key={n.id} {...n} />
+        {v.listed.map((n) => (
+          <NeighborCard key={n.id} {...n} onPress={() => openNeighbor(n.id)} />
         ))}
 
-        {mockAskAfter.length > 0 && (
+        {v.askAfter.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>안부 묻기 좋은 이웃</Text>
-            {mockAskAfter.map((n) => (
-              <View key={n.id} style={styles.askCard}>
-                <Avatar size={44} background={colors.card}>
-                  <Npc color={n.color} hair={n.hair} size={40} />
+            <Text style={styles.sectionTitle}>{ASK_AFTER_TITLE}</Text>
+            {v.askAfter.map((n) => (
+              <View key={n.id} style={styles.askCard} onTouchEnd={() => openNeighbor(n.id)}>
+                <Avatar size={44} background={NEIGHBOR_COLORS[n.color] ?? colors.card}>
+                  <Face face={n.face} size={40} />
                 </Avatar>
                 <View style={styles.askBody}>
                   <Text style={styles.askName}>
@@ -53,6 +71,8 @@ export default function NeighborsScreen() {
             ))}
           </View>
         )}
+
+        {v.total === 0 && <Text style={styles.empty}>오른쪽 아래 + 로 이웃을 등록해 보세요.</Text>}
       </ScrollView>
 
       <RoundButton icon="plus" size={58} accessibilityLabel="이웃 등록" onPress={addNeighbor} style={styles.fab} />
@@ -80,6 +100,7 @@ const styles = StyleSheet.create({
   askName: { fontFamily: fonts.bodyHeavy, fontSize: 15, color: colors.text },
   askRel: { fontSize: 11, color: colors.textMuted },
   askText: { fontFamily: fonts.bodyBold, fontSize: 13, lineHeight: 19, color: colors.textSub },
+  empty: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.textMuted, textAlign: 'center', marginTop: 32 },
   fab: {
     position: 'absolute',
     right: 20,
