@@ -40,6 +40,7 @@ export default function RootLayout() {
             <Stack.Screen name="harvest-result" options={{ presentation: 'transparentModal', animation: 'fade', contentStyle: { backgroundColor: 'transparent' } }} />
             <Stack.Screen name="neighbor-new" options={{ presentation: 'modal' }} />
             <Stack.Screen name="ledger/index" />
+            <Stack.Screen name="ledger/new" options={{ presentation: 'modal' }} />
             <Stack.Screen name="storage" />
           </Stack>
         </View>

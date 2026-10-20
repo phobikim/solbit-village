@@ -9,7 +9,7 @@ import { cropIconSvg } from './crops';
 import { bannerIconSvg, weatherIconSvg } from './icons';
 import { ijangSvg, type IjangMood } from './ijang';
 import { faceSvg, FACES, npcSvg, type NpcHair } from './neighbors';
-import { soliSvg, type SoliMood } from './soli';
+import { soliSkinSvg, soliSvg, type SoliMood } from './soli';
 import { wrap } from './svg';
 import { PLOT_HIT, PLOT_X, VILLAGE_VIEWBOX, villageSceneSvg, villageSkyTop, type VillageSceneParams } from './village';
 
@@ -22,8 +22,8 @@ const Char = memo(function Char({ xml, size, style }: CharProps & { xml: string 
   return <SvgXml xml={xml} width={size} height={size * 1.1} style={style} />;
 });
 
-export function Soli({ mood, ...rest }: CharProps & { mood: SoliMood }) {
-  const xml = useMemo(() => wrap(soliSvg(mood)), [mood]);
+export function Soli({ mood, skin, ...rest }: CharProps & { mood: SoliMood; skin?: string | null }) {
+  const xml = useMemo(() => wrap(soliSvg(mood) + soliSkinSvg(skin ?? null)), [mood, skin]);
   return <Char xml={xml} {...rest} />;
 }
 

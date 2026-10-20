@@ -9,6 +9,7 @@ import { HARVEST_ACTION } from '../../src/copy/crops.ko';
 import { VILLAGE_NAME, VILLAGE_TAGLINE } from '../../src/copy/labels.ko';
 import { today as getToday } from '../../src/domain/day';
 import { useFarm } from '../../src/state/farm';
+import { useLedger, useSkins } from '../../src/state/ledger';
 import { useNeighbors } from '../../src/state/neighbors';
 import { useRecords } from '../../src/state/records';
 import { useVillageView, villageRange } from '../../src/state/villageView';
@@ -27,6 +28,8 @@ export default function VillageScreen() {
   const loadFarm = useFarm((s) => s.load);
   const loadNeighbors = useNeighbors((s) => s.load);
   const harvest = useFarm((s) => s.harvest);
+  const loadLedger = useLedger((s) => s.load);
+  const loadSkins = useSkins((s) => s.load);
   const [now, setNow] = useState(() => new Date());
   const [harvesting, setHarvesting] = useState(false);
   const v = useVillageView(today, now);
@@ -54,10 +57,10 @@ export default function VillageScreen() {
     useCallback(() => {
       setNow(new Date());
       const { from, to } = villageRange(today);
-      Promise.all([loadRange(from, to), loadFarm(), loadNeighbors()]).catch((e) =>
+      Promise.all([loadRange(from, to), loadFarm(), loadNeighbors(), loadLedger(), loadSkins()]).catch((e) =>
         console.warn('[village] load failed', e),
       );
-    }, [today, loadRange, loadFarm, loadNeighbors]),
+    }, [today, loadRange, loadFarm, loadNeighbors, loadLedger, loadSkins]),
   );
 
   return (

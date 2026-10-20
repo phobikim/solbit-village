@@ -17,6 +17,7 @@ import {
 import { canEditRecord, recordHeadline } from '../../src/domain/records';
 import type { Condition, Weather } from '../../src/domain/types';
 import { isRainy, weatherOn } from '../../src/domain/weather';
+import { useLedger } from '../../src/state/ledger';
 import { useRecords } from '../../src/state/records';
 import { MonthCalendar } from '../../src/ui/components/MonthCalendar';
 import { RecordCard } from '../../src/ui/components/RecordCard';
@@ -34,11 +35,13 @@ export default function RecordsScreen() {
 
   const byDate = useRecords((s) => s.byDate);
   const loadMonth = useRecords((s) => s.loadMonth);
+  const events = useLedger((s) => s.events);
+  const loadLedger = useLedger((s) => s.load);
 
   useFocusEffect(
     useCallback(() => {
-      loadMonth(month).catch((e) => console.warn('[records] load failed', e));
-    }, [loadMonth, month]),
+      Promise.all([loadMonth(month), loadLedger()]).catch((e) => console.warn('[records] load failed', e));
+    }, [loadMonth, loadLedger, month]),
   );
 
   const { weatherByDay, days } = useMemo(() => {
@@ -60,8 +63,7 @@ export default function RecordsScreen() {
   const rainyDays = Object.values(weatherByDay).filter(isRainy).length;
   const broadcast = { message: withPrefix(broadcasts.rainyMonth(rainyDays)), time: timeLabel(new Date()) };
 
-  // TODO(단계 5): 행사는 이장네 장부(event 테이블)에서
-  const eventDays = useMemo(() => new Set<DayKey>(), []);
+  const eventDays = useMemo(() => new Set<DayKey>(events.map((e) => e.date)), [events]);
 
   const monthNav = (
     <View style={styles.nav}>

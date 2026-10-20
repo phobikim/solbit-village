@@ -5,7 +5,7 @@
 import type { PlotSlot, TimeOfDay, Weather } from '../../domain/types';
 import { plotCrop } from './crops';
 import { faceSvg, FACES } from './neighbors';
-import { soliSvg, type SoliMood } from './soli';
+import { soliSkinSvg, soliSvg, type SoliMood } from './soli';
 import { bud, cloud, flower, L, nest, o, star, svgBodyFont } from './svg';
 
 export const VILLAGE_VIEWBOX = { width: 366, height: 340 } as const;
@@ -19,6 +19,8 @@ export type VillageSceneParams = {
   /** 밭 5칸 */
   plots: readonly PlotSlot[];
   soliMood: SoliMood;
+  /** 쓰고 있는 솔이 스킨 id */
+  soliSkin?: string | null;
   /** 마을에 놀러 온 가까운 이웃 (최대 2명 표시) */
   visitors: readonly VillageVisitor[];
   /** 가장 가까운 행사 현수막 문구. 없으면 현수막을 걸지 않는다. */
@@ -205,7 +207,7 @@ export function villageSceneSvg(p: VillageSceneParams, fit: 'meet' | 'slice' = '
   // 이웃(뒤) → 솔이 → 이웃(앞)
   const [near, far] = p.visitors;
   if (far) s += `<ellipse cx="326" cy="290" rx="24" ry="4.5" fill="#000" opacity=".25"/>` + nest(faceSvg(FACES[far.face] ?? FACES[0]), 296, 236, 60);
-  s += nest(soliSvg(p.soliMood), 90, 176, 140);
+  s += nest(soliSvg(p.soliMood) + soliSkinSvg(p.soliSkin ?? null), 90, 176, 140);
   if (near) {
     s += `<ellipse cx="268" cy="322" rx="36" ry="6" fill="#000" opacity=".25"/>` + nest(faceSvg(FACES[near.face] ?? FACES[0]), 226, 240, 84);
     if (near.heart)

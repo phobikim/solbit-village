@@ -1,6 +1,7 @@
 // 솔이 (soliIn) — design/solbit-v5.dc.html에서 이식. viewBox 0 0 200 220.
 
-import { L, o } from './svg';
+import { cropIconInner } from './crops';
+import { L, o, place48 } from './svg';
 
 /** 컨디션 표정: 지침 / 보통 / 신남 */
 export type SoliMood = 'tired' | 'normal' | 'happy';
@@ -52,4 +53,19 @@ export function soliSvg(m: SoliMood): string {
     `<circle cx="56" cy="152" r="9" fill="#FF8E8E" opacity=".9"/><circle cx="144" cy="152" r="9" fill="#FF8E8E" opacity=".9"/>` +
     `${eyes}${mouth}${ghost}${spark}`
   );
+}
+
+/** 솔이 스킨 (design skinIn 이식). 솔이 그림 위에 겹쳐 그린다. viewBox 0 0 200 220. */
+export function soliSkinSvg(id: string | null): string {
+  if (id === 'hat')
+    return `<ellipse cx="100" cy="68" rx="80" ry="14" fill="#F7D98A" ${o(5)}/><path d="M62 68 Q60 26 100 24 Q140 26 138 68Z" fill="#F2CD6B" ${o(5)}/><path d="M61.5 56 Q100 64 138.5 56 L138 68 Q100 76 62 68Z" fill="#FF4FA0" ${o(4)}/><path d="M76 40 l6 4 M100 32 l6 4 M120 38 l6 4" stroke="#C9A04A" stroke-width="3" stroke-linecap="round"/>`;
+  if (id === 'band')
+    return `<path d="M38 100 Q100 34 162 100" stroke="${L}" stroke-width="13" fill="none" stroke-linecap="round"/><path d="M38 100 Q100 34 162 100" stroke="#FF4A5E" stroke-width="7" fill="none" stroke-linecap="round"/>` +
+      place48(cropIconInner('strawberry'), 42, 46, 34) + place48(cropIconInner('strawberry'), 124, 46, 34);
+  if (id === 'apron')
+    return `<path d="M78 162 Q100 150 122 162" stroke="${L}" stroke-width="4" fill="none"/><path d="M64 164 H136 L132 196 Q100 204 68 196Z" fill="#8E5A34" ${o(5)}/><rect x="88" y="172" width="24" height="16" rx="4" fill="#B57A4E" ${o(3)}/>` +
+      place48(cropIconInner('coffee'), 91, 168, 18);
+  if (id === 'mush')
+    return `<path d="M162 142 L146 34" ${o(6)}/><path d="M162 142 L146 34" stroke="#FFF6D6" stroke-width="2.5" stroke-linecap="round"/><path d="M98 40 Q100 0 146 0 Q192 0 194 40 Q146 32 98 40Z" fill="#FF6B5A" ${o(5)}/><circle cx="124" cy="20" r="7" fill="#FFFFFF"/><circle cx="156" cy="12" r="5.5" fill="#FFFFFF"/><circle cx="174" cy="28" r="5" fill="#FFFFFF"/>`;
+  return '';
 }

@@ -179,6 +179,9 @@ export default function RecordSheet() {
                 ) : (
                   <View style={styles.empty}>
                     <Text style={styles.emptyText}>{ijangLines.noNeighbors}</Text>
+                    <Pressable onPress={() => router.push('/neighbor-new')} style={styles.devButton}>
+                      <Text style={styles.devText}>이웃 등록하러 가기</Text>
+                    </Pressable>
                     {__DEV__ && (
                       <Pressable
                         onPress={() => seedSampleNeighbors().then(loadNeighbors).catch((e) => console.warn(e))}

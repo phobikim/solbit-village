@@ -7,6 +7,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { VILLAGE_NAME } from '../../src/copy/labels.ko';
 import { parseDayKey, today as getToday } from '../../src/domain/day';
 import { useFarm } from '../../src/state/farm';
+import { useLedger, useSkins } from '../../src/state/ledger';
 import { useNeighbors } from '../../src/state/neighbors';
 import { useRecords } from '../../src/state/records';
 import { meRange, useMeView } from '../../src/state/tabViews';
@@ -28,13 +29,17 @@ export default function MeScreen() {
   const loadRange = useRecords((s) => s.loadRange);
   const loadFarm = useFarm((s) => s.load);
   const loadNeighbors = useNeighbors((s) => s.load);
+  const loadLedger = useLedger((s) => s.load);
+  const loadSkins = useSkins((s) => s.load);
   const me = useMeView(today);
 
   useFocusEffect(
     useCallback(() => {
       const { from, to } = meRange(today);
-      Promise.all([loadRange(from, to), loadFarm(), loadNeighbors()]).catch((e) => console.warn('[me] load failed', e));
-    }, [today, loadRange, loadFarm, loadNeighbors]),
+      Promise.all([loadRange(from, to), loadFarm(), loadNeighbors(), loadLedger(), loadSkins()]).catch((e) =>
+        console.warn('[me] load failed', e),
+      );
+    }, [today, loadRange, loadFarm, loadNeighbors, loadLedger, loadSkins]),
   );
 
   return (
@@ -42,7 +47,7 @@ export default function MeScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.profile}>
           <Avatar size={68} background={colors.yellow} offset={6}>
-            <Soli mood="normal" size={62} />
+            <Soli mood="normal" skin={me.soliSkin} size={62} />
           </Avatar>
           <View style={styles.profileBody}>
             <View style={styles.nameRow}>
@@ -72,21 +77,20 @@ export default function MeScreen() {
         </View>
 
         <View style={styles.menuRow}>
-          {/* TODO(단계 5): 다가오는 행사 수 */}
           <MenuCard
             icon="ledger"
             iconBg={colors.pink}
             title="이장네 장부"
-            subtitle="행사와 성취"
+            subtitle={me.upcomingEvents ? `다가오는 행사 ${me.upcomingEvents}개` : '행사와 성취'}
             onPress={() => router.push('/ledger')}
           />
-          {/* TODO(단계 5): 교환 가능한 스킨이 있으면 분홍 점 */}
           <MenuCard
             icon="storage"
             iconBg={colors.yellow}
             title="수확 창고"
             subtitle={`작물 ${me.storedCrops}개 보관 중`}
-            onPress={() => router.push('/storage')}
+            dot={me.canExchange}
+            onPress={() => router.push(me.canExchange ? { pathname: '/storage', params: { tab: 'exchange' } } : '/storage')}
           />
         </View>
         <View style={styles.menuRow}>
