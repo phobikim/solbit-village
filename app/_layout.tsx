@@ -34,6 +34,9 @@ export default function RootLayout() {
           <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.night } }}>
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="record" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="neighbor-new" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="ledger/index" />
+            <Stack.Screen name="storage" />
           </Stack>
         </View>
       </View>
