@@ -75,3 +75,24 @@ export async function insertNeighbor(n: Neighbor): Promise<void> {
 export function newNeighborId(now = Date.now()): string {
   return `n_${now.toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
+
+export function updateNeighbor(n: Omit<Neighbor, 'createdAt'>): Promise<void> {
+  return writeTx(async (db) => {
+    await db.runAsync(
+      'UPDATE neighbor SET name = ?, face = ?, color = ?, relation = ?, frequency = ? WHERE id = ?',
+      n.name,
+      n.face,
+      n.color,
+      n.relation,
+      n.frequency,
+      n.id,
+    );
+  });
+}
+
+/** 목록에서 내리기. 지난 기록의 연락은 그대로 남는다. */
+export function archiveNeighbor(id: string): Promise<void> {
+  return writeTx(async (db) => {
+    await db.runAsync('UPDATE neighbor SET archived = 1 WHERE id = ?', id);
+  });
+}

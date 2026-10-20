@@ -90,3 +90,12 @@ export const TREND_LABEL: Record<TrendBand, string> = {
 };
 
 export const ASK_AFTER_TITLE = '안부 묻기 좋은 이웃';
+
+export const FREQUENCY_LABEL = { often: '자주', sometimes: '가끔', rarely: '드물게' } as const;
+
+export const EVENT_TYPE_LABEL = { anniversary: '기념일', schedule: '일정', etc: '기타' } as const;
+/** 장부 칩 색: 기념일 · 일정 · 기타 · 성취 */
+export const EVENT_TYPE_COLOR = { anniversary: '#FF8CC6', schedule: '#5FD8FF', etc: '#C49BFF', achievement: '#FFE14D' } as const;
+export const ACHIEVEMENT_LABEL = '성취';
+
+export const SKIN_CATEGORY_LABEL = { soli: '솔이', building: '마을 건물', ijang: '이장 소품' } as const;

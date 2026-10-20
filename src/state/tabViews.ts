@@ -11,7 +11,10 @@ import { TREND_WEEKS, trendBand, weeklyTrend, type IndexNeighbor } from '../doma
 import { bestFriendOf, closenessOf, closenessRatio, monthContactCount, type Closeness } from '../domain/neighbors';
 import type { IndexKind } from '../domain/types';
 import { isUnlocked, levelFromXp, UNLOCK_LEVEL } from '../domain/village';
+import { upcomingEvents } from '../domain/events';
+import { exchangeableSkins, SKINS } from '../domain/harvest';
 import { useFarm } from './farm';
+import { useLedger, useSkins } from './ledger';
 import { useNeighbors } from './neighbors';
 import { useRecords } from './records';
 
@@ -86,6 +89,9 @@ export type MeView = {
   villageLevel: number;
   patternsLocked: boolean;
   patternsUnlockLevel: number;
+  upcomingEvents: number;
+  canExchange: boolean;
+  soliSkin: string | null;
   broadcast: string;
 };
 
@@ -98,6 +104,9 @@ export function useMeView(today: DayKey): MeView {
   const byDate = useRecords((s) => s.byDate);
   const list = useNeighbors((s) => s.list);
   const farm = useFarm();
+  const events = useLedger((s) => s.events);
+  const owned = useSkins((s) => s.owned);
+  const equipped = useSkins((s) => s.equipped);
   return useMemo(() => {
     const neighbors: IndexNeighbor[] = list.map((n) => ({ id: n.id, frequency: n.frequency, lastContact: n.lastContact }));
     const kinds: IndexKind[] = ['health', 'work', 'relation', 'leisure'];
@@ -122,7 +131,10 @@ export function useMeView(today: DayKey): MeView {
       villageLevel,
       patternsLocked: !isUnlocked('patterns', villageLevel),
       patternsUnlockLevel: UNLOCK_LEVEL.patterns,
+      upcomingEvents: upcomingEvents(events, today).length,
+      canExchange: exchangeableSkins(farm.inventory, owned).length > 0,
+      soliSkin: SKINS.find((k) => k.category === 'soli' && equipped.has(k.id))?.id ?? null,
       broadcast,
     };
-  }, [byDate, list, farm, today]);
+  }, [byDate, list, farm, today, events, owned, equipped]);
 }

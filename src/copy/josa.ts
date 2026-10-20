@@ -11,3 +11,5 @@ function hasFinalConsonant(word: string): boolean {
 export const eul = (w: string) => `${w}${hasFinalConsonant(w) ? '을' : '를'}`;
 /** 이/가 */
 export const iga = (w: string) => `${w}${hasFinalConsonant(w) ? '이' : '가'}`;
+/** 이랑/랑 */
+export const irang = (w: string) => `${w}${hasFinalConsonant(w) ? '이랑' : '랑'}`;

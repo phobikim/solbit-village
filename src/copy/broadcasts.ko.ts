@@ -3,7 +3,7 @@
 // 톤: 시니컬하지만 놀리는 대상은 상황이지 사용자가 아니다.
 
 import { CROP_NAME } from './crops.ko';
-import { eul, iga } from './josa';
+import { eul, iga, irang } from './josa';
 import type { BroadcastSituation } from '../domain/broadcast';
 
 export const BROADCAST_PREFIX = '아아, 이장입니다.';
@@ -20,8 +20,14 @@ export const broadcasts = {
   villageLevelUp: '마을이 커졌습니다. 이장 월급은 안 올랐습니다.',
   autoHarvest: (crop: string) => `밭이 꽉 차서 제일 오래된 ${eul(crop)} 대신 땄습니다. 창고에 넣어놨습니다.`,
   exchangeReady: (crop: string, n: number, skin: string) =>
-    `${iga(crop)} ${n}개 모였습니다. ${skin}랑 바꿀 수 있습니다. 안 바꿔도 되고요.`,
-  eventEve: (name: string) => `내일이 ${name} 씨 생신입니다. 빈손으로 가지 마세요.`,
+    `${iga(crop)} ${n}개 모였습니다. ${irang(skin)} 바꿀 수 있습니다. 안 바꿔도 되고요.`,
+  /** 행사 전날 — 기념일 */
+  eventEveAnniversary: (name: string) => `내일이 ${name}입니다. 빈손으로 가지 마세요.`,
+  /** 행사 전날 — 일정 · 기타 */
+  eventEve: (name: string) => `내일 ${name} 있습니다. 이장도 괜히 긴장됩니다.`,
+  exchangeDone: (skin: string) => `${skin} 들여놨습니다. 잘 어울립니다. 아마도요.`,
+  ledger: '장부에 다 적어뒀습니다. 이장은 다 기억합니다. 장부가요.',
+  storageQuiet: '창고는 잘 있습니다. 쥐는 없습니다. 아마도요.',
   rainyMonth: (days: number) => `이번 달 비 온 날이 ${days}일입니다. 우산은 각자 챙기세요.`,
   weeklySummaryWorkHeavy: '솔이 씨 4주 치 정리했습니다. 일만 열심히 하셨네요.',
   ripe: (n: number) => `밭에 다 익은 작물이 ${n}개 있습니다. 안 따도 안 시듭니다. 그냥 알려드립니다.`,
@@ -40,6 +46,11 @@ export const ijangLines = {
   sheetTooOld: '그날 기록은 이제 장부에 굳었습니다. 7일 지난 기록은 못 고칩니다.',
   sheetNoBackfill: '지난날 빈칸은 비워 둡니다. 오늘 것만 적으시면 됩니다.',
   noNeighbors: '아직 등록한 이웃이 없습니다. 이웃 탭에서 등록하면 여기 뜹니다.',
+  neighborNew: '새 이웃이요? 주민등록은 제가 알아서 하겠습니다.',
+  neighborEdit: '고칠 게 있으면 고치세요. 이장은 못 본 척하겠습니다.',
+  neighborArchiveConfirm: '목록에서만 내립니다. 지난 기록은 그대로 남습니다.',
+  eventNew: '현수막은 이장이 겁니다. 글씨는 장담 못 합니다.',
+  eventEdit: '날짜가 바뀌었나 봅니다. 현수막 다시 걸겠습니다.',
 } as const;
 
 /** 폭풍 방송은 "아아, 이장입니다." 머리말 없이 그대로 쓴다 */
@@ -52,6 +63,10 @@ export function broadcastText(s: BroadcastSituation): string {
   switch (s.kind) {
     case 'storm':
       return broadcasts.storm;
+    case 'eventEve':
+      return withPrefix(s.type === 'anniversary' ? broadcasts.eventEveAnniversary(s.name) : broadcasts.eventEve(s.name));
+    case 'exchangeReady':
+      return withPrefix(broadcasts.exchangeReady(CROP_NAME[s.crop], s.count, s.skin));
     case 'villageLevelUp':
       return withPrefix(broadcasts.villageLevelUp);
     case 'autoHarvest':

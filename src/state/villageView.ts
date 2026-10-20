@@ -29,7 +29,11 @@ import type { Condition, DayRecord, IndexKind } from '../domain/types';
 import { levelFromXp, type LevelProgress } from '../domain/village';
 import { WEATHER_WINDOW_DAYS, weatherNow } from '../domain/weather';
 import type { SoliMood, VillageSceneParams } from '../ui/characters';
+import { bannerEvent, eventsTomorrow } from '../domain/events';
+import { exchangeableSkins, exchangeHint, SKINS } from '../domain/harvest';
+import { dDayLabel } from '../domain/day';
 import { useFarm } from './farm';
+import { useLedger, useSkins } from './ledger';
 import { useNeighbors } from './neighbors';
 import { useRecords } from './records';
 
@@ -58,6 +62,9 @@ export function useVillageView(today: DayKey, now: Date): VillageView {
   const byDate = useRecords((s) => s.byDate);
   const neighbors = useNeighbors((s) => s.list);
   const farm = useFarm();
+  const events = useLedger((s) => s.events);
+  const owned = useSkins((s) => s.owned);
+  const equipped = useSkins((s) => s.equipped);
 
   return useMemo(() => {
     const conditionByDay: Record<DayKey, Condition> = Object.fromEntries(
@@ -89,8 +96,14 @@ export function useVillageView(today: DayKey, now: Date): VillageView {
     let recent = 0;
     for (let i = 0; i < INDEX_WINDOW_DAYS; i++) if (byDate[addDays(today, -i)]) recent++;
 
+    const banner = bannerEvent(events, today);
+    const eve = eventsTomorrow(events, today)[0];
+    const canExchange = exchangeableSkins(farm.inventory, owned)[0];
+
     const situation = selectBroadcast({
       weather,
+      eventTomorrow: eve ? { name: eve.name, type: eve.type } : null,
+      exchangeReady: canExchange ? exchangeHint(canExchange, farm.inventory) : null,
       leveledUpToday: level.level > levelBefore,
       autoHarvestedToday: farm.autoHarvestedToday,
       visitorFromYesterday: fromYesterday ? nameOf.get(fromYesterday)!.name : null,
@@ -108,8 +121,8 @@ export function useVillageView(today: DayKey, now: Date): VillageView {
       plots: fieldSlots(farm.active, today),
       soliMood: latest ? MOOD[latest.condition] : 'normal',
       visitors,
-      // TODO(단계 5): 가장 가까운 행사 현수막 (이장네 장부)
-      bannerText: null,
+      soliSkin: SKINS.find((k) => k.category === 'soli' && equipped.has(k.id))?.id ?? null,
+      bannerText: banner ? `${banner.name} ${dDayLabel(banner.date, today)}` : null,
       lanternOn: latest?.work === 3 || (idx.work !== null && idx.work >= WORK_OVERHEAT),
       bloom: (idx.leisure ?? 0) / 100,
     };
@@ -142,5 +155,5 @@ export function useVillageView(today: DayKey, now: Date): VillageView {
       recordedToday: !!todayRec,
       ripeSlots: ripeList.map((p) => p.slot),
     };
-  }, [byDate, neighbors, farm, today, now]);
+  }, [byDate, neighbors, farm, today, now, events, owned, equipped]);
 }

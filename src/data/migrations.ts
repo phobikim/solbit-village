@@ -74,6 +74,24 @@ export const MIGRATIONS: readonly string[] = [
   );
   CREATE INDEX village_xp_date ON village_xp(date);
   `,
+
+  // v3 — 단계 5: 행사(이장네 장부) · 스킨
+  `
+  CREATE TABLE event (
+    id         TEXT PRIMARY KEY NOT NULL,
+    name       TEXT NOT NULL,
+    date       TEXT NOT NULL,                         -- YYYY-MM-DD
+    type       TEXT NOT NULL CHECK (type IN ('anniversary', 'schedule', 'etc')),
+    created_at INTEGER NOT NULL
+  );
+  CREATE INDEX event_date ON event(date);
+
+  CREATE TABLE skin (
+    id       TEXT PRIMARY KEY NOT NULL,
+    owned    INTEGER NOT NULL DEFAULT 0,
+    equipped INTEGER NOT NULL DEFAULT 0
+  );
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;
