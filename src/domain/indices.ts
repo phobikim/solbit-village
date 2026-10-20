@@ -2,7 +2,10 @@
 // SPEC 3장 [확정] 2026-10-20 — 최근 7일 기록 기준, 0~100. 값 조정은 이 파일의 상수만 바꾸면 된다.
 
 import { addDays, daysBetween, type DayKey } from './day';
+import { FREQUENCY_WINDOW_DAYS, type Frequency } from './neighbors';
 import type { Condition, DayRecord, IndexKind, WorkLevel } from './types';
+
+export type { Frequency };
 
 /** 최근 며칠을 볼지 */
 export const INDEX_WINDOW_DAYS = 7;
@@ -13,9 +16,6 @@ const WORK_SCORE: Record<WorkLevel, number> = { 1: 20, 2: 55, 3: 90 };
 /** 관계: 최근 7일 연락이 이만큼이면 연락 수 점수 만점 */
 export const RELATION_FULL_CONTACTS = 5;
 
-/** 이웃 연락 주기별 "충족" 기준 (일) */
-export const FREQUENCY_WINDOW_DAYS = { often: 7, sometimes: 30, rarely: 90 } as const;
-export type Frequency = keyof typeof FREQUENCY_WINDOW_DAYS;
 
 export type IndexNeighbor = { id: string; frequency: Frequency; lastContact: DayKey | null };
 
@@ -52,23 +52,40 @@ export function workIndex(records: Readonly<Record<DayKey, DayRecord>>, end: Day
   return Math.round(w.reduce((a, { r }) => a + WORK_SCORE[r.work], 0) / w.length);
 }
 
+/** 기준일(end) 시점의 마지막 연락 날짜. end 이후 연락은 보지 않는다. */
+function lastContactAsOf(
+  records: Readonly<Record<DayKey, DayRecord>>,
+  n: IndexNeighbor,
+  end: DayKey,
+): DayKey | null {
+  if (n.lastContact !== null && daysBetween(n.lastContact, end) >= 0) return n.lastContact;
+  let last: DayKey | null = null;
+  for (const r of Object.values(records)) {
+    if (daysBetween(r.date, end) < 0) continue;
+    if (r.contacts.some((c) => c.neighborId === n.id) && (last === null || r.date > last)) last = r.date;
+  }
+  return last;
+}
+
 /**
  * 관계: 최근 7일 연락 수 점수와 이웃별 연락 주기 충족 비율의 평균.
- * 등록한 이웃이 없으면 null.
+ * 등록한 이웃이 없거나 최근 7일 기록이 없으면 null.
  */
 export function relationIndex(
   records: Readonly<Record<DayKey, DayRecord>>,
   neighbors: readonly IndexNeighbor[],
   end: DayKey,
 ): number | null {
-  if (!neighbors.length) return null;
-  const contacts = windowRecords(records, end, INDEX_WINDOW_DAYS).reduce((a, { r }) => a + r.contacts.length, 0);
+  const w = windowRecords(records, end, INDEX_WINDOW_DAYS);
+  if (!neighbors.length || !w.length) return null;
+  const contacts = w.reduce((a, { r }) => a + r.contacts.length, 0);
   const countScore = Math.min(1, contacts / RELATION_FULL_CONTACTS);
-  const met = neighbors.filter(
-    (n) => n.lastContact !== null && daysBetween(n.lastContact, end) < FREQUENCY_WINDOW_DAYS[n.frequency],
-  ).length;
+  const met = neighbors.filter((n) => {
+    const last = lastContactAsOf(records, n, end);
+    return last !== null && daysBetween(last, end) < FREQUENCY_WINDOW_DAYS[n.frequency];
+  }).length;
   const freqScore = met / neighbors.length;
-  return Math.round(100 * (countScore + freqScore) / 2);
+  return Math.round((100 * (countScore + freqScore)) / 2);
 }
 
 /** 여가: 최근 7일 중 여가 기록이 있는 날 비율 */
@@ -114,3 +131,35 @@ export function leisureBand(v: number): LeisureBand {
 export const WORK_OVERHEAT = 80;
 /** 여가 부족 기준 (방송) */
 export const LEISURE_LOW = 20;
+
+// ── 최근 4주 추세 (7d) ──────────────────────────────────────────────────
+
+export const TREND_WEEKS = 4;
+
+/** 오래된 주 → 이번 주. 각 주 마지막 날 기준 지수. */
+export function weeklyTrend(
+  kind: IndexKind,
+  records: Readonly<Record<DayKey, DayRecord>>,
+  neighbors: readonly IndexNeighbor[],
+  end: DayKey,
+): (number | null)[] {
+  const out: (number | null)[] = [];
+  for (let w = TREND_WEEKS - 1; w >= 0; w--) out.push(computeIndices(records, neighbors, addDays(end, -7 * w))[kind]);
+  return out;
+}
+
+/** 첫 주와 이번 주의 차이 → 추세 단계 (기록 있는 주가 2개 미만이면 unknown) */
+export const TREND_STEP = { big: 15, small: 5 } as const;
+
+export type TrendBand = 'up' | 'slightlyUp' | 'flat' | 'slightlyDown' | 'down' | 'unknown';
+
+export function trendBand(values: readonly (number | null)[]): TrendBand {
+  const known = values.filter((v): v is number => v !== null);
+  if (known.length < 2) return 'unknown';
+  const diff = known[known.length - 1] - known[0];
+  if (diff >= TREND_STEP.big) return 'up';
+  if (diff >= TREND_STEP.small) return 'slightlyUp';
+  if (diff > -TREND_STEP.small) return 'flat';
+  if (diff > -TREND_STEP.big) return 'slightlyDown';
+  return 'down';
+}

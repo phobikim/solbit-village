@@ -59,7 +59,18 @@ describe('관계 지수: 연락 수 점수와 연락 주기 충족 비율의 평
       { id: 'a', frequency: 'sometimes' as const, lastContact: '2026-10-01' },
       { id: 'b', frequency: 'often' as const, lastContact: '2026-10-01' },
     ];
-    expect(relationIndex({}, neighbors, today)).toBe(25);
+    expect(relationIndex(byDate(rec(today)), neighbors, today)).toBe(25);
+  });
+
+  it('최근 7일 기록이 없으면 null', () => {
+    expect(relationIndex({}, [{ id: 'a', frequency: 'often', lastContact: today }], today)).toBeNull();
+  });
+
+  it('과거 시점 계산엔 그 뒤의 연락을 쓰지 않는다', () => {
+    const records = byDate(rec('2026-09-29'), rec(today, { contacts: [contact('a')] }));
+    const neighbors = [{ id: 'a', frequency: 'often' as const, lastContact: today }];
+    expect(relationIndex(records, neighbors, '2026-09-29')).toBe(0);
+    expect(relationIndex(records, neighbors, today)).toBe(60); // (1/5 + 1) / 2
   });
 
   it('단계: 단짝이 있으면 단짝 있음', () => {

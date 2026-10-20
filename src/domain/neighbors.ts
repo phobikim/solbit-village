@@ -1,7 +1,52 @@
-// 이웃 규칙 (SPEC 7장). 가까움 계산식은 [미정] — 단계 5에서 사용자와 정한다.
+// 이웃 규칙 (SPEC 7장). 가까운 이웃을 부각하고, 소홀한 이웃을 경고처럼 다루지 않는다 (CLAUDE.md 규칙 6).
 
-import { addDays, parseDayKey, type DayKey, type YearMonth } from './day';
+import { addDays, daysBetween, parseDayKey, type DayKey, type YearMonth } from './day';
 import type { DayRecord } from './types';
+
+// ── 가까움 — SPEC 7장 [확정] 2026-10-20 ─────────────────────────────────
+
+/** 연락 주기별 기준일 */
+export const FREQUENCY_WINDOW_DAYS = { often: 7, sometimes: 30, rarely: 90 } as const;
+export type Frequency = keyof typeof FREQUENCY_WINDOW_DAYS;
+
+/** (마지막 연락 후 경과일 ÷ 기준일) 상한 → 단계. 2를 넘으면 '안부 묻기 좋은 이웃'. */
+export const CLOSENESS_RATIO = { close: 0.5, normal: 1, distant: 2 } as const;
+
+export type Closeness = 'close' | 'normal' | 'distant' | 'askAfter';
+
+/**
+ * 경과 비율. 연락한 적이 없으면 등록한 날부터 센다.
+ */
+export function closenessRatio(
+  frequency: Frequency,
+  lastContact: DayKey | null,
+  registeredOn: DayKey,
+  today: DayKey,
+): number {
+  const since = lastContact ?? registeredOn;
+  return Math.max(0, daysBetween(since, today)) / FREQUENCY_WINDOW_DAYS[frequency];
+}
+
+export function closenessOf(ratio: number): Closeness {
+  if (ratio <= CLOSENESS_RATIO.close) return 'close';
+  if (ratio <= CLOSENESS_RATIO.normal) return 'normal';
+  if (ratio <= CLOSENESS_RATIO.distant) return 'distant';
+  return 'askAfter';
+}
+
+/** 이번 달 연락 횟수 */
+export function monthContactCount(
+  records: Readonly<Record<DayKey, DayRecord>>,
+  month: YearMonth,
+  neighborId: string,
+): number {
+  let n = 0;
+  for (const r of Object.values(records)) {
+    const { year, month: m } = parseDayKey(r.date);
+    if (year === month.year && m === month.month) n += r.contacts.filter((c) => c.neighborId === neighborId).length;
+  }
+  return n;
+}
 
 /** 마을에 놀러 와 있는 이웃 최대 수 */
 export const VILLAGE_VISITOR_MAX = 2;

@@ -26,12 +26,10 @@ export function xpToNext(level: number): number {
 }
 
 /**
- * 해금 레벨.
- * TODO: SPEC 6장 [미정] — 아직 결정 전. 화면에서는 '발견한 패턴' 잠금 표시에만 쓴다.
+ * 해금 레벨 — SPEC 6장 [확정] 2026-10-20.
+ * '발견한 패턴'만 마을 Lv.10에 열린다. 나머지 기능은 처음부터 열려 있다.
  */
 export const UNLOCK_LEVEL = {
-  neighbors: 3,
-  leisureDrawer: 5,
   patterns: 10,
 } as const;
 

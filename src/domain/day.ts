@@ -7,6 +7,19 @@
  */
 export const DAY_BOUNDARY_HOUR = 4;
 
+/**
+ * 낮/밤 — SPEC 3장 [확정] 2026-10-20. 기기 현지 시각 06:00 ~ 18:59 낮, 그 외 밤.
+ * 하루 경계(DAY_BOUNDARY_HOUR)와는 별개다. 마을 무대 배경색만 바뀐다.
+ */
+export const DAY_START_HOUR = 6;
+/** 이 시각(시)부터 밤 */
+export const NIGHT_START_HOUR = 19;
+
+export function timeOfDayAt(at: Date): 'day' | 'night' {
+  const h = at.getHours();
+  return h >= DAY_START_HOUR && h < NIGHT_START_HOUR ? 'day' : 'night';
+}
+
 /** 'YYYY-MM-DD' */
 export type DayKey = string;
 
