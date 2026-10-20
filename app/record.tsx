@@ -122,7 +122,7 @@ export default function RecordSheet() {
     <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
       <View style={styles.handle} />
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" indicatorStyle="white">
           <IjangBubble text={bubble} />
           <View style={styles.titleRow}>
             <Text style={styles.title}>{date === today ? '오늘 기록' : '지난 기록'}</Text>

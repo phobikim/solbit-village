@@ -8,8 +8,10 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { initDb } from '../src/data/db';
 import { colors, fontFiles } from '../src/ui/theme';
+import { injectWebStyles } from '../src/ui/webStyles';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
+injectWebStyles();
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts(fontFiles);
