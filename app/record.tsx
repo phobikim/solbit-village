@@ -16,6 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ijangLines } from '../src/copy/broadcasts.ko';
+import { seedChip } from '../src/copy/crops.ko';
 import { WEEKDAYS } from '../src/copy/labels.ko';
 import { seedSampleNeighbors } from '../src/data/devSeed';
 import { parseDayKey, today as getToday, weekdayOf, type DayKey } from '../src/domain/day';
@@ -96,9 +97,22 @@ export default function RecordSheet() {
     setSaving(true);
     setError(null);
     try {
-      await save(normalizeDraft(date, draft, Date.now(), existing));
-      // TODO(단계 4): 처음 기록한 날이면 씨앗을 심고 씨앗 결과(9b, 9c)로 이동
-      close();
+      const record = normalizeDraft(date, draft, Date.now(), existing);
+      const { seed } = await save(record);
+      if (seed) {
+        const nameOf = (id: string) => neighbors.find((n) => n.id === id)?.name;
+        router.replace({
+          pathname: '/seed-result',
+          params: {
+            crop: seed.crop,
+            slot: String(seed.slot),
+            chip: seedChip(seed.crop, record, nameOf),
+            ...(seed.autoHarvested ? { auto: seed.autoHarvested } : {}),
+          },
+        });
+      } else {
+        close();
+      }
     } catch (e) {
       console.warn('[record] save failed', e);
       setError('저장하지 못했습니다. 다시 시도해 주세요.');

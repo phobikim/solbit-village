@@ -17,7 +17,6 @@ import {
 import { canEditRecord, recordHeadline } from '../../src/domain/records';
 import type { Condition, Weather } from '../../src/domain/types';
 import { isRainy, weatherOn } from '../../src/domain/weather';
-import { mockEventDays } from '../../src/mocks/tabs';
 import { useRecords } from '../../src/state/records';
 import { MonthCalendar } from '../../src/ui/components/MonthCalendar';
 import { RecordCard } from '../../src/ui/components/RecordCard';
@@ -58,12 +57,11 @@ export default function RecordsScreen() {
     return { weatherByDay: weather, days: list };
   }, [byDate, month]);
 
-  // TODO(단계 4): 방송 선택은 src/domain/broadcast.ts로
   const rainyDays = Object.values(weatherByDay).filter(isRainy).length;
   const broadcast = { message: withPrefix(broadcasts.rainyMonth(rainyDays)), time: timeLabel(new Date()) };
 
   // TODO(단계 5): 행사는 이장네 장부(event 테이블)에서
-  const eventDays = useMemo(() => new Set(mockEventDays), []);
+  const eventDays = useMemo(() => new Set<DayKey>(), []);
 
   const monthNav = (
     <View style={styles.nav}>

@@ -6,11 +6,6 @@ import type { DayKey } from '../domain/day';
 import type { IndexKind } from '../domain/types';
 import type { NpcHair } from '../ui/characters';
 
-// ── 7b 기록 ─────────────────────────────────────────────────────────────
-
-/** 행사 날짜 (달력 현수막 표시) */
-export const mockEventDays: DayKey[] = ['2026-10-27', '2026-11-04', '2026-11-19'];
-
 // ── 7c 이웃 ─────────────────────────────────────────────────────────────
 
 export type MockNeighbor = {

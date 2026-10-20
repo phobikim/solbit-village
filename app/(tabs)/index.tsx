@@ -1,13 +1,16 @@
-// 7a 마을 (메인). 단계 2: 목업 데이터로 정적 화면.
+// 7a 마을 (메인). 기록·밭·경험치를 SQLite에서 읽어 마을을 그린다.
 
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { VILLAGE_NAME, VILLAGE_TAGLINE } from '../../src/copy/labels.ko';
 import { today as getToday } from '../../src/domain/day';
-import { mockVillage } from '../../src/mocks/village';
+import { useFarm } from '../../src/state/farm';
+import { useNeighbors } from '../../src/state/neighbors';
 import { useRecords } from '../../src/state/records';
+import { useVillageView, villageRange } from '../../src/state/villageView';
 import { VillageScene } from '../../src/ui/characters';
 import { BroadcastLine } from '../../src/ui/components/BroadcastLine';
 import { IndexCard } from '../../src/ui/components/IndexCard';
@@ -15,33 +18,40 @@ import { LevelBar } from '../../src/ui/components/LevelBar';
 import { PrimaryButton } from '../../src/ui/components/PrimaryButton';
 import { colors, fonts, radius } from '../../src/ui/theme';
 
+const timeLabel = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+
 export default function VillageScreen() {
-  const v = mockVillage;
   const today = getToday();
-  const recordedToday = useRecords((s) => !!s.byDate[today]);
-  const loadDay = useRecords((s) => s.loadDay);
+  const loadRange = useRecords((s) => s.loadRange);
+  const loadFarm = useFarm((s) => s.load);
+  const loadNeighbors = useNeighbors((s) => s.load);
+  const v = useVillageView(today);
 
   useFocusEffect(
     useCallback(() => {
-      loadDay(today).catch((e) => console.warn('[records] load failed', e));
-    }, [loadDay, today]),
+      const { from, to } = villageRange(today);
+      Promise.all([loadRange(from, to), loadFarm(), loadNeighbors()]).catch((e) =>
+        console.warn('[village] load failed', e),
+      );
+    }, [today, loadRange, loadFarm, loadNeighbors]),
   );
+
   return (
     <SafeAreaView edges={['top']} style={styles.root}>
       <View style={styles.header}>
         <View style={styles.titleRow}>
           <View style={styles.titleCol}>
-            <Text style={styles.title}>{v.name}</Text>
-            <Text style={styles.tagline}>{v.tagline}</Text>
+            <Text style={styles.title}>{VILLAGE_NAME}</Text>
+            <Text style={styles.tagline}>{VILLAGE_TAGLINE}</Text>
           </View>
           <View style={styles.levelBadge}>
-            <Text style={styles.levelText}>Lv.{v.level}</Text>
+            <Text style={styles.levelText}>Lv.{v.level.level}</Text>
           </View>
         </View>
-        <LevelBar current={v.xp.current} goal={v.xp.goal} />
+        <LevelBar current={v.level.into} goal={v.level.needed} />
       </View>
 
-      <BroadcastLine {...v.broadcast} />
+      <BroadcastLine message={v.broadcast} time={timeLabel(new Date())} />
 
       {/* 마을 무대: 탭해서 기록하는 장치는 두지 않는다 (CLAUDE.md 규칙 5) */}
       <View style={styles.scene}>
@@ -55,7 +65,7 @@ export default function VillageScreen() {
       </View>
 
       <PrimaryButton
-        label={recordedToday ? '오늘 기록 고치기' : '오늘 기록하기'}
+        label={v.recordedToday ? '오늘 기록 고치기' : '오늘 기록하기'}
         onPress={() => router.push('/record')}
         style={styles.cta}
       />

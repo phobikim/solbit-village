@@ -30,7 +30,8 @@ export function indexColor(kind: IndexKind, value: number): string {
 
 type Props = {
   kind: IndexKind;
-  value: number;
+  /** 계산할 기록이 없으면 null */
+  value: number | null;
   status: string;
 };
 
@@ -40,10 +41,10 @@ const R = (SIZE - STROKE) / 2;
 const CIRC = 2 * Math.PI * R;
 
 export function IndexCard({ kind, value, status }: Props) {
-  const col = indexColor(kind, value);
-  const v = Math.min(100, Math.max(0, value));
+  const col = value === null ? colors.textMuted : indexColor(kind, value);
+  const v = value === null ? 0 : Math.min(100, Math.max(0, value));
   return (
-    <View style={styles.card} accessibilityLabel={`${LABEL[kind]} ${v}, ${status}`}>
+    <View style={styles.card} accessibilityLabel={`${LABEL[kind]} ${value ?? ''}, ${status}`}>
       <View style={styles.gauge}>
         <Svg width={SIZE} height={SIZE} style={StyleSheet.absoluteFill}>
           <Circle cx={SIZE / 2} cy={SIZE / 2} r={R} stroke={colors.track} strokeWidth={STROKE} fill="none" />
@@ -62,7 +63,7 @@ export function IndexCard({ kind, value, status }: Props) {
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>{LABEL[kind]}</Text>
-        <Text style={[styles.value, { color: col }]}>{v}</Text>
+        <Text style={[styles.value, { color: col }]}>{value === null ? '-' : v}</Text>
       </View>
       <Text style={styles.status} numberOfLines={1}>
         {status}

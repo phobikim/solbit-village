@@ -4,13 +4,14 @@
 
 import type { PlotSlot, TimeOfDay, Weather } from '../../domain/types';
 import { plotCrop } from './crops';
-import { npcSvg, type NpcHair } from './neighbors';
+import { faceSvg, FACES } from './neighbors';
 import { soliSvg, type SoliMood } from './soli';
 import { bud, cloud, flower, L, nest, o, star, svgBodyFont } from './svg';
 
 export const VILLAGE_VIEWBOX = { width: 366, height: 340 } as const;
 
-export type VillageVisitor = { color: string; hair: NpcHair; heart?: boolean };
+/** 놀러 온 이웃: 얼굴(0-11), 단짝이면 하트 */
+export type VillageVisitor = { face: number; heart?: boolean };
 
 export type VillageSceneParams = {
   timeOfDay: TimeOfDay;
@@ -201,10 +202,10 @@ export function villageSceneSvg(p: VillageSceneParams, fit: 'meet' | 'slice' = '
 
   // 이웃(뒤) → 솔이 → 이웃(앞)
   const [near, far] = p.visitors;
-  if (far) s += `<ellipse cx="326" cy="290" rx="24" ry="4.5" fill="#000" opacity=".25"/>` + nest(npcSvg(far.color, far.hair), 296, 236, 60);
+  if (far) s += `<ellipse cx="326" cy="290" rx="24" ry="4.5" fill="#000" opacity=".25"/>` + nest(faceSvg(FACES[far.face] ?? FACES[0]), 296, 236, 60);
   s += nest(soliSvg(p.soliMood), 90, 176, 140);
   if (near) {
-    s += `<ellipse cx="268" cy="322" rx="36" ry="6" fill="#000" opacity=".25"/>` + nest(npcSvg(near.color, near.hair), 226, 240, 84);
+    s += `<ellipse cx="268" cy="322" rx="36" ry="6" fill="#000" opacity=".25"/>` + nest(faceSvg(FACES[near.face] ?? FACES[0]), 226, 240, 84);
     if (near.heart)
       s += `<path d="M280 248 C280 240 270 237 268 245 C266 237 256 240 256 248 C256 256 268 262 268 262 C268 262 280 256 280 248Z" fill="#FF4FA0" ${o(2.5)}/>`;
   }
