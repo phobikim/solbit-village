@@ -5,6 +5,8 @@ export const colors = {
   nightOuter: '#0D1130',
   card: '#232B60',
   cardSub: '#1E2558',
+  cardMuted: '#181F4C',
+  disabled: '#4A5290',
   track: '#2E3775',
   barTrack: '#2A3270',
   day: '#EAF6FF',

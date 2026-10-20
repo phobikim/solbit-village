@@ -40,5 +40,5 @@ export const mockVillage = {
 export const mockBroadcasts = {
   records: { message: withPrefix(broadcasts.rainyMonth(4)), time: '21:40' },
   neighbors: { message: withPrefix(broadcasts.bestFriend('서연')), time: '21:40' },
-  me: { message: withPrefix(broadcasts.villageLevelUp), time: '21:40' },
+  me: { message: withPrefix(broadcasts.weeklySummaryWorkHeavy), time: '21:40' },
 };

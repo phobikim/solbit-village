@@ -19,6 +19,8 @@ export const broadcasts = {
     `${crop}가 ${n}개 모였습니다. ${skin}랑 바꿀 수 있습니다. 안 바꿔도 되고요.`,
   eventEve: (name: string) => `내일이 ${name} 씨 생신입니다. 빈손으로 가지 마세요.`,
   rainyMonth: (days: number) => `이번 달 비 온 날이 ${days}일입니다. 우산은 각자 챙기세요.`,
+  weeklySummaryWorkHeavy: '솔이 씨 4주 치 정리했습니다. 일만 열심히 하셨네요.',
+  askAfter: (name: string) => `${name} 씨 안부 한 번 물어보기 좋은 날씨네요.`,
 } as const;
 
 /** 폭풍 방송은 "아아, 이장입니다." 머리말 없이 그대로 쓴다 */

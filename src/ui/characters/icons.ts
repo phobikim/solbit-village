@@ -60,6 +60,24 @@ export function tabIconSvg(k: TabIcon, col: string): string {
   return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${col}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${b}</svg>`;
 }
 
+export type MenuIcon = 'ledger' | 'storage' | 'drawer' | 'locked' | 'settings';
+
+/** 나 탭 메뉴 아이콘 (7d) */
+export function menuIconSvg(k: MenuIcon, col: string): string {
+  switch (k) {
+    case 'ledger':
+      return bannerIconSvg('#FFE14D', L);
+    case 'storage':
+      return `<svg viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="10" r="3.4" fill="#FF8A5C" stroke="${L}" stroke-width="1.6"/><circle cx="13" cy="9" r="3.4" fill="#FFFFFF" stroke="${L}" stroke-width="1.6"/><circle cx="18" cy="10" r="3.4" fill="#A8EB5A" stroke="${L}" stroke-width="1.6"/><rect x="3" y="11" width="20" height="12" rx="3" fill="#E8B070" stroke="${L}" stroke-width="2"/><path d="M6 17h14" stroke="#B57A3E" stroke-width="1.8"/></svg>`;
+    case 'drawer':
+      return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${col}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 12h16M10 8h4M10 16h4"/></svg>`;
+    case 'locked':
+      return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${col}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="3" fill="${col}"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`;
+    case 'settings':
+      return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${col}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.6M12 18.6v2.6M2.8 12h2.6M18.6 12h2.6M5.5 5.5l1.8 1.8M16.7 16.7l1.8 1.8M5.5 18.5l1.8-1.8M16.7 7.3l1.8-1.8"/></svg>`;
+  }
+}
+
 /** 방송 확성기 */
 export function megaphoneSvg(col: string): string {
   return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="${col}"><path d="M3 9h3l10-6v18L6 15H3z"/></svg>`;
