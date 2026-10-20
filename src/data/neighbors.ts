@@ -1,0 +1,77 @@
+// 이웃 저장소. 등록 화면(9f)은 단계 5.
+
+import type { Relation } from '../copy/labels.ko';
+import type { NeighborContactStat } from '../domain/neighbors';
+import { getDb, writeTx } from './db';
+
+export type Frequency = 'often' | 'sometimes' | 'rarely';
+
+export type Neighbor = {
+  id: string;
+  name: string;
+  /** 얼굴 0-11 */
+  face: number;
+  /** 배경색 0-5 */
+  color: number;
+  relation: Relation;
+  frequency: Frequency;
+  createdAt: number;
+};
+
+export type NeighborWithStats = Neighbor & NeighborContactStat;
+
+type Row = {
+  id: string;
+  name: string;
+  face: number;
+  color: number;
+  relation: Relation;
+  frequency: Frequency;
+  created_at: number;
+  contact_count: number;
+  last_contact: string | null;
+};
+
+/** 보관하지 않은 이웃 + 연락 통계 */
+export async function listNeighbors(): Promise<NeighborWithStats[]> {
+  const db = await getDb();
+  const rows = await db.getAllAsync<Row>(
+    `SELECT n.id, n.name, n.face, n.color, n.relation, n.frequency, n.created_at,
+            COUNT(c.id) AS contact_count, MAX(c.date) AS last_contact
+       FROM neighbor n LEFT JOIN contact c ON c.neighbor_id = n.id
+      WHERE n.archived = 0
+      GROUP BY n.id
+      ORDER BY n.created_at`,
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    face: r.face,
+    color: r.color,
+    relation: r.relation,
+    frequency: r.frequency,
+    createdAt: r.created_at,
+    contactCount: r.contact_count,
+    lastContact: r.last_contact,
+  }));
+}
+
+export async function insertNeighbor(n: Neighbor): Promise<void> {
+  await writeTx(async (db) => {
+    await db.runAsync(
+    'INSERT INTO neighbor (id, name, face, color, relation, frequency, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    n.id,
+    n.name,
+    n.face,
+    n.color,
+    n.relation,
+    n.frequency,
+    n.createdAt,
+    );
+  });
+}
+
+/** 새 이웃 id (기기 안에서만 쓰므로 시각 + 난수로 충분) */
+export function newNeighborId(now = Date.now()): string {
+  return `n_${now.toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+}
