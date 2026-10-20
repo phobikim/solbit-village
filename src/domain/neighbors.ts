@@ -3,6 +3,9 @@
 import { addDays, daysBetween, parseDayKey, type DayKey, type YearMonth } from './day';
 import type { DayRecord } from './types';
 
+/** 이웃 이름 최대 길이 */
+export const NEIGHBOR_NAME_MAX = 12;
+
 // ── 가까움 — SPEC 7장 [확정] 2026-10-20 ─────────────────────────────────
 
 /** 연락 주기별 기준일 */

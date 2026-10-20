@@ -2,12 +2,15 @@
 // 컨디션 폭풍이면 개그 없이 짧게 (CLAUDE.md 규칙 7).
 
 import { LEISURE_LOW, WORK_OVERHEAT } from './indices';
+import type { EventType } from './events';
 import type { CropKind, Weather } from './types';
 
 export type BroadcastSituation =
   | { kind: 'storm' }
+  | { kind: 'eventEve'; name: string; type: EventType }
   | { kind: 'villageLevelUp' }
   | { kind: 'autoHarvest'; crop: CropKind }
+  | { kind: 'exchangeReady'; crop: CropKind; count: number; skin: string }
   | { kind: 'neighborVisit'; name: string }
   | { kind: 'workOverheat' }
   | { kind: 'leisureLow' }
@@ -19,6 +22,10 @@ export type BroadcastSituation =
 
 export type BroadcastContext = {
   weather: Weather | null;
+  /** 내일 행사 */
+  eventTomorrow: { name: string; type: EventType } | null;
+  /** 지금 바꿀 수 있는 스킨 (가장 앞 하나): 가장 많이 든 작물과 그 수량 */
+  exchangeReady: { crop: CropKind; count: number; skin: string } | null;
   leveledUpToday: boolean;
   autoHarvestedToday: CropKind | null;
   /** 어제 연락해서 오늘 놀러 온 이웃 이름 */
@@ -33,11 +40,13 @@ export type BroadcastContext = {
   ripeCount: number;
 };
 
-/** 위에서부터 먼저 맞는 상황 하나 */
+/** 위에서부터 먼저 맞는 상황 하나. 폭풍 > 행사 전날 > 마을 레벨업 > 자동 수확 > 교환 가능 > 이웃 방문 > … */
 export function selectBroadcast(c: BroadcastContext): BroadcastSituation {
   if (c.weather === 'storm') return { kind: 'storm' };
+  if (c.eventTomorrow) return { kind: 'eventEve', ...c.eventTomorrow };
   if (c.leveledUpToday) return { kind: 'villageLevelUp' };
   if (c.autoHarvestedToday) return { kind: 'autoHarvest', crop: c.autoHarvestedToday };
+  if (c.exchangeReady) return { kind: 'exchangeReady', ...c.exchangeReady };
   if (c.visitorFromYesterday) return { kind: 'neighborVisit', name: c.visitorFromYesterday };
   if (c.workIndex !== null && c.workIndex >= WORK_OVERHEAT) return { kind: 'workOverheat' };
   if (c.leisureIndex !== null && c.leisureIndex <= LEISURE_LOW && c.recentRecordCount >= 3) return { kind: 'leisureLow' };

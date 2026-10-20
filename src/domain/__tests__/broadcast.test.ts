@@ -6,6 +6,8 @@ import { byDate, rec } from '../__fixtures__/records';
 
 const base: BroadcastContext = {
   weather: 'sun',
+  eventTomorrow: null,
+  exchangeReady: null,
   leveledUpToday: false,
   autoHarvestedToday: null,
   visitorFromYesterday: null,
@@ -30,6 +32,24 @@ describe('방송 선택', () => {
     expect(selectBroadcast({ ...base, visitorFromYesterday: '하준', workIndex: 90 }).kind).toBe('neighborVisit');
     expect(selectBroadcast({ ...base, workIndex: 90, leisureIndex: 0 }).kind).toBe('workOverheat');
     expect(selectBroadcast({ ...base, leisureIndex: 10 }).kind).toBe('leisureLow');
+  });
+
+  it('행사 전날 > 레벨업, 자동 수확 > 교환 가능 > 이웃 방문', () => {
+    expect(selectBroadcast({ ...base, eventTomorrow: { name: '엄마 생신', type: 'anniversary' }, leveledUpToday: true }).kind).toBe('eventEve');
+    const ex = { crop: 'potato' as const, count: 10, skin: '밀짚모자' };
+    expect(selectBroadcast({ ...base, autoHarvestedToday: 'potato', exchangeReady: ex }).kind).toBe('autoHarvest');
+    expect(selectBroadcast({ ...base, exchangeReady: ex, visitorFromYesterday: '하준' }).kind).toBe('exchangeReady');
+    expect(broadcastText({ kind: 'exchangeReady', ...ex })).toBe(
+      '아아, 이장입니다. 감자가 10개 모였습니다. 밀짚모자랑 바꿀 수 있습니다. 안 바꿔도 되고요.',
+    );
+    expect(broadcastText({ kind: 'exchangeReady', crop: 'mushroom', count: 5, skin: '버섯 우산' })).toContain('버섯이 5개 모였습니다. 버섯 우산이랑');
+    expect(broadcastText({ kind: 'eventEve', name: '엄마 생신', type: 'anniversary' })).toBe(
+      '아아, 이장입니다. 내일이 엄마 생신입니다. 빈손으로 가지 마세요.',
+    );
+  });
+
+  it('폭풍이면 행사 전날이어도 개그 없는 방송', () => {
+    expect(selectBroadcast({ ...base, weather: 'storm', eventTomorrow: { name: 'x', type: 'etc' } }).kind).toBe('storm');
   });
 
   it('여가 부족은 기록이 3일 이상 있을 때만', () => {
