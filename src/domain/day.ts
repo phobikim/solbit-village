@@ -2,10 +2,10 @@
 // 날짜는 'YYYY-MM-DD' 문자열(DayKey)로 다룬다. 내부 계산은 UTC로 해서 서머타임 영향을 받지 않는다.
 
 /**
- * 하루가 바뀌는 시각 (기기 현지 시각, 시).
- * TODO: SPEC 4장 [미정] — 자정(0)인지, 새벽 4시 같은 늦은 기준인지 사용자 결정 필요. 임시로 자정.
+ * 하루가 바뀌는 시각 (기기 현지 시각, 시). 새벽 4시 전까지는 전날로 친다.
+ * SPEC 4장 — 2026-10-20 사용자 결정으로 확정.
  */
-export const DAY_BOUNDARY_HOUR = 0;
+export const DAY_BOUNDARY_HOUR = 4;
 
 /** 'YYYY-MM-DD' */
 export type DayKey = string;

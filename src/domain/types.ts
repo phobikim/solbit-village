@@ -19,3 +19,25 @@ export type Condition = 1 | 2 | 3;
 export type TimeOfDay = 'day' | 'night';
 
 export type IndexKind = 'health' | 'work' | 'relation' | 'leisure';
+
+/** 일 강도 1~3 */
+export type WorkLevel = 1 | 2 | 3;
+
+export type ContactMethod = 'call' | 'meet' | 'message';
+
+export type Contact = { neighborId: string; method: ContactMethod };
+
+/** 하루 기록 (SPEC 4장). date는 day.ts 기준 'YYYY-MM-DD'. */
+export type DayRecord = {
+  date: string;
+  condition: Condition;
+  work: WorkLevel;
+  /** 오늘의 성취 (선택, 장부로 감) */
+  achievement: string | null;
+  memo: string | null;
+  /** 여가 칩 이름 (기본 칩 + 직접 입력) */
+  leisure: string[];
+  contacts: Contact[];
+  createdAt: number;
+  updatedAt: number;
+};
