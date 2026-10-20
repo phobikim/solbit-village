@@ -1,0 +1,54 @@
+{
+  "expo": {
+    "name": "솔빛 마을",
+    "slug": "solbit-village",
+    "version": "0.1.0",
+    "scheme": "solbit",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#141A3E",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.solbit.village"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#141A3E",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "headers": {
+            "Cross-Origin-Embedder-Policy": "credentialless",
+            "Cross-Origin-Opener-Policy": "same-origin"
+          }
+        }
+      ],
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "backgroundColor": "#141A3E"
+        }
+      ],
+      "expo-sqlite",
+      "expo-notifications"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
