@@ -3,8 +3,18 @@
 // 톤: 시니컬하지만 놀리는 대상은 상황이지 사용자가 아니다.
 
 import { CROP_NAME } from './crops.ko';
+import { EVENT_TYPE_LINE } from './labels.ko';
 import { eul, iga, irang } from './josa';
 import type { BroadcastSituation } from '../domain/broadcast';
+
+/** 행사 일주일 전 방송 꼬리말 (분류별) */
+const EVENT_WEEK_TAIL = {
+  travel: '짐은 아직 안 쌌을 겁니다.',
+  birth: '선물은 미리 사 두세요.',
+  work: '준비는 미리 하는 겁니다. 아마도요.',
+  meet: '약속은 지키라고 있는 겁니다.',
+  etc: '이장이 기억하고 있습니다. 장부가요.',
+} as const;
 
 export const BROADCAST_PREFIX = '아아, 이장입니다.';
 
@@ -24,7 +34,13 @@ export const broadcasts = {
   exchangeReady: (crop: string, n: number, skin: string) =>
     `${iga(crop)} ${n}개 모였습니다. ${irang(skin)} 바꿀 수 있습니다. 안 바꿔도 되고요.`,
   exchangeReadyAny: (n: number, skin: string) => `작물이 ${n}개 모였습니다. ${irang(skin)} 바꿀 수 있습니다. 안 바꿔도 되고요.`,
-  /** 행사 전날 — 기념일 */
+  /** 행사 당일 */
+  eventToday: (name: string, line: string) => `오늘은 ${name} 날입니다. ${line}`,
+  /** 행사 일주일 전 */
+  eventWeek: (name: string, tail: string) => `${name} 일주일 남았습니다. ${tail}`,
+  /** 게시판이 빈 조용한 날 */
+  boardEmpty: '게시판이 비었습니다. 이장이 일을 안 한 건 아닙니다.',
+  /** 행사 전날 — 생일·기념일 */
   eventEveAnniversary: (name: string) => `내일이 ${name}입니다. 빈손으로 가지 마세요.`,
   /** 행사 전날 — 일정 · 기타 */
   eventEve: (name: string) => `내일 ${name} 있습니다. 이장도 괜히 긴장됩니다.`,
@@ -55,8 +71,6 @@ export const ijangLines = {
   neighborNew: '새 이웃이요? 주민등록은 제가 알아서 하겠습니다.',
   neighborEdit: '고칠 게 있으면 고치세요. 이장은 못 본 척하겠습니다.',
   neighborArchiveConfirm: '목록에서만 내립니다. 지난 기록은 그대로 남습니다.',
-  eventNew: '현수막은 이장이 겁니다. 글씨는 장담 못 합니다.',
-  eventEdit: '날짜가 바뀌었나 봅니다. 현수막 다시 걸겠습니다.',
 } as const;
 
 /** 폭풍 방송은 "아아, 이장입니다." 머리말 없이 그대로 쓴다 */
@@ -69,8 +83,12 @@ export function broadcastText(s: BroadcastSituation): string {
   switch (s.kind) {
     case 'storm':
       return s.eventTomorrow ? broadcasts.stormWithEvent(s.eventTomorrow) : broadcasts.storm;
+    case 'eventToday':
+      return withPrefix(broadcasts.eventToday(s.name, EVENT_TYPE_LINE[s.type]));
     case 'eventEve':
-      return withPrefix(s.type === 'anniversary' ? broadcasts.eventEveAnniversary(s.name) : broadcasts.eventEve(s.name));
+      return withPrefix(s.type === 'birth' ? broadcasts.eventEveAnniversary(s.name) : broadcasts.eventEve(s.name));
+    case 'eventWeek':
+      return withPrefix(broadcasts.eventWeek(s.name, EVENT_WEEK_TAIL[s.type]));
     case 'exchangeReady':
       return withPrefix(
         s.crop ? broadcasts.exchangeReady(CROP_NAME[s.crop], s.count, s.skin) : broadcasts.exchangeReadyAny(s.count, s.skin),
@@ -94,6 +112,6 @@ export function broadcastText(s: BroadcastSituation): string {
     case 'bestFriend':
       return withPrefix(broadcasts.bestFriend(s.name));
     case 'quiet':
-      return withPrefix(broadcasts.quiet);
+      return withPrefix(s.boardEmpty ? broadcasts.boardEmpty : broadcasts.quiet);
   }
 }

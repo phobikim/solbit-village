@@ -8,7 +8,9 @@ import type { CropKind, Weather } from './types';
 export type BroadcastSituation =
   /** 폭풍: 개그 없이 짧게. 내일 행사가 있으면 그것만 남긴다. */
   | { kind: 'storm'; eventTomorrow: string | null }
+  | { kind: 'eventToday'; name: string; type: EventType }
   | { kind: 'eventEve'; name: string; type: EventType }
+  | { kind: 'eventWeek'; name: string; type: EventType }
   | { kind: 'villageLevelUp' }
   /** 밤사이(앱을 연 오늘 정산한) 자동 수확 */
   | { kind: 'overnightHarvest'; crops: CropKind[] }
@@ -22,12 +24,19 @@ export type BroadcastSituation =
   | { kind: 'recordOnly' }
   | { kind: 'cloudy' }
   | { kind: 'bestFriend'; name: string }
-  | { kind: 'quiet' };
+  /** 조용한 날. 게시판에 붙은 행사가 없으면 게시판 이야기 */
+  | { kind: 'quiet'; boardEmpty: boolean };
 
 export type BroadcastContext = {
   weather: Weather | null;
+  /** 오늘 행사 */
+  eventToday: { name: string; type: EventType } | null;
   /** 내일 행사 */
   eventTomorrow: { name: string; type: EventType } | null;
+  /** 꼭 일주일 남은 행사 */
+  eventInAWeek: { name: string; type: EventType } | null;
+  /** 게시판에 붙은 행사가 없음 */
+  boardEmpty: boolean;
   /** 지금 바꿀 수 있는 스킨 (가장 앞 하나): 가장 많이 든 작물과 그 수량 */
   exchangeReady: { crop: CropKind | null; count: number; skin: string } | null;
   leveledUpToday: boolean;
@@ -45,19 +54,21 @@ export type BroadcastContext = {
   harvestedToday: CropKind[];
 };
 
-/** 위에서부터 먼저 맞는 상황 하나. 폭풍(행사 전날이면 행사만 남김) > 행사 전날 > 마을 레벨업 > 밤사이 수확 > 밭이 꽉 차 대신 딴 것 > 교환 가능 > 이웃 방문 > … */
+/** 위에서부터 먼저 맞는 상황 하나. 폭풍(행사 전날이면 행사만 남김) > 행사 당일 > 행사 전날 > 마을 레벨업 > 밤사이 수확 > 밭이 꽉 차 대신 딴 것 > 교환 가능 > 행사 일주일 전 > 이웃 방문 > … */
 export function selectBroadcast(c: BroadcastContext): BroadcastSituation {
   if (c.weather === 'storm') return { kind: 'storm', eventTomorrow: c.eventTomorrow?.name ?? null };
+  if (c.eventToday) return { kind: 'eventToday', ...c.eventToday };
   if (c.eventTomorrow) return { kind: 'eventEve', ...c.eventTomorrow };
   if (c.leveledUpToday) return { kind: 'villageLevelUp' };
   if (c.harvestedToday.length) return { kind: 'overnightHarvest', crops: c.harvestedToday };
   if (c.autoHarvestedToday) return { kind: 'autoHarvest', crop: c.autoHarvestedToday };
   if (c.exchangeReady) return { kind: 'exchangeReady', ...c.exchangeReady };
+  if (c.eventInAWeek) return { kind: 'eventWeek', ...c.eventInAWeek };
   if (c.visitorFromYesterday) return { kind: 'neighborVisit', name: c.visitorFromYesterday };
   if (c.workIndex !== null && c.workIndex >= WORK_OVERHEAT) return { kind: 'workOverheat' };
   if (c.leisureIndex !== null && c.leisureIndex <= LEISURE_LOW && c.recentRecordCount >= 3) return { kind: 'leisureLow' };
   if (c.todayRecordOnly) return { kind: 'recordOnly' };
   if (c.weather === 'over' || c.weather === 'rain') return { kind: 'cloudy' };
   if (c.bestFriendName) return { kind: 'bestFriend', name: c.bestFriendName };
-  return { kind: 'quiet' };
+  return { kind: 'quiet', boardEmpty: c.boardEmpty };
 }

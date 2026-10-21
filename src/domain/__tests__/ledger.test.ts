@@ -1,5 +1,15 @@
 import { rec } from '../__fixtures__/records';
-import { achievementsOf, bannerEvent, eventsTomorrow, pastItems, upcomingEvents, type VillageEvent } from '../events';
+import {
+  achievementsOf,
+  boardEvents,
+  eventsInAWeek,
+  eventsToday,
+  eventsTomorrow,
+  nextOccurrence,
+  pastItems,
+  upcomingEvents,
+  type VillageEvent,
+} from '../events';
 import {
   canAfford,
   equipSkin,
@@ -13,7 +23,14 @@ import {
   SKINS,
 } from '../harvest';
 
-const ev = (id: string, date: string, createdAt = 0): VillageEvent => ({ id, name: id, date, type: 'schedule', createdAt });
+const ev = (id: string, date: string, createdAt = 0, repeatYearly = false): VillageEvent => ({
+  id,
+  name: id,
+  date,
+  type: repeatYearly ? 'birth' : 'etc',
+  repeatYearly,
+  createdAt,
+});
 const today = '2026-10-20';
 
 describe('행사', () => {
@@ -24,8 +41,8 @@ describe('행사', () => {
   });
 
   it('현수막: 가장 가까운 다가오는 행사 하나', () => {
-    expect(bannerEvent(events, today)?.id).toBe('today');
-    expect(bannerEvent([ev('past', '2026-10-01')], today)).toBeNull();
+    expect(boardEvents(events, today)[0]?.id).toBe('today');
+    expect(boardEvents([ev('past', '2026-10-01')], today)).toEqual([]);
   });
 
   it('행사 전날', () => {
@@ -128,5 +145,43 @@ describe('스킨 착용', () => {
   });
   it('모르는 스킨이면 그대로', () => {
     expect([...equipSkin(new Set(['hat']), 'nope')]).toEqual(['hat']);
+  });
+});
+
+describe('마을 게시판', () => {
+  it('가까운 순 최대 3장', () => {
+    const events = [ev('d', '2026-12-01'), ev('a', '2026-10-21'), ev('c', '2026-11-01'), ev('b', '2026-10-25')];
+    expect(boardEvents(events, today).map((e) => e.id)).toEqual(['a', 'b', 'c']);
+  });
+  it('오늘 · 내일 · 꼭 일주일 남은 행사', () => {
+    const events = [ev('t', today), ev('n', '2026-10-21'), ev('w', '2026-10-27')];
+    expect(eventsToday(events, today).map((e) => e.id)).toEqual(['t']);
+    expect(eventsTomorrow(events, today).map((e) => e.id)).toEqual(['n']);
+    expect(eventsInAWeek(events, today).map((e) => e.id)).toEqual(['w']);
+  });
+});
+
+describe('매년 반복 (생일·기념일)', () => {
+  it('올해 그날이 지났으면 내년 그날', () => {
+    const mom = ev('엄마 생신', '2025-03-10', 0, true);
+    expect(nextOccurrence(mom, today)).toBe('2027-03-10');
+    expect(nextOccurrence(ev('결혼기념일', '2024-11-04', 0, true), today)).toBe('2026-11-04');
+    expect(nextOccurrence(ev('오늘', '2020-10-20', 0, true), today)).toBe('2026-10-20');
+  });
+  it('반복이 아니면 원래 날짜', () => {
+    expect(nextOccurrence(ev('시험', '2026-11-19'), today)).toBe('2026-11-19');
+  });
+  it('처음 날짜보다 앞서지 않는다', () => {
+    expect(nextOccurrence(ev('첫 생일', '2027-01-05', 0, true), today)).toBe('2027-01-05');
+  });
+  it('2월 29일은 평년엔 2월 28일', () => {
+    expect(nextOccurrence(ev('윤일', '2024-02-29', 0, true), '2026-10-20')).toBe('2027-02-28');
+    expect(nextOccurrence(ev('윤일', '2024-02-29', 0, true), '2027-10-20')).toBe('2028-02-29');
+  });
+  it('게시판·방송에는 다음에 오는 날짜로, 지나간 일로는 옮기지 않는다', () => {
+    const mom = ev('엄마 생신', '2025-10-21', 0, true);
+    expect(upcomingEvents([mom], today)[0].date).toBe('2026-10-21');
+    expect(eventsTomorrow([mom], today).length).toBe(1);
+    expect(pastItems([mom], [], today)).toEqual([]);
   });
 });

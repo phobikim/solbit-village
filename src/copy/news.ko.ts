@@ -30,7 +30,7 @@ export function newsText(item: NewsItem): string {
     case 'visitors':
       return `${iga(item.names.map((n) => `${n} 씨`).join(', '))} 놀러 와 있습니다.`;
     case 'eventToday':
-      return `오늘은 ${item.name} 날입니다. 현수막 걸어 뒀습니다.`;
+      return `오늘은 ${item.name} 날입니다. 게시판에 붙여 뒀습니다.`;
     case 'eventSoon':
       return `${item.name}까지 ${item.days}일 남았습니다.`;
     case 'quiet':

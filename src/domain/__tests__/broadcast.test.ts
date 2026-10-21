@@ -6,7 +6,10 @@ import { byDate, rec } from '../__fixtures__/records';
 
 const base: BroadcastContext = {
   weather: 'sun',
+  eventToday: null,
   eventTomorrow: null,
+  eventInAWeek: null,
+  boardEmpty: false,
   exchangeReady: null,
   leveledUpToday: false,
   autoHarvestedToday: null,
@@ -35,7 +38,7 @@ describe('방송 선택', () => {
   });
 
   it('행사 전날 > 레벨업, 자동 수확 > 교환 가능 > 이웃 방문', () => {
-    expect(selectBroadcast({ ...base, eventTomorrow: { name: '엄마 생신', type: 'anniversary' }, leveledUpToday: true }).kind).toBe('eventEve');
+    expect(selectBroadcast({ ...base, eventTomorrow: { name: '엄마 생신', type: 'birth' }, leveledUpToday: true }).kind).toBe('eventEve');
     const ex = { crop: 'potato' as const, count: 10, skin: '밀짚모자' };
     expect(selectBroadcast({ ...base, autoHarvestedToday: 'potato', exchangeReady: ex }).kind).toBe('autoHarvest');
     expect(selectBroadcast({ ...base, exchangeReady: ex, visitorFromYesterday: '하준' }).kind).toBe('exchangeReady');
@@ -43,13 +46,13 @@ describe('방송 선택', () => {
       '아아, 이장입니다. 감자가 10개 모였습니다. 밀짚모자랑 바꿀 수 있습니다. 안 바꿔도 되고요.',
     );
     expect(broadcastText({ kind: 'exchangeReady', crop: 'mushroom', count: 5, skin: '버섯 우산' })).toContain('버섯이 5개 모였습니다. 버섯 우산이랑');
-    expect(broadcastText({ kind: 'eventEve', name: '엄마 생신', type: 'anniversary' })).toBe(
+    expect(broadcastText({ kind: 'eventEve', name: '엄마 생신', type: 'birth' })).toBe(
       '아아, 이장입니다. 내일이 엄마 생신입니다. 빈손으로 가지 마세요.',
     );
   });
 
   it('폭풍 + 행사 전날: 톤은 유지하고 행사 정보만 남긴다', () => {
-    const s = selectBroadcast({ ...base, weather: 'storm', eventTomorrow: { name: '엄마 생신', type: 'anniversary' }, leveledUpToday: true });
+    const s = selectBroadcast({ ...base, weather: 'storm', eventTomorrow: { name: '엄마 생신', type: 'birth' }, leveledUpToday: true });
     expect(s).toEqual({ kind: 'storm', eventTomorrow: '엄마 생신' });
     expect(broadcastText(s)).toBe('...오늘은 방송 안 합니다. 내일 엄마 생신만 기억하세요. 푹 쉬세요.');
   });
@@ -128,5 +131,30 @@ describe('밤사이 자동 수확 방송', () => {
   });
   it('폭풍이면 수확했어도 개그 없는 방송', () => {
     expect(selectBroadcast({ ...base, weather: 'storm', harvestedToday: ['potato'] }).kind).toBe('storm');
+  });
+});
+
+describe('마을 게시판 행사 방송', () => {
+  const e = (name: string, type: 'travel' | 'birth' | 'work' | 'meet' | 'etc') => ({ name, type });
+  it('행사 당일 > 전날 > … > 일주일 전 (이웃 방문보다 먼저)', () => {
+    expect(selectBroadcast({ ...base, eventToday: e('사파 여행', 'travel'), eventTomorrow: e('엄마 생신', 'birth') }).kind).toBe('eventToday');
+    expect(selectBroadcast({ ...base, eventInAWeek: e('사파 여행', 'travel'), visitorFromYesterday: '하준' }).kind).toBe('eventWeek');
+    expect(selectBroadcast({ ...base, eventInAWeek: e('x', 'etc'), exchangeReady: { crop: 'potato', count: 10, skin: '밀짚모자' } }).kind).toBe('exchangeReady');
+  });
+  it('문구: 분류별 한마디', () => {
+    expect(broadcastText({ kind: 'eventToday', ...e('사파 여행', 'travel') })).toBe(
+      '아아, 이장입니다. 오늘은 사파 여행 날입니다. 다녀오세요. 마을은 이장이 지킵니다. 대충요.',
+    );
+    expect(broadcastText({ kind: 'eventWeek', ...e('사파 여행', 'travel') })).toBe(
+      '아아, 이장입니다. 사파 여행 일주일 남았습니다. 짐은 아직 안 쌌을 겁니다.',
+    );
+  });
+  it('게시판이 비면 조용한 날도 게시판 이야기', () => {
+    expect(selectBroadcast({ ...base, boardEmpty: true })).toEqual({ kind: 'quiet', boardEmpty: true });
+    expect(broadcastText({ kind: 'quiet', boardEmpty: true })).toBe('아아, 이장입니다. 게시판이 비었습니다. 이장이 일을 안 한 건 아닙니다.');
+    expect(broadcastText({ kind: 'quiet', boardEmpty: false })).toContain('오늘도 마을은 조용합니다');
+  });
+  it('폭풍이면 행사 당일이어도 개그 없는 방송', () => {
+    expect(selectBroadcast({ ...base, weather: 'storm', eventToday: e('사파 여행', 'travel') }).kind).toBe('storm');
   });
 });

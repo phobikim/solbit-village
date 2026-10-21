@@ -93,9 +93,27 @@ export const ASK_AFTER_TITLE = '안부 묻기 좋은 이웃';
 
 export const FREQUENCY_LABEL = { often: '자주', sometimes: '가끔', rarely: '드물게' } as const;
 
-export const EVENT_TYPE_LABEL = { anniversary: '기념일', schedule: '일정', etc: '기타' } as const;
-/** 장부 칩 색: 기념일 · 일정 · 기타 · 성취 */
-export const EVENT_TYPE_COLOR = { anniversary: '#FF8CC6', schedule: '#5FD8FF', etc: '#C49BFF', achievement: '#FFE14D' } as const;
+/** 행사 분류 이름 (디자인 11a) */
+export const EVENT_TYPE_LABEL = { travel: '여행', birth: '생일·기념일', work: '업무', meet: '약속', etc: '기타' } as const;
+/** 분류 색 (아이콘 · 칩) — 성취는 장부 '지나간 일' 표시 */
+export const EVENT_TYPE_COLOR = {
+  travel: '#C49BFF',
+  birth: '#FF4FA0',
+  work: '#FFC23C',
+  meet: '#A8EB5A',
+  etc: '#5FD8FF',
+  achievement: '#FFE14D',
+} as const;
+/** 게시판 쪽지 종이 색 */
+export const EVENT_PAPER_COLOR = { travel: '#EBDDFF', birth: '#FFD6E9', work: '#FFEDBF', meet: '#E5F8CC', etc: '#D3F4FF' } as const;
+/** 행사 등록 시트의 이장 한마디 (분류별) */
+export const EVENT_TYPE_LINE = {
+  travel: '다녀오세요. 마을은 이장이 지킵니다. 대충요.',
+  birth: '빈손으로 가지 마세요.',
+  work: '일은 일이고 밭은 밭입니다.',
+  meet: '늦지 마세요. 이장은 늦습니다.',
+  etc: '적어두면 이장이 기억합니다. 장부가요.',
+} as const;
 export const ACHIEVEMENT_LABEL = '성취';
 
 export const SKIN_CATEGORY_LABEL = { soli: '솔이', building: '마을 건물', ijang: '이장 소품' } as const;
