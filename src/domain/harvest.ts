@@ -45,13 +45,20 @@ export type Skin = { id: string; name: string; category: SkinCategory; cost: Ski
  */
 export const NON_INGREDIENT_CROPS: readonly CropKind[] = ['coffee', 'mushroom'];
 
-/** 스킨 목록과 가격 — SPEC 5장 [확정] 2026-10-21 */
+/** 규칙 3 예외: 잠자리채 = 커피콩 4 + 해바라기 2 (2026-10-21 사용자 결정, 시안 그대로) */
+export const NON_INGREDIENT_EXCEPTIONS: readonly string[] = ['net'];
+
+/**
+ * 스킨 목록과 가격 — SPEC 5장 [확정] 2026-10-21 (솔이 스킨은 디자인 v5 개정 반영).
+ * 커피 앞치마 · 버섯 우산은 목록에서 빠졌다 (보유분도 마이그레이션 v5에서 정리).
+ */
 export const SKINS: readonly Skin[] = [
   // 솔이
   { id: 'hat', name: '밀짚모자', category: 'soli', cost: { crops: { potato: 10, sunflower: 3 }, any: 0 } },
   { id: 'band', name: '딸기 머리띠', category: 'soli', cost: { crops: { strawberry: 8 }, any: 0 } },
-  { id: 'apron', name: '커피 앞치마', category: 'soli', cost: { crops: {}, any: 10 } },
-  { id: 'mush', name: '버섯 우산', category: 'soli', cost: { crops: {}, any: 12 } },
+  { id: 'glasses', name: '동글이 안경', category: 'soli', cost: { crops: { sunflower: 3, strawberry: 2 }, any: 0 } },
+  { id: 'ice', name: '하드', category: 'soli', cost: { crops: { strawberry: 4, potato: 3 }, any: 0 } },
+  { id: 'net', name: '잠자리채', category: 'soli', cost: { crops: { coffee: 4, sunflower: 2 }, any: 0 } },
   // 마을 건물
   { id: 'scarecrow', name: '허수아비', category: 'building', cost: { crops: { potato: 12 }, any: 0 } },
   { id: 'mailbox', name: '빨간 우체통', category: 'building', cost: { crops: { strawberry: 6 }, any: 6 } },

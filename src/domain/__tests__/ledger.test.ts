@@ -7,6 +7,7 @@ import {
   exchangeHint,
   harvestProgress,
   NON_INGREDIENT_CROPS,
+  NON_INGREDIENT_EXCEPTIONS,
   payFor,
   planPayment,
   SKINS,
@@ -53,16 +54,22 @@ describe('행사', () => {
 describe('스킨 교환', () => {
   const skin = (id: string) => SKINS.find((s) => s.id === id)!;
 
-  it('확정 목록 10종, 분류별 3~4종', () => {
+  it('확정 목록 11종 (솔이 5 · 마을 건물 3 · 이장 소품 3), 커피 앞치마·버섯 우산 없음', () => {
     expect(SKINS.map((s) => s.name)).toEqual([
-      '밀짚모자', '딸기 머리띠', '커피 앞치마', '버섯 우산',
+      '밀짚모자', '딸기 머리띠', '동글이 안경', '하드', '잠자리채',
       '허수아비', '빨간 우체통', '장독대',
       '금색 확성기', '선글라스', '털모자',
     ]);
   });
 
-  it('커피콩·버섯은 지정 재료로 쓰지 않는다 (규칙 3)', () => {
-    for (const s of SKINS) for (const c of NON_INGREDIENT_CROPS) expect(s.cost.crops[c]).toBeUndefined();
+  it('커피콩·버섯은 지정 재료로 쓰지 않는다 (규칙 3) — 예외는 잠자리채의 커피콩뿐', () => {
+    for (const s of SKINS) {
+      if (NON_INGREDIENT_EXCEPTIONS.includes(s.id)) continue;
+      for (const c of NON_INGREDIENT_CROPS) expect(s.cost.crops[c]).toBeUndefined();
+    }
+    expect(NON_INGREDIENT_EXCEPTIONS).toEqual(['net']);
+    expect(skin('net').cost).toEqual({ crops: { coffee: 4, sunflower: 2 }, any: 0 });
+    for (const s of SKINS) expect(s.cost.crops.mushroom).toBeUndefined();
   });
 
   it('지정 작물만: 밀짚모자 = 감자 10 + 해바라기 3', () => {
@@ -79,9 +86,9 @@ describe('스킨 교환', () => {
   });
 
   it('아무 작물: 보유량이 가장 많은 작물부터 다 쓸 때까지 차감', () => {
-    // 커피 앞치마 = 아무 10
-    const p = planPayment(skin('apron').cost, { potato: 4, coffee: 7, strawberry: 2 });
-    expect(p.deduct).toEqual({ coffee: 7, potato: 3 });
+    // 털모자 = 아무 12
+    const p = planPayment(skin('knitHat').cost, { potato: 4, coffee: 9, strawberry: 2 });
+    expect(p.deduct).toEqual({ coffee: 9, potato: 3 });
     expect(p.lackingAny).toBe(0);
   });
 
@@ -104,7 +111,7 @@ describe('스킨 교환', () => {
 
   it('갖고 있지 않고 지금 바꿀 수 있는 스킨만 (분홍 점 · 방송)', () => {
     const inv = { potato: 12, sunflower: 3 };
-    expect(exchangeableSkins(inv, new Set()).map((s) => s.id)).toEqual(['hat', 'apron', 'mush', 'scarecrow', 'goldMega', 'knitHat']);
+    expect(exchangeableSkins(inv, new Set()).map((s) => s.id)).toEqual(['hat', 'scarecrow', 'goldMega', 'knitHat']);
     expect(exchangeableSkins(inv, new Set(['hat'])).map((s) => s.id)).not.toContain('hat');
   });
 

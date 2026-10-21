@@ -111,6 +111,11 @@ export const MIGRATIONS: readonly string[] = [
   ALTER TABLE planting_v4 RENAME TO planting;
   CREATE INDEX planting_active ON planting(harvested_date);
   `,
+
+  // v5 — 디자인 v5 개정: 솔이 스킨 커피 앞치마 · 버섯 우산을 목록과 보유 스킨에서 뺀다 (2026-10-21 사용자 결정)
+  `
+  DELETE FROM skin WHERE id IN ('apron', 'mush');
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

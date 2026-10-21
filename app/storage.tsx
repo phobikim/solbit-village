@@ -33,7 +33,7 @@ const timeLabel = (d: Date) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 
 /** 분류에 맞는 미리보기: 솔이 · 건물 · 이장 */
 function SkinPreview({ skin, size = 70 }: { skin: Skin; size?: number }) {
-  if (skin.category === 'soli') return <Soli mood="happy" skin={skin.id} size={size} />;
+  if (skin.category === 'soli') return <Soli mood="normal" skin={skin.id} size={size} />;
   if (skin.category === 'building') return <Building id={skin.id} size={size} />;
   return <Ijang mood="base" prop={skin.id} size={size} />;
 }

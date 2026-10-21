@@ -55,17 +55,18 @@ export function soliSvg(m: SoliMood): string {
   );
 }
 
-/** 솔이 스킨 (design skinIn 이식). 솔이 그림 위에 겹쳐 그린다. viewBox 0 0 200 220. */
+/** 솔이 스킨 (design skinIn 이식). 솔이 그림 위에 겹쳐 그린다 (시안 미리보기는 보통 표정). viewBox 0 0 200 220. */
 export function soliSkinSvg(id: string | null): string {
   if (id === 'hat')
     return `<ellipse cx="100" cy="68" rx="80" ry="14" fill="#F7D98A" ${o(5)}/><path d="M62 68 Q60 26 100 24 Q140 26 138 68Z" fill="#F2CD6B" ${o(5)}/><path d="M61.5 56 Q100 64 138.5 56 L138 68 Q100 76 62 68Z" fill="#FF4FA0" ${o(4)}/><path d="M76 40 l6 4 M100 32 l6 4 M120 38 l6 4" stroke="#C9A04A" stroke-width="3" stroke-linecap="round"/>`;
   if (id === 'band')
     return `<path d="M38 100 Q100 34 162 100" stroke="${L}" stroke-width="13" fill="none" stroke-linecap="round"/><path d="M38 100 Q100 34 162 100" stroke="#FF4A5E" stroke-width="7" fill="none" stroke-linecap="round"/>` +
       place48(cropIconInner('strawberry'), 42, 46, 34) + place48(cropIconInner('strawberry'), 124, 46, 34);
-  if (id === 'apron')
-    return `<path d="M78 162 Q100 150 122 162" stroke="${L}" stroke-width="4" fill="none"/><path d="M64 164 H136 L132 196 Q100 204 68 196Z" fill="#8E5A34" ${o(5)}/><rect x="88" y="172" width="24" height="16" rx="4" fill="#B57A4E" ${o(3)}/>` +
-      place48(cropIconInner('coffee'), 91, 168, 18);
-  if (id === 'mush')
-    return `<path d="M162 142 L146 34" ${o(6)}/><path d="M162 142 L146 34" stroke="#FFF6D6" stroke-width="2.5" stroke-linecap="round"/><path d="M98 40 Q100 0 146 0 Q192 0 194 40 Q146 32 98 40Z" fill="#FF6B5A" ${o(5)}/><circle cx="124" cy="20" r="7" fill="#FFFFFF"/><circle cx="156" cy="12" r="5.5" fill="#FFFFFF"/><circle cx="174" cy="28" r="5" fill="#FFFFFF"/>`;
+  if (id === 'glasses')
+    return `<circle cx="74" cy="130" r="18" fill="#BFEFFF" fill-opacity=".35" ${o(5)}/><circle cx="126" cy="130" r="18" fill="#BFEFFF" fill-opacity=".35" ${o(5)}/><path d="M92 128 Q100 122 108 128 M56 126 L36 120 M144 126 L164 120" stroke="${L}" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M64 122 l6 -4 M116 122 l6 -4" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round"/>`;
+  if (id === 'ice')
+    return `<g transform="translate(4 50)"><rect x="158" y="72" width="10" height="26" rx="4" fill="#E8B070" ${o(3.5)}/><path d="M146 40 Q146 20 163 20 Q180 20 180 40 V76 Q180 82 174 82 H152 Q146 82 146 76Z" fill="#7FE0D0" ${o(5)}/><path d="M146 52 H180" stroke="${L}" stroke-width="3" /><path d="M146 40 Q146 20 163 20 Q180 20 180 40 V52 H146Z" fill="#FF8CC6" ${o(5)}/><circle cx="174" cy="24" r="7" fill="#1E2558"/><path d="M154 60 v12 M162 60 v8" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity=".8"/><path d="M178 82 q2 8 0 10" stroke="#7FE0D0" stroke-width="4" stroke-linecap="round" fill="none"/></g>`;
+  if (id === 'net')
+    return `<g transform="translate(40 40)"><path d="M126 106 L138 -4" ${o(7)}/><path d="M126 106 L138 -4" stroke="#E8B070" stroke-width="3" stroke-linecap="round"/><path d="M114 -14 Q112 24 140 30 Q160 26 162 -10" fill="#FFFFFF" fill-opacity=".55" ${o(4)}/><path d="M124 -6 Q126 18 138 26 M138 -10 Q140 14 140 28 M150 -8 Q152 12 148 26 M116 4 Q138 10 160 4 M118 16 Q138 22 156 16" stroke="${L}" stroke-width="2" fill="none" opacity=".55"/><ellipse cx="138" cy="-12" rx="25" ry="9" fill="none" ${o(5)}/><ellipse cx="138" cy="-12" rx="25" ry="9" fill="none" stroke="#5FD8FF" stroke-width="2.5"/></g>`;
   return '';
 }
