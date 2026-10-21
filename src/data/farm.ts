@@ -4,6 +4,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import { cropFor, planSeed, ripePlantings, type Planting } from '../domain/crops';
+import { canEditRecord } from '../domain/records';
 import { dayKeyOf, type DayKey } from '../domain/day';
 import type { CropKind, DayRecord } from '../domain/types';
 import { xpDelta, xpForRecord } from '../domain/village';
@@ -86,7 +87,8 @@ export type CommitResult = {
 
 /**
  * 하루 기록을 저장한다.
- * - 그날 씨앗이 아직 없고 그날이 오늘이면: 기록대로 작물을 정해 심는다 (꽉 차면 가장 오래된 작물 자동 수확).
+ * - 그날 기록의 씨앗이 아직 없고 최근 7일 안이면: 기록대로 작물을 정해 오늘 밭에 심는다
+ *   (지난날 빈칸 기록도 씨앗은 오늘 심는다. 꽉 차면 가장 오래된 작물 자동 수확).
  *   기록을 고쳐도 이미 심은 작물은 바뀌지 않는다.
  * - 경험치: 그날 기록으로 받은 경험치보다 많아질 때만 차이를 준다 (줄지 않는다).
  */
@@ -95,13 +97,19 @@ export function commitDayRecord(record: DayRecord, today: DayKey, now = Date.now
   return writeTx(async (db) => {
     await saveDayRecordTx(db, record);
 
-    if (record.date === today) {
-      const planted = await db.getFirstAsync<{ id: number }>('SELECT id FROM planting WHERE planted_date = ?', record.date);
+    if (canEditRecord(record.date, today)) {
+      const planted = await db.getFirstAsync<{ id: number }>('SELECT id FROM planting WHERE record_date = ?', record.date);
       if (!planted) {
         const crop = cropFor(record);
         const plan = planSeed(await activePlantingsOn(db));
         if (plan.autoHarvest) await harvestTx(db, plan.autoHarvest, today, true);
-        await db.runAsync('INSERT INTO planting (crop, planted_date, slot) VALUES (?, ?, ?)', crop, record.date, plan.slot);
+        await db.runAsync(
+          'INSERT INTO planting (crop, record_date, planted_date, slot) VALUES (?, ?, ?, ?)',
+          crop,
+          record.date,
+          today,
+          plan.slot,
+        );
         result.seed = { crop, slot: plan.slot, autoHarvested: plan.autoHarvest?.crop ?? null };
       }
     }

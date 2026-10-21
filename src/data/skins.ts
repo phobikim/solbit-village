@@ -28,8 +28,9 @@ export function exchangeSkin(skinId: string): Promise<boolean> {
     const inv: Inventory = Object.fromEntries(rows.map((r) => [r.crop, r.qty]));
     const next = payFor(skin.cost, inv);
     if (!next) return;
-    for (const crop of Object.keys(skin.cost) as CropKind[]) {
-      await db.runAsync('UPDATE inventory SET qty = ? WHERE crop = ?', next[crop] ?? 0, crop);
+    // 지정 작물 + '아무 작물'로 실제 줄어든 작물만 다시 쓴다
+    for (const crop of Object.keys(next) as CropKind[]) {
+      if (next[crop] !== inv[crop]) await db.runAsync('UPDATE inventory SET qty = ? WHERE crop = ?', next[crop] ?? 0, crop);
     }
     await db.runAsync(
       'INSERT INTO skin (id, owned, equipped) VALUES (?, 1, 0) ON CONFLICT(id) DO UPDATE SET owned = 1',

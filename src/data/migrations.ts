@@ -92,6 +92,25 @@ export const MIGRATIONS: readonly string[] = [
     equipped INTEGER NOT NULL DEFAULT 0
   );
   `,
+
+  // v4 — 지난날 빈칸 기록: 씨앗은 기록한 날(record_date)당 1개, 심는 날(planted_date)은 오늘.
+  //      record_date NULL은 개발 도구로 채운 작물.
+  `
+  CREATE TABLE planting_v4 (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    crop           TEXT NOT NULL CHECK (crop IN ('sunflower', 'strawberry', 'coffee', 'mushroom', 'potato')),
+    record_date    TEXT UNIQUE,                       -- 하루 기록 1번 = 씨앗 1개
+    planted_date   TEXT NOT NULL,                     -- 성장은 이 날부터
+    slot           INTEGER NOT NULL CHECK (slot BETWEEN 0 AND 4),
+    harvested_date TEXT,
+    auto_harvested INTEGER NOT NULL DEFAULT 0
+  );
+  INSERT INTO planting_v4 (id, crop, record_date, planted_date, slot, harvested_date, auto_harvested)
+    SELECT id, crop, planted_date, planted_date, slot, harvested_date, auto_harvested FROM planting;
+  DROP TABLE planting;
+  ALTER TABLE planting_v4 RENAME TO planting;
+  CREATE INDEX planting_active ON planting(harvested_date);
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;
