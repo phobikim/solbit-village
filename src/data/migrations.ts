@@ -116,6 +116,24 @@ export const MIGRATIONS: readonly string[] = [
   `
   DELETE FROM skin WHERE id IN ('apron', 'mush');
   `,
+
+  // v6 — 디자인 v5 TURN 11 마을 게시판: 행사 분류 5종 + 매년 반복.
+  //      예전 분류는 기념일 → 생일·기념일, 일정 · 기타 → 기타로 옮긴다 (CHECK가 바뀌어 테이블을 다시 만든다).
+  `
+  CREATE TABLE event_v6 (
+    id            TEXT PRIMARY KEY NOT NULL,
+    name          TEXT NOT NULL,
+    date          TEXT NOT NULL,                      -- 처음 날짜 (매년 반복이면 월·일만 씀)
+    type          TEXT NOT NULL CHECK (type IN ('travel', 'birth', 'work', 'meet', 'etc')),
+    repeat_yearly INTEGER NOT NULL DEFAULT 0,
+    created_at    INTEGER NOT NULL
+  );
+  INSERT INTO event_v6 (id, name, date, type, repeat_yearly, created_at)
+    SELECT id, name, date, CASE type WHEN 'anniversary' THEN 'birth' ELSE 'etc' END, 0, created_at FROM event;
+  DROP TABLE event;
+  ALTER TABLE event_v6 RENAME TO event;
+  CREATE INDEX event_date ON event(date);
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

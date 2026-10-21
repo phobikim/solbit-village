@@ -15,7 +15,7 @@ export const BACKUP_TABLES = {
   inventory: ['crop', 'qty'],
   harvest_stat: ['id', 'total_harvested'],
   village_xp: ['id', 'date', 'amount', 'reason', 'at'],
-  event: ['id', 'name', 'date', 'type', 'created_at'],
+  event: ['id', 'name', 'date', 'type', 'repeat_yearly', 'created_at'],
   skin: ['id', 'owned', 'equipped'],
 } as const;
 
@@ -29,6 +29,9 @@ export type Backup = {
   exportedAt: string;
   tables: Partial<Record<BackupTable, Row[]>>;
 };
+
+/** 스키마 v6 전 백업의 행사 분류 → 지금 분류 (마이그레이션 v6과 같음) */
+const OLD_EVENT_TYPE: Record<string, string> = { anniversary: 'birth', schedule: 'etc', etc: 'etc' };
 
 /** 기기 안에만 남기는 설정 (가져오기로 덮지 않음): 오늘 소식을 본 날 */
 export const DEVICE_ONLY_SETTINGS: readonly string[] = ['news_seen_date'];
@@ -77,6 +80,9 @@ export function parseBackup(text: string, currentSchemaVersion: number): ParseRe
         row[c] = v as string | number | null;
       }
       clean.push(row);
+    }
+    if (name === 'event' && o.schemaVersion < 6) {
+      for (const r of clean) r.type = OLD_EVENT_TYPE[String(r.type)] ?? 'etc';
     }
     tables[name] = name === 'settings' ? clean.filter((r) => !DEVICE_ONLY_SETTINGS.includes(String(r.key))) : clean;
   }

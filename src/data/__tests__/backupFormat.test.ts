@@ -46,3 +46,23 @@ describe('백업 형식', () => {
 
   it('파일 이름', () => expect(backupFileName('2026-10-21')).toBe('solbit-backup-2026-10-21.json'));
 });
+
+describe('예전 백업의 행사 분류', () => {
+  it('v6 전 백업은 기념일 → 생일·기념일, 일정·기타 → 기타', () => {
+    const old = buildBackup(5, {
+      event: [
+        { id: 'a', name: '엄마 생신', date: '2026-11-04', type: 'anniversary', created_at: 1 },
+        { id: 'b', name: '시험', date: '2026-11-19', type: 'schedule', created_at: 2 },
+      ],
+    });
+    const r = parseBackup(JSON.stringify(old), 6);
+    if (!r.ok) throw new Error();
+    expect(r.backup.tables.event?.map((e) => e.type)).toEqual(['birth', 'etc']);
+  });
+  it('v6 백업은 그대로', () => {
+    const cur = buildBackup(6, { event: [{ id: 'a', name: '여행', date: '2026-10-27', type: 'travel', repeat_yearly: 0, created_at: 1 }] });
+    const r = parseBackup(JSON.stringify(cur), 6);
+    if (!r.ok) throw new Error();
+    expect(r.backup.tables.event?.[0]).toMatchObject({ type: 'travel', repeat_yearly: 0 });
+  });
+});
