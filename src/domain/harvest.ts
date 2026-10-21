@@ -136,3 +136,15 @@ export function exchangeHint(skin: Skin, inv: Inventory): { crop: CropKind | nul
 export function equippedSkin(category: SkinCategory, equipped: ReadonlySet<string>): string | null {
   return SKINS.find((s) => s.category === category && equipped.has(s.id))?.id ?? null;
 }
+
+/**
+ * 스킨을 쓰면 같은 분류(부위)에 쓰던 스킨은 벗는다. 쓴 뒤의 착용 목록.
+ * 교환 직후에도 이 규칙으로 바로 쓴다.
+ */
+export function equipSkin(equipped: ReadonlySet<string>, skinId: string): Set<string> {
+  const skin = SKINS.find((s) => s.id === skinId);
+  if (!skin) return new Set(equipped);
+  const next = new Set([...equipped].filter((id) => SKINS.find((s) => s.id === id)?.category !== skin.category));
+  next.add(skinId);
+  return next;
+}

@@ -1,6 +1,16 @@
 import { rec } from '../__fixtures__/records';
 import { achievementsOf, bannerEvent, eventsTomorrow, pastItems, upcomingEvents, type VillageEvent } from '../events';
-import { canAfford, exchangeableSkins, exchangeHint, harvestProgress, NON_INGREDIENT_CROPS, payFor, planPayment, SKINS } from '../harvest';
+import {
+  canAfford,
+  equipSkin,
+  exchangeableSkins,
+  exchangeHint,
+  harvestProgress,
+  NON_INGREDIENT_CROPS,
+  payFor,
+  planPayment,
+  SKINS,
+} from '../harvest';
 
 const ev = (id: string, date: string, createdAt = 0): VillageEvent => ({ id, name: id, date, type: 'schedule', createdAt });
 const today = '2026-10-20';
@@ -101,5 +111,15 @@ describe('스킨 교환', () => {
   it('방송 힌트: 지정 작물 / 아무 작물만이면 전체 수량', () => {
     expect(exchangeHint(skin('hat'), { potato: 10, sunflower: 3 })).toEqual({ crop: 'potato', count: 10, skin: '밀짚모자' });
     expect(exchangeHint(skin('knitHat'), { potato: 5, coffee: 8 })).toEqual({ crop: null, count: 13, skin: '털모자' });
+  });
+});
+
+describe('스킨 착용', () => {
+  it('쓰면 같은 분류에 쓰던 스킨은 벗고, 다른 분류는 그대로', () => {
+    expect([...equipSkin(new Set(['hat', 'jars', 'goldMega']), 'band')].sort()).toEqual(['band', 'goldMega', 'jars']);
+    expect([...equipSkin(new Set(), 'knitHat')]).toEqual(['knitHat']);
+  });
+  it('모르는 스킨이면 그대로', () => {
+    expect([...equipSkin(new Set(['hat']), 'nope')]).toEqual(['hat']);
   });
 });

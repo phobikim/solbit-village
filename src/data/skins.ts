@@ -1,7 +1,9 @@
-// 스킨 저장소: 교환(창고 작물 차감) · 쓰기/벗기.
+// 스킨 저장소: 교환(창고 작물 차감 + 바로 착용) · 쓰기/벗기.
 // 교환은 창고 수량만 줄인다. 누적 수확량(harvest_stat)과 수확 레벨은 그대로.
 
-import { payFor, SKINS, type Inventory } from '../domain/harvest';
+import type { SQLiteDatabase } from 'expo-sqlite';
+
+import { equipSkin, payFor, SKINS, type Inventory } from '../domain/harvest';
 import type { CropKind } from '../domain/types';
 import { getDb, writeTx } from './db';
 
@@ -16,7 +18,16 @@ export async function loadSkins(): Promise<SkinState> {
   };
 }
 
-/** 교환. 작물이 모자라거나 이미 있으면 false. */
+/** 트랜잭션 안에서: 이 스킨을 쓰고, 같은 분류에 쓰던 스킨은 벗는다 */
+async function equipTx(db: SQLiteDatabase, skinId: string): Promise<void> {
+  const rows = await db.getAllAsync<{ id: string }>('SELECT id FROM skin WHERE equipped = 1');
+  const before = new Set(rows.map((r) => r.id));
+  const after = equipSkin(before, skinId);
+  for (const id of before) if (!after.has(id)) await db.runAsync('UPDATE skin SET equipped = 0 WHERE id = ?', id);
+  await db.runAsync('UPDATE skin SET equipped = 1 WHERE id = ? AND owned = 1', skinId);
+}
+
+/** 교환하고 바로 쓴다. 작물이 모자라거나 이미 있으면 false. */
 export function exchangeSkin(skinId: string): Promise<boolean> {
   const skin = SKINS.find((s) => s.id === skinId);
   let ok = false;
@@ -36,19 +47,16 @@ export function exchangeSkin(skinId: string): Promise<boolean> {
       'INSERT INTO skin (id, owned, equipped) VALUES (?, 1, 0) ON CONFLICT(id) DO UPDATE SET owned = 1',
       skinId,
     );
+    await equipTx(db, skinId);
     ok = true;
   }).then(() => ok);
 }
 
-/** 쓰기/벗기. 같은 분류(솔이 등)에서는 하나만 쓴다. */
+/** 쓰기(같은 분류에 쓰던 스킨은 벗김) / 벗기 */
 export function setSkinEquipped(skinId: string, equipped: boolean): Promise<void> {
-  const skin = SKINS.find((s) => s.id === skinId);
-  if (!skin) return Promise.resolve();
+  if (!SKINS.some((s) => s.id === skinId)) return Promise.resolve();
   return writeTx(async (db) => {
-    if (equipped) {
-      const sameCategory = SKINS.filter((s) => s.category === skin.category).map((s) => s.id);
-      for (const id of sameCategory) await db.runAsync('UPDATE skin SET equipped = 0 WHERE id = ?', id);
-    }
-    await db.runAsync('UPDATE skin SET equipped = ? WHERE id = ? AND owned = 1', equipped ? 1 : 0, skinId);
+    if (equipped) await equipTx(db, skinId);
+    else await db.runAsync('UPDATE skin SET equipped = 0 WHERE id = ?', skinId);
   });
 }

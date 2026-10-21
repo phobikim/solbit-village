@@ -148,9 +148,14 @@ export default function Storage() {
                   ...(plan.lackingAny ? [`작물 ${plan.lackingAny}개 부족`] : []),
                 ].join(' · ');
                 return (
-                  <View key={s.id} style={[styles.skin, !isOwned && afford && styles.skinReady]}>
+                  <View key={s.id} style={[styles.skin, !isOwned && afford && styles.skinReady, isOn && styles.skinWorn]}>
                     <View style={styles.skinArt}>
                       <SkinPreview skin={s} />
+                      {isOn && (
+                        <View style={styles.wornBadge}>
+                          <Text style={styles.wornText}>착용 중</Text>
+                        </View>
+                      )}
                     </View>
                     <Text style={styles.skinName}>{s.name}</Text>
                     <View style={styles.costs}>
@@ -169,10 +174,12 @@ export default function Storage() {
                     </View>
                     {isOwned ? (
                       <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`${s.name} ${isOn ? '벗기' : '쓰기'}`}
                         onPress={() => setEquipped(s.id, !isOn)}
-                        style={[styles.skinBtn, isOn ? styles.skinBtnOn : styles.skinBtnOwned]}
+                        style={[styles.skinBtn, isOn ? styles.skinBtnOwned : styles.skinBtnOn]}
                       >
-                        <Text style={[styles.skinBtnText, isOn && { color: colors.line }]}>{isOn ? '쓰는 중' : '쓰기'}</Text>
+                        <Text style={[styles.skinBtnText, !isOn && { color: colors.line }]}>{isOn ? '벗기' : '쓰기'}</Text>
                       </Pressable>
                     ) : afford ? (
                       <Pressable onPress={() => setConfirming(s)} style={[styles.skinBtn, styles.skinBtnOn]}>
@@ -259,6 +266,17 @@ const styles = StyleSheet.create({
   skins: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   skin: { width: '48.8%', backgroundColor: colors.cardSub, borderRadius: 22, padding: 10, gap: 6, borderWidth: 2.5, borderColor: 'transparent' },
   skinReady: { borderColor: colors.yellow },
+  skinWorn: { borderColor: colors.pink },
+  wornBadge: {
+    position: 'absolute',
+    top: 6,
+    left: 6,
+    backgroundColor: colors.pink,
+    borderRadius: 99,
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+  },
+  wornText: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.line },
   skinArt: { height: 84, borderRadius: 16, backgroundColor: colors.night, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   skinName: { fontFamily: fonts.bodyHeavy, fontSize: 14, color: colors.text },
   costs: { flexDirection: 'row', gap: 6 },

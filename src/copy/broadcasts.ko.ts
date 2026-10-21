@@ -28,7 +28,8 @@ export const broadcasts = {
   eventEveAnniversary: (name: string) => `내일이 ${name}입니다. 빈손으로 가지 마세요.`,
   /** 행사 전날 — 일정 · 기타 */
   eventEve: (name: string) => `내일 ${name} 있습니다. 이장도 괜히 긴장됩니다.`,
-  exchangeDone: (skin: string) => `${skin} 들여놨습니다. 잘 어울립니다. 아마도요.`,
+  /** 교환 직후 (바로 착용) */
+  exchangeDone: (skin: string) => `${skin} 들여놓고 바로 써 봤습니다. 잘 어울립니다. 아마도요.`,
   ledger: '장부에 다 적어뒀습니다. 이장은 다 기억합니다. 장부가요.',
   storageQuiet: '창고는 잘 있습니다. 쥐는 없습니다. 아마도요.',
   rainyMonth: (days: number) => `이번 달 비 온 날이 ${days}일입니다. 우산은 각자 챙기세요.`,
