@@ -7,9 +7,9 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { broadcasts, withPrefix } from '../../src/copy/broadcasts.ko';
 import { ACHIEVEMENT_LABEL, EVENT_TYPE_COLOR, EVENT_TYPE_LABEL, WEEKDAYS } from '../../src/copy/labels.ko';
 import { dDayLabel, parseDayKey, today as getToday, weekdayOf, type DayKey } from '../../src/domain/day';
-import { pastItems, upcomingEvents } from '../../src/domain/events';
+import { BOARD_MAX, pastItems, upcomingEvents } from '../../src/domain/events';
 import { useLedger } from '../../src/state/ledger';
-import { BannerIcon } from '../../src/ui/characters';
+import { BannerIcon, EventIcon } from '../../src/ui/characters';
 import { SubScreen } from '../../src/ui/components/form';
 import { RoundButton } from '../../src/ui/components/RoundButton';
 import { colors, fonts } from '../../src/ui/theme';
@@ -30,6 +30,7 @@ export default function Ledger() {
   const events = useLedger((s) => s.events);
   const achievements = useLedger((s) => s.achievements);
   const load = useLedger((s) => s.load);
+  const loaded = useLedger((s) => s.loaded);
 
   useFocusEffect(
     useCallback(() => {
@@ -48,24 +49,27 @@ export default function Ledger() {
     <SubScreen title="이장네 장부" broadcast={{ message: withPrefix(broadcasts.ledger), time: timeLabel(new Date()) }}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.section}>다가오는 행사</Text>
-        {upcoming.length === 0 && <Text style={styles.empty}>걸린 현수막이 없습니다. + 로 행사를 적어 두세요.</Text>}
+        {loaded && upcoming.length === 0 && (
+          <Text style={styles.empty}>게시판에 붙은 쪽지가 없습니다. + 로 행사를 적어 두세요.</Text>
+        )}
         {upcoming.map((e, i) => (
           <Pressable key={e.id} onPress={() => open(e.id)} style={[styles.card, i === 0 && styles.cardBanner]}>
             <View style={styles.icon}>
-              <BannerIcon color={EVENT_TYPE_COLOR[e.type]} size={28} />
+              <EventIcon type={e.type} size={30} />
             </View>
             <View style={styles.body}>
               <View style={styles.nameRow}>
                 <Text style={styles.name} numberOfLines={1}>
                   {e.name}
                 </Text>
-                <Text style={[styles.badge, { color: EVENT_TYPE_COLOR[e.type], borderColor: EVENT_TYPE_COLOR[e.type] }]}>
+                <Text style={[styles.badge, { color: EVENT_TYPE_COLOR[e.type] }]}>
                   {EVENT_TYPE_LABEL[e.type]}
                 </Text>
               </View>
               <Text style={styles.date}>
                 {mdDow(e.date)}
-                {i === 0 ? ' · 마을 입구에 걸림' : ''}
+                {i === 0 ? ' · 게시판 맨 앞' : i < BOARD_MAX ? ' · 게시판' : ''}
+                {e.repeatYearly ? ' · 매년' : ''}
               </Text>
             </View>
             <View style={[styles.dday, i === 0 && styles.ddayBanner]}>
@@ -79,14 +83,14 @@ export default function Ledger() {
           p.kind === 'event' ? (
             <Pressable key={`e${p.event.id}`} onPress={() => open(p.event.id)} style={styles.card}>
               <View style={styles.icon}>
-                <BannerIcon color={EVENT_TYPE_COLOR[p.event.type]} size={28} />
+                <EventIcon type={p.event.type} size={30} />
               </View>
               <View style={styles.body}>
                 <View style={styles.nameRow}>
                   <Text style={styles.name} numberOfLines={1}>
                     {p.event.name}
                   </Text>
-                  <Text style={[styles.badge, { color: EVENT_TYPE_COLOR[p.event.type], borderColor: EVENT_TYPE_COLOR[p.event.type] }]}>
+                  <Text style={[styles.badge, { color: EVENT_TYPE_COLOR[p.event.type] }]}>
                     {EVENT_TYPE_LABEL[p.event.type]}
                   </Text>
                 </View>
@@ -103,7 +107,7 @@ export default function Ledger() {
                   <Text style={styles.name} numberOfLines={2}>
                     {p.text}
                   </Text>
-                  <Text style={[styles.badge, { color: EVENT_TYPE_COLOR.achievement, borderColor: EVENT_TYPE_COLOR.achievement }]}>
+                  <Text style={[styles.badge, { color: EVENT_TYPE_COLOR.achievement }]}>
                     {ACHIEVEMENT_LABEL}
                   </Text>
                 </View>
@@ -140,11 +144,11 @@ const styles = StyleSheet.create({
   name: { flexShrink: 1, fontFamily: fonts.bodyHeavy, fontSize: 16, color: colors.text },
   badge: {
     fontFamily: fonts.bodyHeavy,
-    fontSize: 10,
-    borderWidth: 1,
+    fontSize: 11,
+    backgroundColor: colors.track,
     borderRadius: 99,
-    paddingHorizontal: 6,
-    paddingVertical: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
     overflow: 'hidden',
   },
   date: { fontFamily: fonts.number, fontSize: 12, color: colors.textSub },

@@ -4,8 +4,10 @@ import { memo, useMemo, useState } from 'react';
 import { StyleSheet, View, type LayoutChangeEvent, type StyleProp, type ViewStyle } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
+import type { EventType } from '../../domain/events';
 import type { CropKind, Weather } from '../../domain/types';
 import { cropIconSvg } from './crops';
+import { eventIconSvg } from './eventIcons';
 import { bannerIconSvg, weatherIconSvg } from './icons';
 import { ijangPropsOf, ijangSvg, type IjangMood } from './ijang';
 import { buildingSvg } from './skins';
@@ -59,6 +61,12 @@ export function CropIcon({ crop, size, style }: IconProps & { crop: CropKind }) 
 
 export function WeatherIcon({ weather, size, style }: IconProps & { weather: Weather }) {
   const xml = useMemo(() => weatherIconSvg(weather), [weather]);
+  return <SvgXml xml={xml} width={size} height={size} style={style} />;
+}
+
+/** 행사 분류 아이콘 (small: 24px 이하용 단순한 모양) */
+export function EventIcon({ type, small, size, style }: IconProps & { type: EventType; small?: boolean }) {
+  const xml = useMemo(() => eventIconSvg(type, small ?? size <= 28), [type, small, size]);
   return <SvgXml xml={xml} width={size} height={size} style={style} />;
 }
 

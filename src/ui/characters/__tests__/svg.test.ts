@@ -12,7 +12,8 @@ const base: VillageSceneParams = {
   plots: [null, null, null, null, null],
   soliMood: 'normal',
   visitors: [],
-  bannerText: null,
+  board: [],
+  boardToday: false,
   lanternOn: false,
   bloom: 0,
 };
@@ -59,9 +60,13 @@ describe('village scene', () => {
     expect(villageSceneSvg({ ...base, plots })).not.toMatch(bad);
   });
 
-  it('banner only when there is an event, text escaped', () => {
-    expect(villageSceneSvg(base)).not.toContain('<text');
-    expect(villageSceneSvg({ ...base, bannerText: '엄마 & 아빠 <D-1>' })).toContain('엄마 &amp; 아빠 &lt;D-1&gt;');
+  it('board: 빈 게시판 쪽지 / 쪽지 이름 이스케이프 · 길면 말줄임 / 오늘 도장', () => {
+    expect(villageSceneSvg(base)).toContain('붙일 게 없습니다.');
+    const one = villageSceneSvg({ ...base, board: [{ type: 'birth', dday: 'D-1', name: '엄마&아빠' }] });
+    expect(one).toContain('엄마&amp;아빠');
+    expect(one).not.toContain('붙일 게 없습니다.');
+    expect(villageSceneSvg({ ...base, board: [{ type: 'travel', dday: 'D-7', name: '아주아주긴여행이름' }] })).toContain('아주아주긴…');
+    expect(villageSceneSvg({ ...base, board: [{ type: 'travel', dday: 'D-DAY', name: 'x' }], boardToday: true })).toContain('오늘!');
   });
 
   it('fit mode anchors to the ground', () => {

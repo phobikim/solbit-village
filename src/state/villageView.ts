@@ -29,7 +29,7 @@ import type { Condition, DayRecord, IndexKind } from '../domain/types';
 import { levelFromXp, type LevelProgress } from '../domain/village';
 import { WEATHER_WINDOW_DAYS, weatherNow } from '../domain/weather';
 import type { SoliMood, VillageSceneParams } from '../ui/characters';
-import { bannerEvent, eventsTomorrow } from '../domain/events';
+import { boardEvents, eventsInAWeek, eventsToday, eventsTomorrow } from '../domain/events';
 import { equippedSkin, exchangeableSkins, exchangeHint } from '../domain/harvest';
 import { dDayLabel } from '../domain/day';
 import { useFarm } from './farm';
@@ -92,13 +92,18 @@ export function useVillageView(today: DayKey, now: Date): VillageView {
     let recent = 0;
     for (let i = 0; i < INDEX_WINDOW_DAYS; i++) if (byDate[addDays(today, -i)]) recent++;
 
-    const banner = bannerEvent(events, today);
+    const onBoard = boardEvents(events, today);
+    const todays = eventsToday(events, today)[0];
     const eve = eventsTomorrow(events, today)[0];
+    const week = eventsInAWeek(events, today)[0];
     const canExchange = exchangeableSkins(farm.inventory, owned)[0];
 
     const situation = selectBroadcast({
       weather,
+      eventToday: todays ? { name: todays.name, type: todays.type } : null,
       eventTomorrow: eve ? { name: eve.name, type: eve.type } : null,
+      eventInAWeek: week ? { name: week.name, type: week.type } : null,
+      boardEmpty: onBoard.length === 0,
       exchangeReady: canExchange ? exchangeHint(canExchange, farm.inventory) : null,
       leveledUpToday: level.level > levelBefore,
       autoHarvestedToday: farm.autoHarvestedToday,
@@ -119,7 +124,8 @@ export function useVillageView(today: DayKey, now: Date): VillageView {
       visitors,
       soliSkin: equippedSkin('soli', equipped),
       building: equippedSkin('building', equipped),
-      bannerText: banner ? `${banner.name} ${dDayLabel(banner.date, today)}` : null,
+      board: onBoard.map((e) => ({ type: e.type, dday: dDayLabel(e.date, today), name: e.name })),
+      boardToday: onBoard[0]?.date === today,
       lanternOn: latest?.work === 3 || (idx.work !== null && idx.work >= WORK_OVERHEAT),
       bloom: (idx.leisure ?? 0) / 100,
     };

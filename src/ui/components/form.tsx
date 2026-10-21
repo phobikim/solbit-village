@@ -44,8 +44,18 @@ export function ChoiceChips<T extends string>({
   );
 }
 
-/** 달력에서 날짜 고르기. min 이전 날짜는 고를 수 없다. */
-export function DatePicker({ value, onChange, min }: { value: DayKey; onChange: (d: DayKey) => void; min?: DayKey }) {
+/** 달력에서 날짜 고르기. min 이전 날짜는 고를 수 없다. selectedColor: 고른 날 배경 (행사 분류 색 등) */
+export function DatePicker({
+  value,
+  onChange,
+  min,
+  selectedColor = colors.yellow,
+}: {
+  value: DayKey;
+  onChange: (d: DayKey) => void;
+  min?: DayKey;
+  selectedColor?: string;
+}) {
   const [month, setMonth] = useState(() => yearMonthOf(value));
   const cells = monthGrid(month);
   return (
@@ -76,7 +86,7 @@ export function DatePicker({ value, onChange, min }: { value: DayKey; onChange: 
               onPress={() => onChange(key)}
               accessibilityRole="button"
               accessibilityState={{ selected: on, disabled }}
-              style={[styles.calCell, on && styles.calCellOn]}
+              style={[styles.calCell, on && { backgroundColor: selectedColor }]}
             >
               <Text style={[styles.calDay, disabled && { color: colors.disabled }, on && { color: colors.line }]}>
                 {parseDayKey(key).day}
@@ -136,7 +146,6 @@ const styles = StyleSheet.create({
   calDow: { flex: 1, textAlign: 'center', fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.textMuted },
   calGrid: { flexDirection: 'row', flexWrap: 'wrap' },
   calCell: { width: `${100 / 7}%`, height: 34, alignItems: 'center', justifyContent: 'center', borderRadius: 12 },
-  calCellOn: { backgroundColor: colors.yellow },
   calDay: { fontFamily: fonts.number, fontSize: 13, color: colors.text },
   sub: { flex: 1, backgroundColor: colors.night },
   subHead: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingTop: 2, paddingBottom: 12 },
