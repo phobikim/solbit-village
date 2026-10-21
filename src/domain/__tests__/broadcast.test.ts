@@ -22,7 +22,7 @@ const base: BroadcastContext = {
 describe('방송 선택', () => {
   it('폭풍이면 무조건 개그 없는 짧은 방송', () => {
     const s = selectBroadcast({ ...base, weather: 'storm', leveledUpToday: true, visitorFromYesterday: '하준' });
-    expect(s).toEqual({ kind: 'storm' });
+    expect(s).toEqual({ kind: 'storm', eventTomorrow: null });
     expect(broadcastText(s)).toBe('...오늘은 방송 안 합니다. 푹 쉬세요. 이상.');
   });
 
@@ -48,8 +48,10 @@ describe('방송 선택', () => {
     );
   });
 
-  it('폭풍이면 행사 전날이어도 개그 없는 방송', () => {
-    expect(selectBroadcast({ ...base, weather: 'storm', eventTomorrow: { name: 'x', type: 'etc' } }).kind).toBe('storm');
+  it('폭풍 + 행사 전날: 톤은 유지하고 행사 정보만 남긴다', () => {
+    const s = selectBroadcast({ ...base, weather: 'storm', eventTomorrow: { name: '엄마 생신', type: 'anniversary' }, leveledUpToday: true });
+    expect(s).toEqual({ kind: 'storm', eventTomorrow: '엄마 생신' });
+    expect(broadcastText(s)).toBe('...오늘은 방송 안 합니다. 내일 엄마 생신만 기억하세요. 푹 쉬세요.');
   });
 
   it('여가 부족은 기록이 3일 이상 있을 때만', () => {

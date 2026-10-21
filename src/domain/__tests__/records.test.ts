@@ -28,9 +28,11 @@ describe('기록 수정 기간 (최근 7일)', () => {
     expect(canEditRecord('2026-10-13', today)).toBe(false);
   });
   it('미래 날짜는 안 된다', () => expect(canEditRecord('2026-10-21', today)).toBe(false));
-  it('새 기록은 오늘만', () => {
+  it('빈 날 새 기록: 최근 7일 안만', () => {
     expect(canCreateRecord(today, today)).toBe(true);
-    expect(canCreateRecord('2026-10-19', today)).toBe(false);
+    expect(canCreateRecord('2026-10-14', today)).toBe(true);
+    expect(canCreateRecord('2026-10-13', today)).toBe(false);
+    expect(canCreateRecord('2026-10-21', today)).toBe(false);
   });
 });
 

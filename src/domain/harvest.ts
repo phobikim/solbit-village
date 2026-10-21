@@ -31,43 +31,88 @@ export function harvestProgress(totalHarvested: number): HarvestProgress {
 }
 
 // ── 스킨 교환 (SPEC 5장) ────────────────────────────────────────────────
-// 스킨은 작물 수량만으로 교환한다. 교환하면 창고 수량은 줄지만 누적 수확량·수확 레벨은 그대로.
-
+// 스킨은 작물 수량만으로 교환한다 (확률 없음). 교환하면 창고 수량은 줄지만 누적 수확량·수확 레벨은 그대로.
 
 export type SkinCategory = 'soli' | 'building' | 'ijang';
-export type SkinCost = Partial<Record<CropKind, number>>;
+
+/** 가격: 지정 작물 + '아무 작물' 수량 */
+export type SkinCost = { crops: Partial<Record<CropKind, number>>; any: number };
 export type Skin = { id: string; name: string; category: SkinCategory; cost: SkinCost };
 
 /**
- * 스킨 목록과 가격.
- * TODO: SPEC 5장 [미정] — 스킨 목록과 가격. 지금은 시안(9e)의 솔이 스킨 4종만 임시로 둔다.
- * 마을 건물 · 이장 소품은 시안이 없어 비어 있다.
+ * 스킨 재료로 지정하지 않는 작물 — CLAUDE.md 규칙 3.
+ * 커피콩(일 강도 3)·버섯(지침)을 재료로 요구하면 그런 기록을 유도하게 된다. '아무 작물'로만 쓰인다.
  */
+export const NON_INGREDIENT_CROPS: readonly CropKind[] = ['coffee', 'mushroom'];
+
+/** 스킨 목록과 가격 — SPEC 5장 [확정] 2026-10-21 */
 export const SKINS: readonly Skin[] = [
-  { id: 'hat', name: '밀짚모자', category: 'soli', cost: { potato: 10, sunflower: 3 } },
-  { id: 'band', name: '딸기 머리띠', category: 'soli', cost: { strawberry: 8 } },
-  { id: 'apron', name: '커피 앞치마', category: 'soli', cost: { coffee: 6, potato: 4 } },
-  { id: 'mush', name: '버섯 우산', category: 'soli', cost: { mushroom: 5, sunflower: 2 } },
+  // 솔이
+  { id: 'hat', name: '밀짚모자', category: 'soli', cost: { crops: { potato: 10, sunflower: 3 }, any: 0 } },
+  { id: 'band', name: '딸기 머리띠', category: 'soli', cost: { crops: { strawberry: 8 }, any: 0 } },
+  { id: 'apron', name: '커피 앞치마', category: 'soli', cost: { crops: {}, any: 10 } },
+  { id: 'mush', name: '버섯 우산', category: 'soli', cost: { crops: {}, any: 12 } },
+  // 마을 건물
+  { id: 'scarecrow', name: '허수아비', category: 'building', cost: { crops: { potato: 12 }, any: 0 } },
+  { id: 'mailbox', name: '빨간 우체통', category: 'building', cost: { crops: { strawberry: 6 }, any: 6 } },
+  { id: 'jars', name: '장독대', category: 'building', cost: { crops: {}, any: 20 } },
+  // 이장 소품
+  { id: 'goldMega', name: '금색 확성기', category: 'ijang', cost: { crops: {}, any: 15 } },
+  { id: 'sunglasses', name: '선글라스', category: 'ijang', cost: { crops: { sunflower: 5 }, any: 5 } },
+  { id: 'knitHat', name: '털모자', category: 'ijang', cost: { crops: {}, any: 12 } },
 ];
 
 export type Inventory = Partial<Record<CropKind, number>>;
 
-/** 모자란 작물과 개수 (다 있으면 빈 배열) */
-export function lackingFor(cost: SkinCost, inv: Inventory): { crop: CropKind; n: number }[] {
-  return (Object.entries(cost) as [CropKind, number][])
-    .map(([crop, need]) => ({ crop, n: need - (inv[crop] ?? 0) }))
-    .filter((x) => x.n > 0);
+/** '아무 작물' 차감에서 수량이 같을 때 먼저 쓰는 순서 */
+const TIE_ORDER: readonly CropKind[] = ['potato', 'sunflower', 'strawberry', 'coffee', 'mushroom'];
+
+export type Payment = {
+  /** 작물별 차감 수량 (교환 전 확인 화면에 보여준다) */
+  deduct: Partial<Record<CropKind, number>>;
+  /** 모자란 지정 작물 */
+  lacking: { crop: CropKind; n: number }[];
+  /** 모자란 '아무 작물' 수 */
+  lackingAny: number;
+};
+
+/**
+ * 차감 계획. 지정 작물을 먼저 빼고, '아무 작물'은 남은 것 중 보유량이 가장 많은 작물부터
+ * 그 작물이 다 떨어질 때까지 빼고, 다음으로 많은 작물로 넘어간다.
+ */
+export function planPayment(cost: SkinCost, inv: Inventory): Payment {
+  const deduct: Partial<Record<CropKind, number>> = {};
+  const left: Inventory = { ...inv };
+  const lacking: { crop: CropKind; n: number }[] = [];
+  for (const [crop, need] of Object.entries(cost.crops) as [CropKind, number][]) {
+    const have = left[crop] ?? 0;
+    if (have < need) lacking.push({ crop, n: need - have });
+    const take = Math.min(have, need);
+    if (take) deduct[crop] = take;
+    left[crop] = have - take;
+  }
+  let rest = cost.any;
+  const piles = TIE_ORDER.filter((c) => (left[c] ?? 0) > 0).sort((a, b) => (left[b] ?? 0) - (left[a] ?? 0));
+  for (const crop of piles) {
+    if (rest <= 0) break;
+    const take = Math.min(left[crop] ?? 0, rest);
+    deduct[crop] = (deduct[crop] ?? 0) + take;
+    rest -= take;
+  }
+  return { deduct, lacking, lackingAny: Math.max(0, rest) };
 }
 
 export function canAfford(cost: SkinCost, inv: Inventory): boolean {
-  return lackingFor(cost, inv).length === 0;
+  const p = planPayment(cost, inv);
+  return p.lacking.length === 0 && p.lackingAny === 0;
 }
 
 /** 교환 후 창고 수량 (모자라면 null) */
 export function payFor(cost: SkinCost, inv: Inventory): Inventory | null {
-  if (!canAfford(cost, inv)) return null;
+  const p = planPayment(cost, inv);
+  if (p.lacking.length || p.lackingAny) return null;
   const next: Inventory = { ...inv };
-  for (const [crop, need] of Object.entries(cost) as [CropKind, number][]) next[crop] = (next[crop] ?? 0) - need;
+  for (const [crop, n] of Object.entries(p.deduct) as [CropKind, number][]) next[crop] = (next[crop] ?? 0) - n;
   return next;
 }
 
@@ -76,8 +121,18 @@ export function exchangeableSkins(inv: Inventory, owned: ReadonlySet<string>): S
   return SKINS.filter((s) => !owned.has(s.id) && canAfford(s.cost, inv));
 }
 
-/** 방송용: 스킨 가격 중 가장 많이 드는 작물과 지금 가진 수량 */
-export function exchangeHint(skin: Skin, inv: Inventory): { crop: CropKind; count: number; skin: string } {
-  const [crop] = (Object.entries(skin.cost) as [CropKind, number][]).sort((a, b) => b[1] - a[1])[0];
-  return { crop, count: inv[crop] ?? 0, skin: skin.name };
+/**
+ * 방송용: 지정 작물이 있으면 가장 많이 드는 지정 작물과 지금 수량,
+ * '아무 작물'만이면 crop = null, count = 전체 보유량.
+ */
+export function exchangeHint(skin: Skin, inv: Inventory): { crop: CropKind | null; count: number; skin: string } {
+  const named = (Object.entries(skin.cost.crops) as [CropKind, number][]).sort((a, b) => b[1] - a[1])[0];
+  if (named) return { crop: named[0], count: inv[named[0]] ?? 0, skin: skin.name };
+  const total = Object.values(inv).reduce((a: number, n) => a + (n ?? 0), 0);
+  return { crop: null, count: total, skin: skin.name };
+}
+
+/** 분류별로 하나만 쓴다: 그 분류에서 쓰고 있는 스킨 id */
+export function equippedSkin(category: SkinCategory, equipped: ReadonlySet<string>): string | null {
+  return SKINS.find((s) => s.category === category && equipped.has(s.id))?.id ?? null;
 }

@@ -23,12 +23,11 @@ export function canEditRecord(date: DayKey, today: DayKey): boolean {
 }
 
 /**
- * 이 날짜에 새 기록을 만들 수 있는가. 지금은 오늘만.
- * TODO: SPEC 4장 [미정] — 기록 안 한 지난날에 새로 기록하기 허용 여부. 사용자 결정 전까지
- * 씨앗이 소급해서 생기지 않도록 막아 둔다.
+ * 이 날짜에 새 기록을 만들 수 있는가 (그날 기록이 아직 없을 때).
+ * SPEC 4장 [확정] 2026-10-21 — 최근 7일 안의 빈 날만. 씨앗은 주고, 심는 곳은 오늘 밭.
  */
 export function canCreateRecord(date: DayKey, today: DayKey): boolean {
-  return date === today;
+  return canEditRecord(date, today);
 }
 
 /** 기록 시트 입력값 */

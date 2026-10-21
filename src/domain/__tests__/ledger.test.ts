@@ -1,6 +1,6 @@
 import { rec } from '../__fixtures__/records';
 import { achievementsOf, bannerEvent, eventsTomorrow, pastItems, upcomingEvents, type VillageEvent } from '../events';
-import { canAfford, exchangeableSkins, exchangeHint, harvestProgress, lackingFor, payFor, SKINS } from '../harvest';
+import { canAfford, exchangeableSkins, exchangeHint, harvestProgress, NON_INGREDIENT_CROPS, payFor, planPayment, SKINS } from '../harvest';
 
 const ev = (id: string, date: string, createdAt = 0): VillageEvent => ({ id, name: id, date, type: 'schedule', createdAt });
 const today = '2026-10-20';
@@ -41,34 +41,65 @@ describe('행사', () => {
 });
 
 describe('스킨 교환', () => {
-  const hat = SKINS.find((s) => s.id === 'hat')!;
+  const skin = (id: string) => SKINS.find((s) => s.id === id)!;
 
-  it('작물 수량만으로 교환 (확률 없음)', () => {
-    expect(canAfford(hat.cost, { potato: 10, sunflower: 3 })).toBe(true);
-    expect(canAfford(hat.cost, { potato: 9, sunflower: 3 })).toBe(false);
-  });
-
-  it('모자란 작물과 개수', () => {
-    expect(lackingFor(hat.cost, { potato: 7 })).toEqual([
-      { crop: 'potato', n: 3 },
-      { crop: 'sunflower', n: 3 },
+  it('확정 목록 10종, 분류별 3~4종', () => {
+    expect(SKINS.map((s) => s.name)).toEqual([
+      '밀짚모자', '딸기 머리띠', '커피 앞치마', '버섯 우산',
+      '허수아비', '빨간 우체통', '장독대',
+      '금색 확성기', '선글라스', '털모자',
     ]);
   });
 
+  it('커피콩·버섯은 지정 재료로 쓰지 않는다 (규칙 3)', () => {
+    for (const s of SKINS) for (const c of NON_INGREDIENT_CROPS) expect(s.cost.crops[c]).toBeUndefined();
+  });
+
+  it('지정 작물만: 밀짚모자 = 감자 10 + 해바라기 3', () => {
+    expect(canAfford(skin('hat').cost, { potato: 10, sunflower: 3 })).toBe(true);
+    expect(canAfford(skin('hat').cost, { potato: 9, sunflower: 3, coffee: 50 })).toBe(false);
+    expect(planPayment(skin('hat').cost, { potato: 7 })).toEqual({
+      deduct: { potato: 7 },
+      lacking: [
+        { crop: 'potato', n: 3 },
+        { crop: 'sunflower', n: 3 },
+      ],
+      lackingAny: 0,
+    });
+  });
+
+  it('아무 작물: 보유량이 가장 많은 작물부터 다 쓸 때까지 차감', () => {
+    // 커피 앞치마 = 아무 10
+    const p = planPayment(skin('apron').cost, { potato: 4, coffee: 7, strawberry: 2 });
+    expect(p.deduct).toEqual({ coffee: 7, potato: 3 });
+    expect(p.lackingAny).toBe(0);
+  });
+
+  it('지정 + 아무: 지정 작물을 먼저 빼고 남은 것에서 아무 작물', () => {
+    // 빨간 우체통 = 딸기 6 + 아무 6
+    const p = planPayment(skin('mailbox').cost, { strawberry: 9, potato: 2, mushroom: 2 });
+    expect(p.deduct).toEqual({ strawberry: 9, potato: 2, mushroom: 1 });
+    expect(planPayment(skin('mailbox').cost, { strawberry: 6, potato: 2 }).lackingAny).toBe(4);
+  });
+
+  it('수량이 같으면 감자 → 해바라기 → 딸기 → 커피콩 → 버섯 순', () => {
+    expect(planPayment(skin('jars').cost, { mushroom: 10, potato: 10, coffee: 10 }).deduct).toEqual({ potato: 10, coffee: 10 });
+  });
+
   it('교환하면 창고 수량만 준다 (누적 수확량 · 수확 레벨은 그대로)', () => {
-    expect(payFor(hat.cost, { potato: 12, sunflower: 3, coffee: 1 })).toEqual({ potato: 2, sunflower: 0, coffee: 1 });
-    expect(payFor(hat.cost, { potato: 1 })).toBeNull();
-    // 수확 레벨은 누적 수확량으로만 계산하므로 교환과 무관
+    expect(payFor(skin('hat').cost, { potato: 12, sunflower: 3, coffee: 1 })).toEqual({ potato: 2, sunflower: 0, coffee: 1 });
+    expect(payFor(skin('hat').cost, { potato: 1 })).toBeNull();
     expect(harvestProgress(46).level).toBe(4);
   });
 
   it('갖고 있지 않고 지금 바꿀 수 있는 스킨만 (분홍 점 · 방송)', () => {
-    const inv = { potato: 10, sunflower: 5, strawberry: 8 };
-    expect(exchangeableSkins(inv, new Set()).map((s) => s.id)).toEqual(['hat', 'band']);
-    expect(exchangeableSkins(inv, new Set(['hat'])).map((s) => s.id)).toEqual(['band']);
+    const inv = { potato: 12, sunflower: 3 };
+    expect(exchangeableSkins(inv, new Set()).map((s) => s.id)).toEqual(['hat', 'apron', 'mush', 'scarecrow', 'goldMega', 'knitHat']);
+    expect(exchangeableSkins(inv, new Set(['hat'])).map((s) => s.id)).not.toContain('hat');
   });
 
-  it('방송 힌트: 가장 많이 드는 작물과 지금 수량', () => {
-    expect(exchangeHint(hat, { potato: 10, sunflower: 3 })).toEqual({ crop: 'potato', count: 10, skin: '밀짚모자' });
+  it('방송 힌트: 지정 작물 / 아무 작물만이면 전체 수량', () => {
+    expect(exchangeHint(skin('hat'), { potato: 10, sunflower: 3 })).toEqual({ crop: 'potato', count: 10, skin: '밀짚모자' });
+    expect(exchangeHint(skin('knitHat'), { potato: 5, coffee: 8 })).toEqual({ crop: null, count: 13, skin: '털모자' });
   });
 });

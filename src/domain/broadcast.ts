@@ -6,11 +6,13 @@ import type { EventType } from './events';
 import type { CropKind, Weather } from './types';
 
 export type BroadcastSituation =
-  | { kind: 'storm' }
+  /** 폭풍: 개그 없이 짧게. 내일 행사가 있으면 그것만 남긴다. */
+  | { kind: 'storm'; eventTomorrow: string | null }
   | { kind: 'eventEve'; name: string; type: EventType }
   | { kind: 'villageLevelUp' }
   | { kind: 'autoHarvest'; crop: CropKind }
-  | { kind: 'exchangeReady'; crop: CropKind; count: number; skin: string }
+  /** crop이 null이면 '아무 작물'만 드는 스킨 (count = 전체 보유량) */
+  | { kind: 'exchangeReady'; crop: CropKind | null; count: number; skin: string }
   | { kind: 'neighborVisit'; name: string }
   | { kind: 'workOverheat' }
   | { kind: 'leisureLow' }
@@ -25,7 +27,7 @@ export type BroadcastContext = {
   /** 내일 행사 */
   eventTomorrow: { name: string; type: EventType } | null;
   /** 지금 바꿀 수 있는 스킨 (가장 앞 하나): 가장 많이 든 작물과 그 수량 */
-  exchangeReady: { crop: CropKind; count: number; skin: string } | null;
+  exchangeReady: { crop: CropKind | null; count: number; skin: string } | null;
   leveledUpToday: boolean;
   autoHarvestedToday: CropKind | null;
   /** 어제 연락해서 오늘 놀러 온 이웃 이름 */
@@ -40,9 +42,9 @@ export type BroadcastContext = {
   ripeCount: number;
 };
 
-/** 위에서부터 먼저 맞는 상황 하나. 폭풍 > 행사 전날 > 마을 레벨업 > 자동 수확 > 교환 가능 > 이웃 방문 > … */
+/** 위에서부터 먼저 맞는 상황 하나. 폭풍(행사 전날이면 행사만 남김) > 행사 전날 > 마을 레벨업 > 자동 수확 > 교환 가능 > 이웃 방문 > … */
 export function selectBroadcast(c: BroadcastContext): BroadcastSituation {
-  if (c.weather === 'storm') return { kind: 'storm' };
+  if (c.weather === 'storm') return { kind: 'storm', eventTomorrow: c.eventTomorrow?.name ?? null };
   if (c.eventTomorrow) return { kind: 'eventEve', ...c.eventTomorrow };
   if (c.leveledUpToday) return { kind: 'villageLevelUp' };
   if (c.autoHarvestedToday) return { kind: 'autoHarvest', crop: c.autoHarvestedToday };

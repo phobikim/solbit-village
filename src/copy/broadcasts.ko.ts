@@ -11,6 +11,8 @@ export const BROADCAST_PREFIX = '아아, 이장입니다.';
 export const broadcasts = {
   /** 컨디션 폭풍: 개그 없이 짧게 */
   storm: '...오늘은 방송 안 합니다. 푹 쉬세요. 이상.',
+  /** 폭풍 + 내일 행사: 톤은 그대로, 행사 정보만 남긴다 */
+  stormWithEvent: (name: string) => `...오늘은 방송 안 합니다. 내일 ${name}만 기억하세요. 푹 쉬세요.`,
   morningCloudy: '오늘 날씨 흐림. 솔이 씨 얼굴도 흐림. 이상.',
   workOverheat: '밭에 또 밤새 불이 켜져 있네요. 작물도 잠은 자야 됩니다.',
   neighborVisit: (name: string) => `${name} 씨가 또 놀러 왔습니다. 이 집 문지방 닳겠습니다.`,
@@ -21,6 +23,7 @@ export const broadcasts = {
   autoHarvest: (crop: string) => `밭이 꽉 차서 제일 오래된 ${eul(crop)} 대신 땄습니다. 창고에 넣어놨습니다.`,
   exchangeReady: (crop: string, n: number, skin: string) =>
     `${iga(crop)} ${n}개 모였습니다. ${irang(skin)} 바꿀 수 있습니다. 안 바꿔도 되고요.`,
+  exchangeReadyAny: (n: number, skin: string) => `작물이 ${n}개 모였습니다. ${irang(skin)} 바꿀 수 있습니다. 안 바꿔도 되고요.`,
   /** 행사 전날 — 기념일 */
   eventEveAnniversary: (name: string) => `내일이 ${name}입니다. 빈손으로 가지 마세요.`,
   /** 행사 전날 — 일정 · 기타 */
@@ -44,7 +47,8 @@ export const ijangLines = {
   sheetNew: '대충 적어도 됩니다. 이장도 대충 읽습니다.',
   sheetEdit: '고쳐도 됩니다. 이미 심은 작물은 그대로입니다.',
   sheetTooOld: '그날 기록은 이제 장부에 굳었습니다. 7일 지난 기록은 못 고칩니다.',
-  sheetNoBackfill: '지난날 빈칸은 비워 둡니다. 오늘 것만 적으시면 됩니다.',
+  sheetNoBackfill: '일주일 넘은 빈칸은 그대로 둡니다. 비어 있어도 괜찮습니다.',
+  sheetBackfill: '빈 날 채우시는군요. 씨앗은 오늘 밭에 심어 드립니다.',
   noNeighbors: '아직 등록한 이웃이 없습니다. 이웃 탭에서 등록하면 여기 뜹니다.',
   neighborNew: '새 이웃이요? 주민등록은 제가 알아서 하겠습니다.',
   neighborEdit: '고칠 게 있으면 고치세요. 이장은 못 본 척하겠습니다.',
@@ -62,11 +66,13 @@ export function withPrefix(body: string): string {
 export function broadcastText(s: BroadcastSituation): string {
   switch (s.kind) {
     case 'storm':
-      return broadcasts.storm;
+      return s.eventTomorrow ? broadcasts.stormWithEvent(s.eventTomorrow) : broadcasts.storm;
     case 'eventEve':
       return withPrefix(s.type === 'anniversary' ? broadcasts.eventEveAnniversary(s.name) : broadcasts.eventEve(s.name));
     case 'exchangeReady':
-      return withPrefix(broadcasts.exchangeReady(CROP_NAME[s.crop], s.count, s.skin));
+      return withPrefix(
+        s.crop ? broadcasts.exchangeReady(CROP_NAME[s.crop], s.count, s.skin) : broadcasts.exchangeReadyAny(s.count, s.skin),
+      );
     case 'villageLevelUp':
       return withPrefix(broadcasts.villageLevelUp);
     case 'autoHarvest':
