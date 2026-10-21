@@ -1,4 +1,15 @@
-import { cropFor, fieldSlots, FIELD_SIZE, isRipe, planSeed, ripePlantings, stageOf, type Planting } from '../crops';
+import {
+  autoHarvestDay,
+  cropFor,
+  dueForAutoHarvest,
+  fieldSlots,
+  FIELD_SIZE,
+  isRipe,
+  planSeed,
+  stageOf,
+  type Planting,
+} from '../crops';
+import { dayKeyOf } from '../day';
 import { rec } from '../__fixtures__/records';
 
 const meet = [{ neighborId: 'a', method: 'meet' as const }];
@@ -76,8 +87,55 @@ describe('밭 5칸', () => {
     expect(slots).toEqual([null, null, { crop: 'coffee', stage: 2 }, null, null]);
   });
 
-  it('ripePlantings: 익은 것만, 오래된 순', () => {
-    const list = [p(1, '2026-10-19', 0), p(2, '2026-10-10', 1), p(3, '2026-10-18', 2)];
-    expect(ripePlantings(list, '2026-10-20').map((x) => x.id)).toEqual([2, 3]);
+});
+
+describe('자동 수확', () => {
+  // 10-18 심음: 18 새싹 → 19 자라는 중 → 20 다 익음(반짝) → 21 하루가 시작될 때(04:00) 자동 수확
+  const planted = p(1, '2026-10-18', 0, 'strawberry');
+
+  it('심은 날 새싹 → 다음 날 자라는 중 → 이틀 뒤 다 익음 → 사흘째 수확', () => {
+    expect(stageOf('2026-10-18', '2026-10-18')).toBe(1);
+    expect(stageOf('2026-10-18', '2026-10-19')).toBe(2);
+    expect(isRipe(planted, '2026-10-20')).toBe(true);
+    expect(autoHarvestDay('2026-10-18')).toBe('2026-10-21');
+    expect(dueForAutoHarvest([planted], '2026-10-19')).toEqual([]);
+    expect(dueForAutoHarvest([planted], '2026-10-20')).toEqual([]); // 다 익은 날은 하루 동안 밭에 있다
+    expect(dueForAutoHarvest([planted], '2026-10-21')).toEqual([planted]);
+  });
+
+  it('하루 경계(04:00) 직전엔 아직 밭에, 직후엔 수확', () => {
+    const at = (h: number, m: number) => dayKeyOf(new Date(2026, 9, 21, h, m));
+    expect(at(3, 59)).toBe('2026-10-20');
+    expect(dueForAutoHarvest([planted], at(3, 59))).toEqual([]);
+    expect(at(4, 0)).toBe('2026-10-21');
+    expect(dueForAutoHarvest([planted], at(4, 0))).toEqual([planted]);
+    // 21일 자정 넘어 새벽 1시: 아직 20일 → 반짝이는 채로
+    expect(isRipe(planted, dayKeyOf(new Date(2026, 9, 21, 1, 0)))).toBe(true);
+  });
+
+  it('며칠 만에 앱을 열면 밀린 수확을 한 번에 (오래된 순), 아직 안 익은 것은 남긴다', () => {
+    const field = [
+      p(3, '2026-10-12', 2, 'potato'),
+      p(1, '2026-10-10', 0, 'mushroom'),
+      p(2, '2026-10-11', 1, 'coffee'),
+      p(4, '2026-10-17', 3, 'sunflower'), // 20일 수확 날
+      p(5, '2026-10-18', 4, 'strawberry'), // 21일 수확 날
+    ];
+    expect(dueForAutoHarvest(field, '2026-10-20').map((x) => x.id)).toEqual([1, 2, 3, 4]);
+  });
+
+  it('하루 1개씩 기록하면 밭은 많아야 3칸 → 꽉 차는 건 지난날 빈칸 기록 때뿐', () => {
+    const today = '2026-10-20';
+    const daily = [p(1, '2026-10-17', 0), p(2, '2026-10-18', 1), p(3, '2026-10-19', 2), p(4, today, 3)];
+    const left = daily.filter((x) => !dueForAutoHarvest(daily, today).includes(x));
+    expect(left.length).toBe(3);
+    expect(planSeed(left).autoHarvest).toBeNull();
+  });
+
+  it('꽉 찬 밭(지난날 빈칸을 한꺼번에 채운 날)에서는 가장 오래된 작물을 대신 딴다', () => {
+    const today = '2026-10-20';
+    const full = [1, 2, 3, 4, 5].map((i) => p(i, today, i - 1));
+    expect(dueForAutoHarvest(full, today)).toEqual([]);
+    expect(planSeed(full)).toEqual({ slot: 0, autoHarvest: full[0] });
   });
 });

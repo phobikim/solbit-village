@@ -69,3 +69,14 @@ describe('소식 문구', () => {
     expect(newsText({ kind: 'quiet' })).toBe('어제는 조용했습니다. 고양이 한 마리 지나갔습니다.');
   });
 });
+
+describe('밤사이 소식: 자동 수확', () => {
+  it('작물별 수량 + 창고에 넣었습니다 (맨 앞)', () => {
+    const items = morningNews({ today, active: [], visitors: ['하준'], events: [], harvested: ['strawberry', 'potato', 'strawberry'] });
+    expect(items[0]).toEqual({ kind: 'harvested', counts: { strawberry: 2, potato: 1 } });
+    expect(newsText(items[0])).toBe('딸기 2개, 감자 1개를 따서 창고에 넣었습니다.');
+  });
+  it('다 익은 작물은 내일 새벽에 딴다고 알려준다', () => {
+    expect(newsText({ kind: 'ripened', crops: ['potato'] })).toBe('감자가 다 익었습니다. 내일 새벽에 알아서 따 두겠습니다.');
+  });
+});

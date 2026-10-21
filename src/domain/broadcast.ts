@@ -10,6 +10,9 @@ export type BroadcastSituation =
   | { kind: 'storm'; eventTomorrow: string | null }
   | { kind: 'eventEve'; name: string; type: EventType }
   | { kind: 'villageLevelUp' }
+  /** 밤사이(앱을 연 오늘 정산한) 자동 수확 */
+  | { kind: 'overnightHarvest'; crops: CropKind[] }
+  /** 밭이 꽉 차서 가장 오래된 작물을 대신 딴 것 */
   | { kind: 'autoHarvest'; crop: CropKind }
   /** crop이 null이면 '아무 작물'만 드는 스킨 (count = 전체 보유량) */
   | { kind: 'exchangeReady'; crop: CropKind | null; count: number; skin: string }
@@ -19,7 +22,6 @@ export type BroadcastSituation =
   | { kind: 'recordOnly' }
   | { kind: 'cloudy' }
   | { kind: 'bestFriend'; name: string }
-  | { kind: 'ripe'; count: number }
   | { kind: 'quiet' };
 
 export type BroadcastContext = {
@@ -39,21 +41,22 @@ export type BroadcastContext = {
   /** 오늘 기록이 있고, 성취·연락·여가·메모가 하나도 없음 */
   todayRecordOnly: boolean;
   bestFriendName: string | null;
-  ripeCount: number;
+  /** 오늘 정산한 자동 수확 작물 (없으면 빈 배열) */
+  harvestedToday: CropKind[];
 };
 
-/** 위에서부터 먼저 맞는 상황 하나. 폭풍(행사 전날이면 행사만 남김) > 행사 전날 > 마을 레벨업 > 자동 수확 > 교환 가능 > 이웃 방문 > … */
+/** 위에서부터 먼저 맞는 상황 하나. 폭풍(행사 전날이면 행사만 남김) > 행사 전날 > 마을 레벨업 > 밤사이 수확 > 밭이 꽉 차 대신 딴 것 > 교환 가능 > 이웃 방문 > … */
 export function selectBroadcast(c: BroadcastContext): BroadcastSituation {
   if (c.weather === 'storm') return { kind: 'storm', eventTomorrow: c.eventTomorrow?.name ?? null };
   if (c.eventTomorrow) return { kind: 'eventEve', ...c.eventTomorrow };
   if (c.leveledUpToday) return { kind: 'villageLevelUp' };
+  if (c.harvestedToday.length) return { kind: 'overnightHarvest', crops: c.harvestedToday };
   if (c.autoHarvestedToday) return { kind: 'autoHarvest', crop: c.autoHarvestedToday };
   if (c.exchangeReady) return { kind: 'exchangeReady', ...c.exchangeReady };
   if (c.visitorFromYesterday) return { kind: 'neighborVisit', name: c.visitorFromYesterday };
   if (c.workIndex !== null && c.workIndex >= WORK_OVERHEAT) return { kind: 'workOverheat' };
   if (c.leisureIndex !== null && c.leisureIndex <= LEISURE_LOW && c.recentRecordCount >= 3) return { kind: 'leisureLow' };
   if (c.todayRecordOnly) return { kind: 'recordOnly' };
-  if (c.ripeCount > 0) return { kind: 'ripe', count: c.ripeCount };
   if (c.weather === 'over' || c.weather === 'rain') return { kind: 'cloudy' };
   if (c.bestFriendName) return { kind: 'bestFriend', name: c.bestFriendName };
   return { kind: 'quiet' };

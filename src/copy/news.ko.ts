@@ -2,7 +2,8 @@
 
 import type { NewsItem } from '../domain/news';
 import { CROP_NAME } from './crops.ko';
-import { iga } from './josa';
+import type { CropKind } from '../domain/types';
+import { eul, iga } from './josa';
 
 export const NEWS_TITLE = '밤사이 마을 소식';
 export const NEWS_LINE = '밤사이 있었던 일입니다. 별일은 없었습니다. 아마도요.';
@@ -18,8 +19,12 @@ const cropList = (crops: readonly string[]) => {
 
 export function newsText(item: NewsItem): string {
   switch (item.kind) {
+    case 'harvested': {
+      const list = (Object.entries(item.counts) as [CropKind, number][]).map(([c, n]) => `${CROP_NAME[c]} ${n}개`).join(', ');
+      return `${eul(list)} 따서 창고에 넣었습니다.`;
+    }
     case 'ripened':
-      return `${iga(cropList(item.crops))} 다 익었습니다. 따도 되고, 안 따도 안 시듭니다.`;
+      return `${iga(cropList(item.crops))} 다 익었습니다. 내일 새벽에 알아서 따 두겠습니다.`;
     case 'grew':
       return `${iga(cropList(item.crops))} 밤사이 쑥 자랐습니다.`;
     case 'visitors':

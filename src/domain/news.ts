@@ -10,7 +10,9 @@ import type { CropKind } from './types';
 export const NEWS_EVENT_LOOKAHEAD_DAYS = 3;
 
 export type NewsItem =
-  /** 밤사이 다 익은 작물 */
+  /** 밤사이 자동 수확해서 창고에 넣은 작물 (작물별 수량) */
+  | { kind: 'harvested'; counts: Partial<Record<CropKind, number>> }
+  /** 밤사이 다 익은 작물 (내일 새벽 자동 수확) */
   | { kind: 'ripened'; crops: CropKind[] }
   /** 밤사이 한 단계 자란 작물 (새싹 → 자라는 중) */
   | { kind: 'grew'; crops: CropKind[] }
@@ -28,11 +30,19 @@ export type NewsInput = {
   /** 어제 연락해서 오늘 마을에 와 있는 이웃 이름 */
   visitors: readonly string[];
   events: readonly VillageEvent[];
+  /** 오늘 정산한 자동 수확 작물 */
+  harvested?: readonly CropKind[];
 };
 
-export function morningNews({ today, active, visitors, events }: NewsInput): NewsItem[] {
+export function morningNews({ today, active, visitors, events, harvested = [] }: NewsInput): NewsItem[] {
   const yesterday = addDays(today, -1);
   const items: NewsItem[] = [];
+
+  if (harvested.length) {
+    const counts: Partial<Record<CropKind, number>> = {};
+    for (const c of harvested) counts[c] = (counts[c] ?? 0) + 1;
+    items.push({ kind: 'harvested', counts });
+  }
 
   const ripened: CropKind[] = [];
   const grew: CropKind[] = [];

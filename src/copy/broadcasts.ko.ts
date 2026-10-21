@@ -34,7 +34,8 @@ export const broadcasts = {
   storageQuiet: '창고는 잘 있습니다. 쥐는 없습니다. 아마도요.',
   rainyMonth: (days: number) => `이번 달 비 온 날이 ${days}일입니다. 우산은 각자 챙기세요.`,
   weeklySummaryWorkHeavy: '솔이 씨 4주 치 정리했습니다. 일만 열심히 하셨네요.',
-  ripe: (n: number) => `밭에 다 익은 작물이 ${n}개 있습니다. 안 따도 안 시듭니다. 그냥 알려드립니다.`,
+  /** 밤사이 자동 수확 (crops: 작물 이름들) */
+  overnightHarvest: (crops: string) => `밤사이 ${eul(crops)} 따서 창고에 넣었습니다. 손 하나 까딱 안 하셨습니다.`,
   quiet: '오늘도 마을은 조용합니다. 별일 없는 게 제일입니다.',
   weeklySummary: '솔이 씨 4주 치 정리했습니다. 대체로 무사했습니다.',
   weeklySummaryEmpty: '4주 치 정리하려 했는데 적힌 게 별로 없습니다. 천천히 하셔도 됩니다.',
@@ -76,6 +77,8 @@ export function broadcastText(s: BroadcastSituation): string {
       );
     case 'villageLevelUp':
       return withPrefix(broadcasts.villageLevelUp);
+    case 'overnightHarvest':
+      return withPrefix(broadcasts.overnightHarvest([...new Set(s.crops)].map((c) => CROP_NAME[c]).join(', ')));
     case 'autoHarvest':
       return withPrefix(broadcasts.autoHarvest(CROP_NAME[s.crop]));
     case 'neighborVisit':
@@ -86,8 +89,6 @@ export function broadcastText(s: BroadcastSituation): string {
       return withPrefix(broadcasts.leisureLow);
     case 'recordOnly':
       return withPrefix(broadcasts.recordOnly);
-    case 'ripe':
-      return withPrefix(broadcasts.ripe(s.count));
     case 'cloudy':
       return withPrefix(broadcasts.morningCloudy);
     case 'bestFriend':

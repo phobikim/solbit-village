@@ -16,7 +16,7 @@ const base: BroadcastContext = {
   recentRecordCount: 5,
   todayRecordOnly: false,
   bestFriendName: null,
-  ripeCount: 0,
+  harvestedToday: [],
 };
 
 describe('방송 선택', () => {
@@ -59,8 +59,7 @@ describe('방송 선택', () => {
   });
 
   it('그 밖: 기록만 한 날 > 익은 작물 > 흐림 > 단짝 > 조용', () => {
-    expect(selectBroadcast({ ...base, todayRecordOnly: true, ripeCount: 2 }).kind).toBe('recordOnly');
-    expect(selectBroadcast({ ...base, ripeCount: 2, weather: 'rain' })).toEqual({ kind: 'ripe', count: 2 });
+    expect(selectBroadcast({ ...base, todayRecordOnly: true, weather: 'rain' }).kind).toBe('recordOnly');
     expect(selectBroadcast({ ...base, weather: 'over', bestFriendName: '서연' }).kind).toBe('cloudy');
     expect(selectBroadcast({ ...base, bestFriendName: '서연' })).toEqual({ kind: 'bestFriend', name: '서연' });
     expect(selectBroadcast(base).kind).toBe('quiet');
@@ -110,5 +109,24 @@ describe('이웃: 단짝 · 마을 방문', () => {
   it('보관한(목록에 없는) 이웃은 오지 않는다', () => {
     const records = byDate(rec('2026-10-19', { contacts: [c('gone', 'meet')] }));
     expect(villageVisitors(records, '2026-10-20', new Set(['a']))).toEqual([]);
+  });
+});
+
+describe('밤사이 자동 수확 방송', () => {
+  it('레벨업 다음, 꽉 찬 밭 대신 딴 것·교환 가능보다 먼저', () => {
+    expect(selectBroadcast({ ...base, harvestedToday: ['strawberry'], leveledUpToday: true }).kind).toBe('villageLevelUp');
+    expect(selectBroadcast({ ...base, harvestedToday: ['strawberry'], autoHarvestedToday: 'potato' }).kind).toBe('overnightHarvest');
+    expect(selectBroadcast({ ...base, harvestedToday: ['strawberry'], visitorFromYesterday: '하준' }).kind).toBe('overnightHarvest');
+  });
+  it('문구', () => {
+    expect(broadcastText({ kind: 'overnightHarvest', crops: ['strawberry'] })).toBe(
+      '아아, 이장입니다. 밤사이 딸기를 따서 창고에 넣었습니다. 손 하나 까딱 안 하셨습니다.',
+    );
+    expect(broadcastText({ kind: 'overnightHarvest', crops: ['strawberry', 'potato', 'strawberry', 'mushroom'] })).toContain(
+      '밤사이 딸기, 감자, 버섯을 따서',
+    );
+  });
+  it('폭풍이면 수확했어도 개그 없는 방송', () => {
+    expect(selectBroadcast({ ...base, weather: 'storm', harvestedToday: ['potato'] }).kind).toBe('storm');
   });
 });
