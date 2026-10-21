@@ -7,11 +7,13 @@ import { Platform, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { initDb } from '../src/data/db';
+import { setupNotificationHandler } from '../src/notifications';
 import { colors, fontFiles } from '../src/ui/theme';
 import { injectWebStyles } from '../src/ui/webStyles';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 injectWebStyles();
+setupNotificationHandler();
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts(fontFiles);
@@ -37,6 +39,8 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="record" options={{ presentation: 'modal' }} />
             <Stack.Screen name="seed-result" options={{ presentation: 'transparentModal', animation: 'fade', contentStyle: { backgroundColor: 'transparent' } }} />
+            <Stack.Screen name="morning-news" options={{ presentation: 'transparentModal', animation: 'fade', contentStyle: { backgroundColor: 'transparent' } }} />
+            <Stack.Screen name="settings" />
             <Stack.Screen name="harvest-result" options={{ presentation: 'transparentModal', animation: 'fade', contentStyle: { backgroundColor: 'transparent' } }} />
             <Stack.Screen name="neighbor-new" options={{ presentation: 'modal' }} />
             <Stack.Screen name="ledger/index" />

@@ -106,7 +106,14 @@ export default function MeScreen() {
             locked={me.patternsLocked}
           />
         </View>
-        <MenuCard icon="settings" iconBg={colors.track} iconColor={colors.text} title="설정" subtitle="알림 · 방송 시간" />
+        <MenuCard
+          icon="settings"
+          iconBg={colors.track}
+          iconColor={colors.text}
+          title="설정"
+          subtitle="알림 시간 · 백업"
+          onPress={() => router.push('/settings')}
+        />
         {__DEV__ && <DevTools />}
       </ScrollView>
     </Screen>

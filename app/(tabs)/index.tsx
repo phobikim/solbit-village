@@ -11,6 +11,7 @@ import { today as getToday } from '../../src/domain/day';
 import { useFarm } from '../../src/state/farm';
 import { useLedger, useSkins } from '../../src/state/ledger';
 import { useNeighbors } from '../../src/state/neighbors';
+import { needsMorningNews } from '../../src/state/newsView';
 import { useRecords } from '../../src/state/records';
 import { useVillageView, villageRange } from '../../src/state/villageView';
 import { VillageScene } from '../../src/ui/characters';
@@ -56,6 +57,10 @@ export default function VillageScreen() {
   useFocusEffect(
     useCallback(() => {
       setNow(new Date());
+      // 그날 처음 열면 밤사이 마을 소식부터
+      needsMorningNews(today)
+        .then((show) => show && router.push('/morning-news'))
+        .catch((e) => console.warn('[news] check failed', e));
       const { from, to } = villageRange(today);
       Promise.all([loadRange(from, to), loadFarm(), loadNeighbors(), loadLedger(), loadSkins()]).catch((e) =>
         console.warn('[village] load failed', e),
