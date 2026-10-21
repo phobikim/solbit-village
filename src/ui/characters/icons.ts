@@ -48,7 +48,7 @@ export function indexIconSvg(k: IndexKind, col: string, bg: string): string {
 export type TabIcon = 'village' | 'records' | 'neighbors' | 'me';
 
 /** 하단 탭 아이콘 (선 아이콘) */
-export function tabIconSvg(k: TabIcon, col: string): string {
+export function tabIconSvg(k: TabIcon, col: string, strokeWidth = 2.4): string {
   const b =
     k === 'village'
       ? `<path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M10 20v-5h4v5"/>`
@@ -57,7 +57,7 @@ export function tabIconSvg(k: TabIcon, col: string): string {
         : k === 'neighbors'
           ? `<circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 13.6A4.5 4.5 0 0 1 21 18"/>`
           : `<circle cx="12" cy="9" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/>`;
-  return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${col}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${b}</svg>`;
+  return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${col}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${b}</svg>`;
 }
 
 export type MenuIcon = 'ledger' | 'storage' | 'drawer' | 'locked' | 'settings';

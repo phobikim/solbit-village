@@ -8,6 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { initDb } from '../src/data/db';
 import { setupNotificationHandler } from '../src/notifications';
+import { BottomBar } from '../src/ui/components/BottomBar';
 import { colors, fontFiles } from '../src/ui/theme';
 import { injectWebStyles } from '../src/ui/webStyles';
 
@@ -47,6 +48,8 @@ export default function RootLayout() {
             <Stack.Screen name="ledger/new" options={{ presentation: 'modal' }} />
             <Stack.Screen name="storage" />
           </Stack>
+          {/* 모든 화면에 항상 떠 있는 하단 바 (입력 시트 · 결과 카드는 위를 덮음) */}
+          <BottomBar />
         </View>
       </View>
     </SafeAreaProvider>
