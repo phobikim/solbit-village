@@ -12,7 +12,7 @@ import {
   WORK_STATUS,
 } from '../copy/labels.ko';
 import { selectBroadcast } from '../domain/broadcast';
-import { fieldSlots, ripePlantings } from '../domain/crops';
+import { fieldSlots } from '../domain/crops';
 import { addDays, timeOfDayAt, type DayKey, yearMonthOf } from '../domain/day';
 import {
   computeIndices,
@@ -54,8 +54,6 @@ export type VillageView = {
   scene: VillageSceneParams;
   indices: IndexCardView[];
   recordedToday: boolean;
-  /** 익은 작물이 있는 칸 (탭해서 수확) */
-  ripeSlots: number[];
 };
 
 export function useVillageView(today: DayKey, now: Date): VillageView {
@@ -90,8 +88,6 @@ export function useVillageView(today: DayKey, now: Date): VillageView {
 
     const level = levelFromXp(farm.totalXp);
     const levelBefore = levelFromXp(farm.totalXp - farm.xpGainedToday).level;
-    const ripeList = ripePlantings(farm.active, today);
-    const ripe = ripeList.length;
 
     let recent = 0;
     for (let i = 0; i < INDEX_WINDOW_DAYS; i++) if (byDate[addDays(today, -i)]) recent++;
@@ -112,7 +108,7 @@ export function useVillageView(today: DayKey, now: Date): VillageView {
       recentRecordCount: recent,
       todayRecordOnly: !!todayRec && !recordHeadline(todayRec) && todayRec.contacts.length === 0,
       bestFriendName: best?.name ?? null,
-      ripeCount: ripe,
+      harvestedToday: farm.harvestedToday,
     });
 
     const scene: VillageSceneParams = {
@@ -154,7 +150,6 @@ export function useVillageView(today: DayKey, now: Date): VillageView {
       scene,
       indices,
       recordedToday: !!todayRec,
-      ripeSlots: ripeList.map((p) => p.slot),
     };
   }, [byDate, neighbors, farm, today, now, events, owned, equipped]);
 }

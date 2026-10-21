@@ -21,6 +21,7 @@ export function markNewsSeen(today: DayKey): Promise<void> {
 
 export function useMorningNews(today: DayKey): NewsItem[] {
   const active = useFarm((s) => s.active);
+  const harvested = useFarm((s) => s.harvestedToday);
   const byDate = useRecords((s) => s.byDate);
   const neighbors = useNeighbors((s) => s.list);
   const events = useLedger((s) => s.events);
@@ -29,6 +30,6 @@ export function useMorningNews(today: DayKey): NewsItem[] {
     const visitors = [
       ...new Set((byDate[addDays(today, -1)]?.contacts ?? []).map((c) => nameOf.get(c.neighborId)).filter(Boolean)),
     ] as string[];
-    return morningNews({ today, active, visitors, events });
-  }, [active, byDate, neighbors, events, today]);
+    return morningNews({ today, active, visitors, events, harvested });
+  }, [active, harvested, byDate, neighbors, events, today]);
 }

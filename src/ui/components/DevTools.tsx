@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { devAddCrops, devFillRipe, seedSampleNeighbors } from '../../data/devSeed';
+import { devAddCrops, devFillDue, devFillRipe, seedSampleNeighbors } from '../../data/devSeed';
 import { today as getToday } from '../../domain/day';
 import { useFarm } from '../../state/farm';
 import { useNeighbors } from '../../state/neighbors';
@@ -33,6 +33,9 @@ export function DevTools() {
       <View style={styles.row}>
         <Pressable style={styles.btn} onPress={run('익은 작물 채우기', () => devFillRipe(getToday()))}>
           <Text style={styles.btnText}>익은 작물 채우기</Text>
+        </Pressable>
+        <Pressable style={styles.btn} onPress={run('수확 날 지난 작물 채우기', () => devFillDue(getToday()))}>
+          <Text style={styles.btnText}>수확 날 지난 작물 채우기</Text>
         </Pressable>
         <Pressable style={styles.btn} onPress={run('작물 10개씩 추가', () => devAddCrops(10))}>
           <Text style={styles.btnText}>작물 10개씩 추가</Text>

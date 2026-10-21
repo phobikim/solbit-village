@@ -3,7 +3,7 @@
 
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import { cropFor, planSeed, ripePlantings, type Planting } from '../domain/crops';
+import { cropFor, dueForAutoHarvest, planSeed, type Planting } from '../domain/crops';
 import { canEditRecord } from '../domain/records';
 import { dayKeyOf, type DayKey } from '../domain/day';
 import type { CropKind, DayRecord } from '../domain/types';
@@ -22,13 +22,38 @@ async function activePlantingsOn(db: SQLiteDatabase): Promise<Planting[]> {
   return rows.map(toPlanting);
 }
 
-async function harvestTx(db: SQLiteDatabase, p: Planting, date: DayKey, auto: boolean): Promise<void> {
-  await db.runAsync('UPDATE planting SET harvested_date = ?, auto_harvested = ? WHERE id = ?', date, auto ? 1 : 0, p.id);
+/**
+ * planting.auto_harvested 값: 어떻게 수확됐는지.
+ * 0 = 예전 직접 수확(지금은 없음), 1 = 밭이 꽉 차서 가장 오래된 작물을 대신 땀, 2 = 다 자라서 자동 수확
+ */
+export const HARVEST_KIND = { legacyManual: 0, fieldFull: 1, matured: 2 } as const;
+type HarvestKind = (typeof HARVEST_KIND)[keyof typeof HARVEST_KIND];
+
+async function harvestTx(db: SQLiteDatabase, p: Planting, date: DayKey, kind: HarvestKind): Promise<void> {
+  await db.runAsync('UPDATE planting SET harvested_date = ?, auto_harvested = ? WHERE id = ?', date, kind, p.id);
   await db.runAsync(
     'INSERT INTO inventory (crop, qty) VALUES (?, 1) ON CONFLICT(crop) DO UPDATE SET qty = qty + 1',
     p.crop,
   );
   await db.runAsync('UPDATE harvest_stat SET total_harvested = total_harvested + 1 WHERE id = 1');
+}
+
+/**
+ * 자동 수확 정산 (트랜잭션 안에서). 오늘까지 수확됐어야 할 작물을 전부 따서 창고에 넣는다.
+ * 앱을 며칠 안 열었어도 한 번에 정산하고, 수확한 날은 정산한 오늘로 적는다 (밤사이 소식·방송에 나오게).
+ * 수확 레벨(누적 수확량)과 창고 수량도 이때 함께 오른다.
+ */
+async function settleAutoHarvestTx(db: SQLiteDatabase, today: DayKey): Promise<CropKind[]> {
+  const due = dueForAutoHarvest(await activePlantingsOn(db), today);
+  for (const p of due) await harvestTx(db, p, today, HARVEST_KIND.matured);
+  return due.map((p) => p.crop);
+}
+
+/** 자동 수확 정산만 따로 (앱을 열거나 화면에 들어올 때) */
+export function settleAutoHarvest(today: DayKey): Promise<void> {
+  return writeTx(async (db) => {
+    await settleAutoHarvestTx(db, today);
+  });
 }
 
 // ── 읽기 ────────────────────────────────────────────────────────────────
@@ -37,20 +62,30 @@ export type FarmSnapshot = {
   active: Planting[];
   inventory: Partial<Record<CropKind, number>>;
   totalHarvested: number;
-  /** 오늘 자동 수확된 작물 (방송용, 여러 개면 마지막) */
+  /** 오늘 밭이 꽉 차서 대신 딴 작물 (방송용, 여러 개면 마지막) */
   autoHarvestedToday: CropKind | null;
+  /** 오늘 정산한 자동 수확 작물 (밤사이 소식 · 방송) */
+  harvestedToday: CropKind[];
   totalXp: number;
   /** 오늘(기기 시각 기준 하루) 받은 경험치 — 레벨업한 날인지 판단용 */
   xpGainedToday: number;
 };
 
+/** 밀린 자동 수확을 먼저 정산하고 밭 · 창고 · 경험치를 읽는다 */
 export async function loadFarm(today: DayKey): Promise<FarmSnapshot> {
+  await settleAutoHarvest(today);
   const db = await getDb();
   const active = await activePlantingsOn(db);
   const inv = await db.getAllAsync<{ crop: CropKind; qty: number }>('SELECT crop, qty FROM inventory');
   const stat = await db.getFirstAsync<{ total_harvested: number }>('SELECT total_harvested FROM harvest_stat WHERE id = 1');
   const auto = await db.getFirstAsync<{ crop: CropKind }>(
-    'SELECT crop FROM planting WHERE auto_harvested = 1 AND harvested_date = ? ORDER BY id DESC LIMIT 1',
+    'SELECT crop FROM planting WHERE auto_harvested = ? AND harvested_date = ? ORDER BY id DESC LIMIT 1',
+    HARVEST_KIND.fieldFull,
+    today,
+  );
+  const matured = await db.getAllAsync<{ crop: CropKind }>(
+    'SELECT crop FROM planting WHERE auto_harvested = ? AND harvested_date = ? ORDER BY planted_date, id',
+    HARVEST_KIND.matured,
     today,
   );
   const xpRows = await db.getAllAsync<{ amount: number; at: number }>('SELECT amount, at FROM village_xp');
@@ -65,6 +100,7 @@ export async function loadFarm(today: DayKey): Promise<FarmSnapshot> {
     inventory: Object.fromEntries(inv.map((r) => [r.crop, r.qty])),
     totalHarvested: stat?.total_harvested ?? 0,
     autoHarvestedToday: auto?.crop ?? null,
+    harvestedToday: matured.map((r) => r.crop),
     totalXp,
     xpGainedToday,
   };
@@ -87,8 +123,9 @@ export type CommitResult = {
 
 /**
  * 하루 기록을 저장한다.
+ * - 먼저 밀린 자동 수확을 정산해 밭을 비운다.
  * - 그날 기록의 씨앗이 아직 없고 최근 7일 안이면: 기록대로 작물을 정해 오늘 밭에 심는다
- *   (지난날 빈칸 기록도 씨앗은 오늘 심는다. 꽉 차면 가장 오래된 작물 자동 수확).
+ *   (지난날 빈칸 기록도 씨앗은 오늘 심는다. 그래도 꽉 차 있으면 가장 오래된 작물을 대신 딴다).
  *   기록을 고쳐도 이미 심은 작물은 바뀌지 않는다.
  * - 경험치: 그날 기록으로 받은 경험치보다 많아질 때만 차이를 준다 (줄지 않는다).
  */
@@ -96,13 +133,14 @@ export function commitDayRecord(record: DayRecord, today: DayKey, now = Date.now
   const result: CommitResult = { seed: null, xpGained: 0 };
   return writeTx(async (db) => {
     await saveDayRecordTx(db, record);
+    await settleAutoHarvestTx(db, today);
 
     if (canEditRecord(record.date, today)) {
       const planted = await db.getFirstAsync<{ id: number }>('SELECT id FROM planting WHERE record_date = ?', record.date);
       if (!planted) {
         const crop = cropFor(record);
         const plan = planSeed(await activePlantingsOn(db));
-        if (plan.autoHarvest) await harvestTx(db, plan.autoHarvest, today, true);
+        if (plan.autoHarvest) await harvestTx(db, plan.autoHarvest, today, HARVEST_KIND.fieldFull);
         await db.runAsync(
           'INSERT INTO planting (crop, record_date, planted_date, slot) VALUES (?, ?, ?, ?)',
           crop,
@@ -129,29 +167,6 @@ export function commitDayRecord(record: DayRecord, today: DayKey, now = Date.now
       );
       result.xpGained = delta;
     }
-  }).then(() => result);
-}
-
-// ── 직접 수확 ───────────────────────────────────────────────────────────
-
-export type HarvestResult = {
-  /** 이번에 딴 작물 (오래된 순) */
-  crops: CropKind[];
-  totalBefore: number;
-  totalAfter: number;
-};
-
-/** 밭의 익은 작물을 전부 수확한다. 익은 게 없으면 빈 결과. */
-export function harvestRipe(today: DayKey): Promise<HarvestResult> {
-  const result: HarvestResult = { crops: [], totalBefore: 0, totalAfter: 0 };
-  return writeTx(async (db) => {
-    const stat = await db.getFirstAsync<{ total_harvested: number }>('SELECT total_harvested FROM harvest_stat WHERE id = 1');
-    result.totalBefore = stat?.total_harvested ?? 0;
-    for (const p of ripePlantings(await activePlantingsOn(db), today)) {
-      await harvestTx(db, p, today, false);
-      result.crops.push(p.crop);
-    }
-    result.totalAfter = result.totalBefore + result.crops.length;
   }).then(() => result);
 }
 

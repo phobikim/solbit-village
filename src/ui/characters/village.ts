@@ -92,9 +92,8 @@ const DAY: Palette = {
   window: '#BFEBFF',
 };
 
-/** 밭 5칸의 왼쪽 x (viewBox 좌표). 칸 너비 23, 작물 포함 세로 160~206. */
-export const PLOT_X = [10, 34.8, 59.6, 84.4, 109.2] as const;
-export const PLOT_HIT = { width: 23, top: 160, bottom: 206 } as const;
+/** 밭 5칸의 왼쪽 x (viewBox 좌표) */
+const PLOT_X = [10, 34.8, 59.6, 84.4, 109.2] as const;
 
 function escapeXml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

@@ -76,9 +76,13 @@ const sprout = (cx: number) =>
 const growing = (cx: number) =>
   `<path d="M${cx} 191 V180" stroke="${L}" stroke-width="3.5" stroke-linecap="round"/><path d="M${cx} 191 V180" stroke="#5FB04A" stroke-width="1.6" stroke-linecap="round"/><path d="M${cx} 188 q-8 -1 -9 -8 q8 0 9 8z M${cx} 182 q7 -1 8 -8 q-7 0 -8 8z" fill="#7FD24A" ${o(1.6)}/><path d="M${cx} 181 q-5 -1 -6 -6 q5 0 6 6z" fill="#B6F35C" ${o(1.4)}/>`;
 
+/** 다 익은 날의 반짝임 (내일 새벽 자동 수확) */
+const sparkle = (cx: number) => star(cx + 10, 166, 4.5) + star(cx - 10, 170, 3) + star(cx + 2, 160, 2.6);
+
 /** 밭 한 칸의 작물 (cx: 칸 중심 x) */
 export function plotCrop(crop: CropKind, stage: CropStage, cx: number): string {
   if (stage === 1) return sprout(cx);
   if (stage === 2) return growing(cx);
-  return ripe[crop](cx);
+  // 딸기 그림에는 시안의 반짝임이 이미 들어 있다
+  return ripe[crop](cx) + (crop === 'strawberry' ? '' : sparkle(cx));
 }

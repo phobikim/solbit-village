@@ -47,6 +47,24 @@ export function devFillRipe(today: DayKey): Promise<void> {
   });
 }
 
+/** 빈 칸을 이미 수확 날이 지난 작물로 채운다 → 다음에 마을을 열면 자동 수확 정산 (밀린 수확 확인용) */
+export function devFillDue(today: DayKey): Promise<void> {
+  const dueDay = addDays(today, -(GROW_DAYS + 1));
+  return writeTx(async (db) => {
+    const used = await db.getAllAsync<{ slot: number }>('SELECT slot FROM planting WHERE harvested_date IS NULL');
+    const taken = new Set(used.map((u) => u.slot));
+    for (let slot = 0; slot < FIELD_SIZE; slot++) {
+      if (taken.has(slot)) continue;
+      await db.runAsync(
+        'INSERT INTO planting (crop, record_date, planted_date, slot) VALUES (?, NULL, ?, ?)',
+        DEV_CROPS[slot % DEV_CROPS.length],
+        dueDay,
+        slot,
+      );
+    }
+  });
+}
+
 /** 창고 작물을 종류마다 n개씩 더한다 (누적 수확량은 건드리지 않는다) */
 export function devAddCrops(n = 10): Promise<void> {
   return writeTx(async (db) => {
