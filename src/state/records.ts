@@ -19,6 +19,8 @@ type State = {
   loadDay: (date: DayKey) => Promise<DayRecord | null>;
   /** 기록 저장 + (오늘 처음이면) 씨앗 심기 + 경험치. 결과로 씨앗 결과 화면을 띄운다. */
   save: (r: DayRecord) => Promise<CommitResult>;
+  /** 백업을 가져온 뒤 등: 읽어 둔 기록을 비운다 */
+  reset: () => void;
 };
 
 const monthId = (ym: YearMonth) => `${ym.year}-${String(ym.month).padStart(2, '0')}`;
@@ -45,6 +47,10 @@ export const useRecords = create<State>((set, get) => ({
     const r = await getDayRecord(date);
     if (r) set((s) => ({ byDate: { ...s.byDate, [date]: r } }));
     return r;
+  },
+
+  reset() {
+    set({ byDate: {}, loadedMonths: {} });
   },
 
   async save(r) {
