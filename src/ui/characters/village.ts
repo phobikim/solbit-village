@@ -5,6 +5,7 @@
 import type { PlotSlot, TimeOfDay, Weather } from '../../domain/types';
 import { plotCrop } from './crops';
 import { faceSvg, FACES } from './neighbors';
+import { buildingSvg } from './skins';
 import { soliSkinSvg, soliSvg, type SoliMood } from './soli';
 import { bud, cloud, flower, L, nest, o, star, svgBodyFont } from './svg';
 
@@ -21,6 +22,8 @@ export type VillageSceneParams = {
   soliMood: SoliMood;
   /** 쓰고 있는 솔이 스킨 id */
   soliSkin?: string | null;
+  /** 앞마당에 놓은 마을 건물 스킨 id */
+  building?: string | null;
   /** 마을에 놀러 온 가까운 이웃 (최대 2명 표시) */
   visitors: readonly VillageVisitor[];
   /** 가장 가까운 행사 현수막 문구. 없으면 현수막을 걸지 않는다. */
@@ -203,6 +206,9 @@ export function villageSceneSvg(p: VillageSceneParams, fit: 'meet' | 'slice' = '
   // 앞마당
   s += `<path d="M-4 238 C80 228 290 230 370 234 V344 H-4Z" fill="${c.yard}" ${o(3)}/>`;
   s += `<ellipse cx="40" cy="300" rx="7" ry="3.5" fill="${c.yardSpot}"/><ellipse cx="56" cy="306" rx="4" ry="2.4" fill="${c.yardSpot}"/><ellipse cx="330" cy="318" rx="6" ry="3" fill="${c.yardSpot}"/><path d="M14 258 l3 -9 l3 7 l3 -10 l3 12z M350 262 l3 -9 l3 7 l3 -10 l3 12z" fill="#3E7A3A" ${o(1.6)}/>`;
+
+  // 마을 건물 스킨: 앞마당 왼쪽
+  if (p.building) s += nest(buildingSvg(p.building), 4, 238, 74);
 
   // 이웃(뒤) → 솔이 → 이웃(앞)
   const [near, far] = p.visitors;

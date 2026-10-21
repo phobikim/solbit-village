@@ -3,6 +3,8 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
+import { equippedSkin } from '../../domain/harvest';
+import { useSkins } from '../../state/ledger';
 import { Ijang } from '../characters';
 import { megaphoneSvg } from '../characters/icons';
 import { colors, fonts, radius } from '../theme';
@@ -18,12 +20,14 @@ type Props = {
 const megaphone = megaphoneSvg(colors.line);
 
 export function BroadcastLine({ message, time, action }: Props) {
+  // 이장 소품 스킨을 쓰고 있으면 방송 아바타에도 보인다
+  const prop = useSkins((s) => equippedSkin('ijang', s.equipped));
   return (
     // 버튼이 있으면 묶지 않아야 버튼에 따로 닿는다
     <View style={styles.card} accessible={!action} accessibilityLabel={action ? undefined : `마을 방송 ${time}. ${message}`}>
       <View style={styles.avatarWrap}>
         <View style={styles.avatar}>
-          <Ijang mood="base" size={46} style={styles.avatarImg} />
+          <Ijang mood="base" prop={prop} size={46} style={styles.avatarImg} />
         </View>
         <View style={styles.badge}>
           <SvgXml xml={megaphone} width={11} height={11} />

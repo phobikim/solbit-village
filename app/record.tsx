@@ -130,7 +130,9 @@ export default function RecordSheet() {
         ? ijangLines.sheetTooOld
         : mode === 'noBackfill'
           ? ijangLines.sheetNoBackfill
-          : ijangLines.sheetNew;
+          : date === today
+            ? ijangLines.sheetNew
+            : ijangLines.sheetBackfill;
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.root}>

@@ -13,6 +13,7 @@ import { useRecords } from '../../src/state/records';
 import { meRange, useMeView } from '../../src/state/tabViews';
 import { Soli } from '../../src/ui/characters';
 import { Avatar } from '../../src/ui/components/Avatar';
+import { DevTools } from '../../src/ui/components/DevTools';
 import { MenuCard } from '../../src/ui/components/MenuCard';
 import { Screen } from '../../src/ui/components/Screen';
 import { TrendRow } from '../../src/ui/components/TrendRow';
@@ -106,6 +107,7 @@ export default function MeScreen() {
           />
         </View>
         <MenuCard icon="settings" iconBg={colors.track} iconColor={colors.text} title="설정" subtitle="알림 · 방송 시간" />
+        {__DEV__ && <DevTools />}
       </ScrollView>
     </Screen>
   );

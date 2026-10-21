@@ -12,7 +12,7 @@ import { bestFriendOf, closenessOf, closenessRatio, monthContactCount, type Clos
 import type { IndexKind } from '../domain/types';
 import { isUnlocked, levelFromXp, UNLOCK_LEVEL } from '../domain/village';
 import { upcomingEvents } from '../domain/events';
-import { exchangeableSkins, SKINS } from '../domain/harvest';
+import { equippedSkin, exchangeableSkins } from '../domain/harvest';
 import { useFarm } from './farm';
 import { useLedger, useSkins } from './ledger';
 import { useNeighbors } from './neighbors';
@@ -133,7 +133,7 @@ export function useMeView(today: DayKey): MeView {
       patternsUnlockLevel: UNLOCK_LEVEL.patterns,
       upcomingEvents: upcomingEvents(events, today).length,
       canExchange: exchangeableSkins(farm.inventory, owned).length > 0,
-      soliSkin: SKINS.find((k) => k.category === 'soli' && equipped.has(k.id))?.id ?? null,
+      soliSkin: equippedSkin('soli', equipped),
       broadcast,
     };
   }, [byDate, list, farm, today, events, owned, equipped]);

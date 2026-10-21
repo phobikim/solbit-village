@@ -1,6 +1,6 @@
 // 월간 달력: 날짜별 날씨 아이콘 + 행사 현수막 표시 (7b)
 
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { WEATHER_NAME, WEEKDAYS } from '../../copy/labels.ko';
 import { daysBetween, monthGrid, parseDayKey, type DayKey, type YearMonth } from '../../domain/day';
@@ -13,11 +13,14 @@ type Props = {
   today: DayKey;
   weatherByDay: Record<DayKey, Weather>;
   eventDays: ReadonlySet<DayKey>;
+  /** 눌러서 기록 시트를 열 수 있는 날 (최근 7일) */
+  isPressable?: (day: DayKey) => boolean;
+  onDayPress?: (day: DayKey) => void;
 };
 
 const LEGEND: Weather[] = ['sun', 'cloud', 'over', 'rain', 'storm'];
 
-export function MonthCalendar({ month, today, weatherByDay, eventDays }: Props) {
+export function MonthCalendar({ month, today, weatherByDay, eventDays, isPressable, onDayPress }: Props) {
   const cells = monthGrid(month);
   return (
     <View style={styles.card}>
@@ -36,8 +39,10 @@ export function MonthCalendar({ month, today, weatherByDay, eventDays }: Props) 
           const isToday = key === today;
           const weather = weatherByDay[key];
           return (
-            <View
+            <Pressable
               key={key}
+              disabled={!onDayPress || !isPressable?.(key)}
+              onPress={() => onDayPress?.(key)}
               style={[
                 styles.cell,
                 !future && styles.cellPast,
@@ -60,7 +65,7 @@ export function MonthCalendar({ month, today, weatherByDay, eventDays }: Props) 
                 {day}
               </Text>
               <View style={styles.icon}>{weather && <WeatherIcon weather={weather} size={22} />}</View>
-            </View>
+            </Pressable>
           );
         })}
       </View>

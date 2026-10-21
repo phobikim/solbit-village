@@ -2,16 +2,27 @@
 
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { broadcasts, broadcastText, withPrefix } from '../src/copy/broadcasts.ko';
 import { CROP_NAME } from '../src/copy/crops.ko';
 import { SKIN_CATEGORY_LABEL } from '../src/copy/labels.ko';
-import { canAfford, exchangeableSkins, exchangeHint, HARVEST_PER_LEVEL, harvestProgress, lackingFor, SKINS, type SkinCategory } from '../src/domain/harvest';
+import {
+  canAfford,
+  exchangeableSkins,
+  exchangeHint,
+  HARVEST_PER_LEVEL,
+  harvestProgress,
+  planPayment,
+  SKINS,
+  type Skin,
+  type SkinCategory,
+} from '../src/domain/harvest';
 import type { CropKind } from '../src/domain/types';
 import { useFarm } from '../src/state/farm';
 import { useSkins } from '../src/state/ledger';
-import { CropIcon, Soli } from '../src/ui/characters';
+import { Building, CropIcon, Ijang, Soli } from '../src/ui/characters';
+import { PrimaryButton } from '../src/ui/components/PrimaryButton';
 import { SubScreen } from '../src/ui/components/form';
 import { colors, fonts } from '../src/ui/theme';
 
@@ -20,11 +31,20 @@ const CATEGORIES = Object.keys(SKIN_CATEGORY_LABEL) as SkinCategory[];
 const pad = (n: number) => String(n).padStart(2, '0');
 const timeLabel = (d: Date) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 
+/** 분류에 맞는 미리보기: 솔이 · 건물 · 이장 */
+function SkinPreview({ skin, size = 70 }: { skin: Skin; size?: number }) {
+  if (skin.category === 'soli') return <Soli mood="happy" skin={skin.id} size={size} />;
+  if (skin.category === 'building') return <Building id={skin.id} size={size} />;
+  return <Ijang mood="base" prop={skin.id} size={size} />;
+}
+
 export default function Storage() {
   const params = useLocalSearchParams<{ tab?: string }>();
   const [tab, setTab] = useState<'store' | 'exchange'>(params.tab === 'exchange' ? 'exchange' : 'store');
   const [category, setCategory] = useState<SkinCategory>('soli');
   const [notice, setNotice] = useState<string | null>(null);
+  /** 교환 전 확인 */
+  const [confirming, setConfirming] = useState<Skin | null>(null);
 
   const inventory = useFarm((s) => s.inventory);
   const totalHarvested = useFarm((s) => s.totalHarvested);
@@ -51,9 +71,13 @@ export default function Storage() {
     return withPrefix(broadcasts.storageQuiet);
   }, [notice, ready, inventory]);
 
-  const onExchange = async (id: string, name: string) => {
-    if (await exchange(id)) setNotice(broadcasts.exchangeDone(name));
+  const onConfirm = async () => {
+    if (!confirming) return;
+    const s = confirming;
+    setConfirming(null);
+    if (await exchange(s.id)) setNotice(broadcasts.exchangeDone(s.name));
   };
+  const confirmPlan = confirming ? planPayment(confirming.cost, inventory) : null;
 
   return (
     <SubScreen title="수확 창고" broadcast={{ message: broadcast, time: timeLabel(new Date()) }}>
@@ -118,32 +142,45 @@ export default function Storage() {
                 const isOwned = owned.has(s.id);
                 const isOn = equipped.has(s.id);
                 const afford = canAfford(s.cost, inventory);
-                const lack = lackingFor(s.cost, inventory);
+                const plan = planPayment(s.cost, inventory);
+                const lackText = [
+                  ...plan.lacking.map((l) => `${CROP_NAME[l.crop]} ${l.n}개 부족`),
+                  ...(plan.lackingAny ? [`작물 ${plan.lackingAny}개 부족`] : []),
+                ].join(' · ');
                 return (
                   <View key={s.id} style={[styles.skin, !isOwned && afford && styles.skinReady]}>
                     <View style={styles.skinArt}>
-                      <Soli mood="happy" skin={s.id} size={70} />
+                      <SkinPreview skin={s} />
                     </View>
                     <Text style={styles.skinName}>{s.name}</Text>
                     <View style={styles.costs}>
-                      {(Object.entries(s.cost) as [CropKind, number][]).map(([crop, n]) => (
+                      {(Object.entries(s.cost.crops) as [CropKind, number][]).map(([crop, n]) => (
                         <View key={crop} style={styles.cost}>
                           <CropIcon crop={crop} size={14} />
                           <Text style={styles.costN}>{n}</Text>
                         </View>
                       ))}
+                      {s.cost.any > 0 && (
+                        <View style={styles.cost}>
+                          <Text style={styles.costAny}>아무</Text>
+                          <Text style={styles.costN}>{s.cost.any}</Text>
+                        </View>
+                      )}
                     </View>
                     {isOwned ? (
-                      <Pressable onPress={() => setEquipped(s.id, !isOn)} style={[styles.skinBtn, isOn ? styles.skinBtnOn : styles.skinBtnOwned]}>
+                      <Pressable
+                        onPress={() => setEquipped(s.id, !isOn)}
+                        style={[styles.skinBtn, isOn ? styles.skinBtnOn : styles.skinBtnOwned]}
+                      >
                         <Text style={[styles.skinBtnText, isOn && { color: colors.line }]}>{isOn ? '쓰는 중' : '쓰기'}</Text>
                       </Pressable>
                     ) : afford ? (
-                      <Pressable onPress={() => onExchange(s.id, s.name)} style={[styles.skinBtn, styles.skinBtnOn]}>
+                      <Pressable onPress={() => setConfirming(s)} style={[styles.skinBtn, styles.skinBtnOn]}>
                         <Text style={[styles.skinBtnText, { color: colors.line }]}>교환하기</Text>
                       </Pressable>
                     ) : (
                       <View style={styles.skinBtn}>
-                        <Text style={styles.lack}>{lack.map((l) => `${CROP_NAME[l.crop]} ${l.n}개 부족`).join(' · ')}</Text>
+                        <Text style={styles.lack}>{lackText}</Text>
                       </View>
                     )}
                   </View>
@@ -156,6 +193,38 @@ export default function Storage() {
           </>
         )}
       </ScrollView>
+
+      <Modal transparent visible={!!confirming} animationType="fade" onRequestClose={() => setConfirming(null)}>
+        <View style={styles.dim}>
+          <View style={styles.sheet}>
+            <Text style={styles.sheetTitle}>{confirming?.name}</Text>
+            {confirming && (
+              <View style={styles.skinArtBig}>
+                <SkinPreview skin={confirming} size={110} />
+              </View>
+            )}
+            <Text style={styles.sheetLabel}>창고에서 이만큼 나갑니다</Text>
+            <View style={styles.deducts}>
+              {confirmPlan &&
+                (Object.entries(confirmPlan.deduct) as [CropKind, number][]).map(([crop, n]) => (
+                  <View key={crop} style={styles.deduct}>
+                    <CropIcon crop={crop} size={32} />
+                    <Text style={styles.deductName}>{CROP_NAME[crop]}</Text>
+                    <Text style={styles.deductN}>-{n}</Text>
+                    <Text style={styles.deductLeft}>남는 수 {(inventory[crop] ?? 0) - n}</Text>
+                  </View>
+                ))}
+            </View>
+            {confirming && confirming.cost.any > 0 && (
+              <Text style={styles.sheetHint}>아무 작물은 많이 가진 작물부터 씁니다.</Text>
+            )}
+            <PrimaryButton label="교환하기" onPress={onConfirm} />
+            <Text style={styles.cancel} onPress={() => setConfirming(null)} accessibilityRole="button">
+              그만두기
+            </Text>
+          </View>
+        </View>
+      </Modal>
     </SubScreen>
   );
 }
@@ -201,4 +270,17 @@ const styles = StyleSheet.create({
   skinBtnText: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.text },
   lack: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.pinkSoft, textAlign: 'center' },
   empty: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.textMuted, padding: 12 },
+  costAny: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.textSub },
+  dim: { flex: 1, backgroundColor: 'rgba(6,8,24,.72)', justifyContent: 'center', padding: 20 },
+  sheet: { width: '100%', maxWidth: 390, alignSelf: 'center', backgroundColor: colors.cardSub, borderRadius: 28, padding: 20, gap: 12 },
+  sheetTitle: { fontFamily: fonts.title, fontSize: 24, color: colors.yellow, textAlign: 'center' },
+  skinArtBig: { height: 130, borderRadius: 20, backgroundColor: colors.night, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  sheetLabel: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.textSub },
+  deducts: { gap: 6 },
+  deduct: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.night, borderRadius: 16, paddingVertical: 8, paddingHorizontal: 12 },
+  deductName: { flex: 1, fontFamily: fonts.bodyHeavy, fontSize: 14, color: colors.text },
+  deductN: { fontFamily: fonts.numberBold, fontSize: 16, color: colors.pinkSoft },
+  deductLeft: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.textMuted, minWidth: 64, textAlign: 'right' },
+  sheetHint: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.textMuted, textAlign: 'center' },
+  cancel: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.textSub, textAlign: 'center', padding: 6 },
 });

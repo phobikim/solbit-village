@@ -14,7 +14,7 @@ import {
   yearMonthOf,
   type DayKey,
 } from '../../src/domain/day';
-import { canEditRecord, recordHeadline } from '../../src/domain/records';
+import { canCreateRecord, canEditRecord, recordHeadline } from '../../src/domain/records';
 import type { Condition, Weather } from '../../src/domain/types';
 import { isRainy, weatherOn } from '../../src/domain/weather';
 import { useLedger } from '../../src/state/ledger';
@@ -91,7 +91,14 @@ export default function RecordsScreen() {
   return (
     <Screen title="기록" broadcast={broadcast} right={monthNav}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <MonthCalendar month={month} today={today} weatherByDay={weatherByDay} eventDays={eventDays} />
+        <MonthCalendar
+          month={month}
+          today={today}
+          weatherByDay={weatherByDay}
+          eventDays={eventDays}
+          isPressable={(d) => (byDate[d] ? canEditRecord(d, today) : canCreateRecord(d, today))}
+          onDayPress={(d) => router.push({ pathname: '/record', params: { date: d } })}
+        />
         {days.length > 0 ? (
           days.map((key) => {
             const r = byDate[key];

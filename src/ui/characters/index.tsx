@@ -7,7 +7,8 @@ import { SvgXml } from 'react-native-svg';
 import type { CropKind, Weather } from '../../domain/types';
 import { cropIconSvg } from './crops';
 import { bannerIconSvg, weatherIconSvg } from './icons';
-import { ijangSvg, type IjangMood } from './ijang';
+import { ijangPropsOf, ijangSvg, type IjangMood } from './ijang';
+import { buildingSvg } from './skins';
 import { faceSvg, FACES, npcSvg, type NpcHair } from './neighbors';
 import { soliSkinSvg, soliSvg, type SoliMood } from './soli';
 import { wrap } from './svg';
@@ -27,13 +28,19 @@ export function Soli({ mood, skin, ...rest }: CharProps & { mood: SoliMood; skin
   return <Char xml={xml} {...rest} />;
 }
 
-export function Ijang({ mood, ...rest }: CharProps & { mood: IjangMood }) {
-  const xml = useMemo(() => wrap(ijangSvg(mood)), [mood]);
+export function Ijang({ mood, prop, ...rest }: CharProps & { mood: IjangMood; prop?: string | null }) {
+  const xml = useMemo(() => wrap(ijangSvg(mood, ijangPropsOf(prop ?? null))), [mood, prop]);
   return <Char xml={xml} {...rest} />;
 }
 
 export function Npc({ color, hair, sad, ...rest }: CharProps & { color: string; hair: NpcHair; sad?: boolean }) {
   const xml = useMemo(() => wrap(npcSvg(color, hair, sad)), [color, hair, sad]);
+  return <Char xml={xml} {...rest} />;
+}
+
+/** 마을 건물 스킨 그림 */
+export function Building({ id, ...rest }: CharProps & { id: string }) {
+  const xml = useMemo(() => wrap(buildingSvg(id)), [id]);
   return <Char xml={xml} {...rest} />;
 }
 

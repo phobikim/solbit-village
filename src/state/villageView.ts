@@ -30,7 +30,7 @@ import { levelFromXp, type LevelProgress } from '../domain/village';
 import { WEATHER_WINDOW_DAYS, weatherNow } from '../domain/weather';
 import type { SoliMood, VillageSceneParams } from '../ui/characters';
 import { bannerEvent, eventsTomorrow } from '../domain/events';
-import { exchangeableSkins, exchangeHint, SKINS } from '../domain/harvest';
+import { equippedSkin, exchangeableSkins, exchangeHint } from '../domain/harvest';
 import { dDayLabel } from '../domain/day';
 import { useFarm } from './farm';
 import { useLedger, useSkins } from './ledger';
@@ -121,7 +121,8 @@ export function useVillageView(today: DayKey, now: Date): VillageView {
       plots: fieldSlots(farm.active, today),
       soliMood: latest ? MOOD[latest.condition] : 'normal',
       visitors,
-      soliSkin: SKINS.find((k) => k.category === 'soli' && equipped.has(k.id))?.id ?? null,
+      soliSkin: equippedSkin('soli', equipped),
+      building: equippedSkin('building', equipped),
       bannerText: banner ? `${banner.name} ${dDayLabel(banner.date, today)}` : null,
       lanternOn: latest?.work === 3 || (idx.work !== null && idx.work >= WORK_OVERHEAT),
       bloom: (idx.leisure ?? 0) / 100,
