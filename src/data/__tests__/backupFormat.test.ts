@@ -66,3 +66,18 @@ describe('예전 백업의 행사 분류', () => {
     expect(r.backup.tables.event?.[0]).toMatchObject({ type: 'travel', repeat_yearly: 0 });
   });
 });
+
+describe('예전 백업의 스킨', () => {
+  it('v7 전 백업은 목록에서 빠진 스킨을 지운다', () => {
+    const old = buildBackup(6, {
+      skin: [
+        { id: 'hat', owned: 1, equipped: 1 },
+        { id: 'jars', owned: 1, equipped: 1 },
+        { id: 'goldMega', owned: 1, equipped: 0 },
+      ],
+    });
+    const r = parseBackup(JSON.stringify(old), 7);
+    if (!r.ok) throw new Error();
+    expect(r.backup.tables.skin?.map((s) => s.id)).toEqual(['hat']);
+  });
+});

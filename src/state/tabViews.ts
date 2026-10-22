@@ -132,7 +132,7 @@ export function useMeView(today: DayKey): MeView {
       patternsLocked: !isUnlocked('patterns', villageLevel),
       patternsUnlockLevel: UNLOCK_LEVEL.patterns,
       upcomingEvents: upcomingEvents(events, today).length,
-      canExchange: exchangeableSkins(farm.inventory, owned).length > 0,
+      canExchange: exchangeableSkins(farm.inventory, owned, harvestProgress(farm.totalHarvested).level).length > 0,
       soliSkin: equippedSkin('soli', equipped),
       broadcast,
     };

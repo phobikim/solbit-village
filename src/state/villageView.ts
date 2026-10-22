@@ -30,7 +30,7 @@ import { levelFromXp, type LevelProgress } from '../domain/village';
 import { WEATHER_WINDOW_DAYS, weatherNow } from '../domain/weather';
 import type { SoliMood, VillageSceneParams } from '../ui/characters';
 import { boardEvents, eventsInAWeek, eventsToday, eventsTomorrow } from '../domain/events';
-import { equippedSkin, exchangeableSkins, exchangeHint } from '../domain/harvest';
+import { equippedSkin, exchangeableSkins, exchangeHint, harvestProgress } from '../domain/harvest';
 import { dDayLabel } from '../domain/day';
 import { useFarm } from './farm';
 import { useLedger, useSkins } from './ledger';
@@ -96,7 +96,7 @@ export function useVillageView(today: DayKey, now: Date): VillageView {
     const todays = eventsToday(events, today)[0];
     const eve = eventsTomorrow(events, today)[0];
     const week = eventsInAWeek(events, today)[0];
-    const canExchange = exchangeableSkins(farm.inventory, owned)[0];
+    const canExchange = exchangeableSkins(farm.inventory, owned, harvestProgress(farm.totalHarvested).level)[0];
 
     const situation = selectBroadcast({
       weather,

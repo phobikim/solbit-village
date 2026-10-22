@@ -3,7 +3,7 @@
 
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import { equipSkin, payFor, SKINS, type Inventory } from '../domain/harvest';
+import { equipSkin, harvestProgress, isSkinLocked, payFor, SKINS, type Inventory } from '../domain/harvest';
 import type { CropKind } from '../domain/types';
 import { getDb, writeTx } from './db';
 
@@ -27,7 +27,7 @@ async function equipTx(db: SQLiteDatabase, skinId: string): Promise<void> {
   await db.runAsync('UPDATE skin SET equipped = 1 WHERE id = ? AND owned = 1', skinId);
 }
 
-/** 교환하고 바로 쓴다. 작물이 모자라거나 이미 있으면 false. */
+/** 교환하고 바로 쓴다. 작물이 모자라거나, 수확 레벨이 모자라거나, 이미 있으면 false. */
 export function exchangeSkin(skinId: string): Promise<boolean> {
   const skin = SKINS.find((s) => s.id === skinId);
   let ok = false;
@@ -35,6 +35,8 @@ export function exchangeSkin(skinId: string): Promise<boolean> {
   return writeTx(async (db) => {
     const has = await db.getFirstAsync<{ owned: number }>('SELECT owned FROM skin WHERE id = ?', skinId);
     if (has?.owned) return;
+    const stat = await db.getFirstAsync<{ total_harvested: number }>('SELECT total_harvested FROM harvest_stat WHERE id = 1');
+    if (isSkinLocked(skin, harvestProgress(stat?.total_harvested ?? 0).level)) return;
     const rows = await db.getAllAsync<{ crop: CropKind; qty: number }>('SELECT crop, qty FROM inventory');
     const inv: Inventory = Object.fromEntries(rows.map((r) => [r.crop, r.qty]));
     const next = payFor(skin.cost, inv);

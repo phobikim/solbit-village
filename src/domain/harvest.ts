@@ -37,37 +37,46 @@ export type SkinCategory = 'soli' | 'building' | 'ijang';
 
 /** 가격: 지정 작물 + '아무 작물' 수량 */
 export type SkinCost = { crops: Partial<Record<CropKind, number>>; any: number };
-export type Skin = { id: string; name: string; category: SkinCategory; cost: SkinCost };
+/** unlockLevel: 이 수확 레벨부터 교환할 수 있다 (없으면 처음부터) */
+export type Skin = { id: string; name: string; category: SkinCategory; cost: SkinCost; unlockLevel?: number };
+
+const c = (crops: SkinCost['crops']): SkinCost => ({ crops, any: 0 });
 
 /**
- * 스킨 재료로 지정하지 않는 작물 — CLAUDE.md 규칙 3.
- * 커피콩(일 강도 3)·버섯(지침)을 재료로 요구하면 그런 기록을 유도하게 된다. '아무 작물'로만 쓰인다.
- */
-export const NON_INGREDIENT_CROPS: readonly CropKind[] = ['coffee', 'mushroom'];
-
-/** 규칙 3 예외: 잠자리채 = 커피콩 4 + 해바라기 2 (2026-10-21 사용자 결정, 시안 그대로) */
-export const NON_INGREDIENT_EXCEPTIONS: readonly string[] = ['net'];
-
-/**
- * 스킨 목록과 가격 — SPEC 5장 [확정] 2026-10-21 (솔이 스킨은 디자인 v5 개정 반영).
- * 커피 앞치마 · 버섯 우산은 목록에서 빠졌다 (보유분도 마이그레이션 v5에서 정리).
+ * 스킨 목록 · 가격 · 해금 레벨 — SPEC 5장 [확정] 2026-10-22 (디자인 v5 교환소 개정).
+ * 커피콩·버섯도 재료로 쓴다 (2026-10-22 사용자 결정으로 제한 규칙 삭제).
+ * 목록에서 빠진 스킨은 보유분도 마이그레이션 v7에서 정리한다.
  */
 export const SKINS: readonly Skin[] = [
   // 솔이
-  { id: 'hat', name: '밀짚모자', category: 'soli', cost: { crops: { potato: 10, sunflower: 3 }, any: 0 } },
-  { id: 'band', name: '딸기 머리띠', category: 'soli', cost: { crops: { strawberry: 8 }, any: 0 } },
-  { id: 'glasses', name: '동글이 안경', category: 'soli', cost: { crops: { sunflower: 3, strawberry: 2 }, any: 0 } },
-  { id: 'ice', name: '하드', category: 'soli', cost: { crops: { strawberry: 4, potato: 3 }, any: 0 } },
-  { id: 'net', name: '잠자리채', category: 'soli', cost: { crops: { coffee: 4, sunflower: 2 }, any: 0 } },
+  { id: 'hat', name: '밀짚모자', category: 'soli', cost: c({ potato: 10, sunflower: 3 }) },
+  { id: 'band', name: '머리띠', category: 'soli', cost: c({ strawberry: 8 }) },
+  { id: 'glasses', name: '동글이', category: 'soli', cost: c({ sunflower: 3, strawberry: 2 }) },
+  { id: 'ice', name: '하드', category: 'soli', cost: c({ strawberry: 4, potato: 3 }) },
+  { id: 'net', name: '잠자리채', category: 'soli', cost: c({ coffee: 4, sunflower: 2 }) },
+  { id: 'pj', name: '꿀잠', category: 'soli', cost: c({ coffee: 3, potato: 4 }) },
+  { id: 'rain', name: '비오는날', category: 'soli', cost: c({ sunflower: 5, potato: 6 }) },
+  { id: 'pack', name: '배낭', category: 'soli', cost: c({ potato: 8, strawberry: 3 }) },
+  { id: 'phones', name: '헤드셋', category: 'soli', cost: c({ coffee: 6, mushroom: 2 }), unlockLevel: 6 },
   // 마을 건물
-  { id: 'scarecrow', name: '허수아비', category: 'building', cost: { crops: { potato: 12 }, any: 0 } },
-  { id: 'mailbox', name: '빨간 우체통', category: 'building', cost: { crops: { strawberry: 6 }, any: 6 } },
-  { id: 'jars', name: '장독대', category: 'building', cost: { crops: {}, any: 20 } },
+  { id: 'roof', name: '민트지붕', category: 'building', cost: c({ strawberry: 4 }) },
+  { id: 'post', name: '우체통', category: 'building', cost: c({ strawberry: 3, sunflower: 2 }) },
+  { id: 'scarecrow', name: '허수아비', category: 'building', cost: c({ potato: 6, sunflower: 2 }) },
+  { id: 'barn', name: '씨앗창고', category: 'building', cost: c({ potato: 10, coffee: 3 }) },
+  { id: 'store', name: '편의점', category: 'building', cost: c({ coffee: 8, potato: 12 }), unlockLevel: 8 },
   // 이장 소품
-  { id: 'goldMega', name: '금색 확성기', category: 'ijang', cost: { crops: {}, any: 15 } },
-  { id: 'sunglasses', name: '선글라스', category: 'ijang', cost: { crops: { sunflower: 5 }, any: 5 } },
-  { id: 'knitHat', name: '털모자', category: 'ijang', cost: { crops: {}, any: 12 } },
+  { id: 'shades', name: '선글라스', category: 'ijang', cost: c({ sunflower: 2, potato: 3 }) },
+  { id: 'fan', name: '부채', category: 'ijang', cost: c({ sunflower: 3 }) },
+  { id: 'rod', name: '낚싯대', category: 'ijang', cost: c({ potato: 6, coffee: 2 }) },
+  { id: 'cap', name: '새마을', category: 'ijang', cost: c({ potato: 5, strawberry: 2 }) },
+  { id: 'mic', name: '트로트', category: 'ijang', cost: c({ strawberry: 6, mushroom: 1 }) },
+  { id: 'tractor', name: '트랙터', category: 'ijang', cost: c({ potato: 20, sunflower: 8, mushroom: 3 }), unlockLevel: 10 },
 ];
+
+/** 수확 레벨이 모자라 아직 잠긴 스킨인가 */
+export function isSkinLocked(skin: Skin, harvestLevel: number): boolean {
+  return (skin.unlockLevel ?? 1) > harvestLevel;
+}
 
 export type Inventory = Partial<Record<CropKind, number>>;
 
@@ -123,9 +132,9 @@ export function payFor(cost: SkinCost, inv: Inventory): Inventory | null {
   return next;
 }
 
-/** 아직 갖고 있지 않은데 지금 바꿀 수 있는 스킨 (나 탭 분홍 점 · 방송) */
-export function exchangeableSkins(inv: Inventory, owned: ReadonlySet<string>): Skin[] {
-  return SKINS.filter((s) => !owned.has(s.id) && canAfford(s.cost, inv));
+/** 아직 갖고 있지 않은데 지금 바꿀 수 있는 스킨 (나 탭 분홍 점 · 방송). 잠긴 스킨은 빼고. */
+export function exchangeableSkins(inv: Inventory, owned: ReadonlySet<string>, harvestLevel: number): Skin[] {
+  return SKINS.filter((s) => !owned.has(s.id) && !isSkinLocked(s, harvestLevel) && canAfford(s.cost, inv));
 }
 
 /**

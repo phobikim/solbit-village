@@ -134,6 +134,11 @@ export const MIGRATIONS: readonly string[] = [
   ALTER TABLE event_v6 RENAME TO event;
   CREATE INDEX event_date ON event(date);
   `,
+
+  // v7 — 디자인 v5 교환소 개정: 목록에서 빠진 스킨을 보유 스킨에서도 지운다 (2026-10-22 사용자 결정)
+  `
+  DELETE FROM skin WHERE id IN ('mailbox', 'jars', 'goldMega', 'sunglasses', 'knitHat');
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

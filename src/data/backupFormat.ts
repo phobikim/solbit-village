@@ -33,6 +33,9 @@ export type Backup = {
 /** 스키마 v6 전 백업의 행사 분류 → 지금 분류 (마이그레이션 v6과 같음) */
 const OLD_EVENT_TYPE: Record<string, string> = { anniversary: 'birth', schedule: 'etc', etc: 'etc' };
 
+/** 스키마 v7에서 목록에서 빠진 스킨 (마이그레이션 v7과 같음) */
+const REMOVED_SKINS: readonly string[] = ['mailbox', 'jars', 'goldMega', 'sunglasses', 'knitHat'];
+
 /** 기기 안에만 남기는 설정 (가져오기로 덮지 않음): 오늘 소식을 본 날 */
 export const DEVICE_ONLY_SETTINGS: readonly string[] = ['news_seen_date'];
 
@@ -84,7 +87,11 @@ export function parseBackup(text: string, currentSchemaVersion: number): ParseRe
     if (name === 'event' && o.schemaVersion < 6) {
       for (const r of clean) r.type = OLD_EVENT_TYPE[String(r.type)] ?? 'etc';
     }
-    tables[name] = name === 'settings' ? clean.filter((r) => !DEVICE_ONLY_SETTINGS.includes(String(r.key))) : clean;
+    if (name === 'skin' && o.schemaVersion < 7) {
+      tables[name] = clean.filter((r) => !REMOVED_SKINS.includes(String(r.id)));
+      continue;
+    }
+    tables[name] = name === 'settings' ?clean.filter((r) => !DEVICE_ONLY_SETTINGS.includes(String(r.key))) : clean;
   }
   return {
     ok: true,
