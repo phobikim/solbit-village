@@ -26,7 +26,7 @@ describe('방송 선택', () => {
   it('폭풍이면 무조건 개그 없는 짧은 방송', () => {
     const s = selectBroadcast({ ...base, weather: 'storm', leveledUpToday: true, visitorFromYesterday: '하준' });
     expect(s).toEqual({ kind: 'storm', eventTomorrow: null });
-    expect(broadcastText(s)).toBe('...오늘은 방송 안 합니다. 푹 쉬세요. 이상.');
+    expect(broadcastText(s)).toBe('...오늘은 방송 안 해유. 푹 쉬슈. 이상.');
   });
 
   it('우선순위: 레벨업 > 자동 수확 > 이웃 방문 > 일 과열 > 여가 부족', () => {
@@ -43,18 +43,18 @@ describe('방송 선택', () => {
     expect(selectBroadcast({ ...base, autoHarvestedToday: 'potato', exchangeReady: ex }).kind).toBe('autoHarvest');
     expect(selectBroadcast({ ...base, exchangeReady: ex, visitorFromYesterday: '하준' }).kind).toBe('exchangeReady');
     expect(broadcastText({ kind: 'exchangeReady', ...ex })).toBe(
-      '아아, 이장입니다. 감자가 10개 모였습니다. 밀짚모자랑 바꿀 수 있습니다. 안 바꿔도 되고요.',
+      '아아, 이장이유. 감자 10개 모였슈. 밀짚모자랑 바꿀 수 있슈, 안 바꿔도 되구유.',
     );
-    expect(broadcastText({ kind: 'exchangeReady', crop: 'mushroom', count: 5, skin: '버섯 우산' })).toContain('버섯이 5개 모였습니다. 버섯 우산이랑');
+    expect(broadcastText({ kind: 'exchangeReady', crop: 'mushroom', count: 5, skin: '버섯 우산' })).toContain('버섯 5개 모였슈. 버섯 우산이랑');
     expect(broadcastText({ kind: 'eventEve', name: '엄마 생신', type: 'birth' })).toBe(
-      '아아, 이장입니다. 내일이 엄마 생신입니다. 빈손으로 가지 마세요.',
+      '아아, 이장이유. 내일이 엄마 생신이유. 빈손으로 가지 마슈.',
     );
   });
 
   it('폭풍 + 행사 전날: 톤은 유지하고 행사 정보만 남긴다', () => {
     const s = selectBroadcast({ ...base, weather: 'storm', eventTomorrow: { name: '엄마 생신', type: 'birth' }, leveledUpToday: true });
     expect(s).toEqual({ kind: 'storm', eventTomorrow: '엄마 생신' });
-    expect(broadcastText(s)).toBe('...오늘은 방송 안 합니다. 내일 엄마 생신만 기억하세요. 푹 쉬세요.');
+    expect(broadcastText(s)).toBe('...오늘은 방송 안 해유. 내일 엄마 생신만 기억허슈. 푹 쉬슈.');
   });
 
   it('여가 부족은 기록이 3일 이상 있을 때만', () => {
@@ -70,10 +70,10 @@ describe('방송 선택', () => {
 
   it('문구: 머리말과 조사', () => {
     expect(broadcastText({ kind: 'autoHarvest', crop: 'strawberry' })).toBe(
-      '아아, 이장입니다. 밭이 꽉 차서 제일 오래된 딸기를 대신 땄습니다. 창고에 넣어놨습니다.',
+      '아아, 이장이유. 밭이 꽉 차서 젤 오래된 딸기를 대신 땄슈. 창고에 넣어놨슈.',
     );
     expect(broadcastText({ kind: 'autoHarvest', crop: 'mushroom' })).toContain('버섯을 대신');
-    expect(broadcastText({ kind: 'neighborVisit', name: '하준' })).toBe(`아아, 이장입니다. ${broadcasts.neighborVisit('하준')}`);
+    expect(broadcastText({ kind: 'neighborVisit', name: '하준' })).toBe(`아아, 이장이유. ${broadcasts.neighborVisit('하준')}`);
   });
 
   it('조사', () => {
@@ -123,7 +123,7 @@ describe('밤사이 자동 수확 방송', () => {
   });
   it('문구', () => {
     expect(broadcastText({ kind: 'overnightHarvest', crops: ['strawberry'] })).toBe(
-      '아아, 이장입니다. 밤사이 딸기를 따서 창고에 넣었습니다. 손 하나 까딱 안 하셨습니다.',
+      '아아, 이장이유. 밤사이 딸기를 따서 창고에 넣었슈. 손 하나 까딱 안 하셨슈.',
     );
     expect(broadcastText({ kind: 'overnightHarvest', crops: ['strawberry', 'potato', 'strawberry', 'mushroom'] })).toContain(
       '밤사이 딸기, 감자, 버섯을 따서',
@@ -143,16 +143,16 @@ describe('마을 게시판 행사 방송', () => {
   });
   it('문구: 분류별 한마디', () => {
     expect(broadcastText({ kind: 'eventToday', ...e('사파 여행', 'travel') })).toBe(
-      '아아, 이장입니다. 오늘은 사파 여행 날입니다. 다녀오세요. 마을은 이장이 지킵니다. 대충요.',
+      '아아, 이장이유. 오늘은 사파 여행 날이유. 다녀오슈. 마을은 이장이 지켜유, 대충유.',
     );
     expect(broadcastText({ kind: 'eventWeek', ...e('사파 여행', 'travel') })).toBe(
-      '아아, 이장입니다. 사파 여행 일주일 남았습니다. 짐은 아직 안 쌌을 겁니다.',
+      '아아, 이장이유. 사파 여행 일주일 남았슈. 짐은 아직 안 쌌겄슈.',
     );
   });
   it('게시판이 비면 조용한 날도 게시판 이야기', () => {
     expect(selectBroadcast({ ...base, boardEmpty: true })).toEqual({ kind: 'quiet', boardEmpty: true });
-    expect(broadcastText({ kind: 'quiet', boardEmpty: true })).toBe('아아, 이장입니다. 게시판이 비었습니다. 이장이 일을 안 한 건 아닙니다.');
-    expect(broadcastText({ kind: 'quiet', boardEmpty: false })).toContain('오늘도 마을은 조용합니다');
+    expect(broadcastText({ kind: 'quiet', boardEmpty: true })).toBe('아아, 이장이유. 게시판이 비었슈. 이장이 일을 안 한 건 아니유.');
+    expect(broadcastText({ kind: 'quiet', boardEmpty: false })).toContain('오늘두 마을은 조용허유');
   });
   it('폭풍이면 행사 당일이어도 개그 없는 방송', () => {
     expect(selectBroadcast({ ...base, weather: 'storm', eventToday: e('사파 여행', 'travel') }).kind).toBe('storm');

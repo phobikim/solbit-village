@@ -63,10 +63,10 @@ describe('아침 알림 시각', () => {
 
 describe('소식 문구', () => {
   it('조사와 조용한 날', () => {
-    expect(newsText({ kind: 'visitors', names: ['하준', '서연'] })).toBe('하준 씨, 서연 씨가 놀러 와 있습니다.');
-    expect(newsText({ kind: 'ripened', crops: ['mushroom'] })).toContain('버섯이 다 익었습니다');
-    expect(newsText({ kind: 'grew', crops: ['potato', 'strawberry', 'coffee'] })).toBe('감자, 딸기 외 1종이 밤사이 쑥 자랐습니다.');
-    expect(newsText({ kind: 'quiet' })).toBe('어제는 조용했습니다. 고양이 한 마리 지나갔습니다.');
+    expect(newsText({ kind: 'visitors', names: ['하준', '서연'] })).toBe('하준 씨, 서연 씨가 놀러 와 있슈.');
+    expect(newsText({ kind: 'ripened', crops: ['mushroom'] })).toContain('버섯이 다 익었슈');
+    expect(newsText({ kind: 'grew', crops: ['potato', 'strawberry', 'coffee'] })).toBe('감자, 딸기 외 1종이 밤사이 쑥 자랐슈.');
+    expect(newsText({ kind: 'quiet' })).toBe('어제는 조용했슈. 고양이 한 마리 지나갔슈.');
   });
 });
 
@@ -74,9 +74,9 @@ describe('밤사이 소식: 자동 수확', () => {
   it('작물별 수량 + 창고에 넣었습니다 (맨 앞)', () => {
     const items = morningNews({ today, active: [], visitors: ['하준'], events: [], harvested: ['strawberry', 'potato', 'strawberry'] });
     expect(items[0]).toEqual({ kind: 'harvested', counts: { strawberry: 2, potato: 1 } });
-    expect(newsText(items[0])).toBe('딸기 2개, 감자 1개를 따서 창고에 넣었습니다.');
+    expect(newsText(items[0])).toBe('딸기 2개, 감자 1개를 따서 창고에 넣었슈.');
   });
   it('다 익은 작물은 내일 새벽에 딴다고 알려준다', () => {
-    expect(newsText({ kind: 'ripened', crops: ['potato'] })).toBe('감자가 다 익었습니다. 내일 새벽에 알아서 따 두겠습니다.');
+    expect(newsText({ kind: 'ripened', crops: ['potato'] })).toBe('감자가 다 익었슈. 내일 새벽에 알아서 따 두겄슈.');
   });
 });

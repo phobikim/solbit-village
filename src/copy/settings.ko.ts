@@ -1,7 +1,7 @@
 // 설정 화면 문구
 
 export const SETTINGS_TITLE = '설정';
-export const SETTINGS_BROADCAST = '알림 시간만 정해 주세요. 방송은 이장이 알아서 합니다.';
+export const SETTINGS_BROADCAST = '알림 시간만 정해 주슈. 방송은 이장이 알아서 혀유.';
 
 export const ALARM_SECTION = '아침 소식 알림';
 export const ALARM_DESC = '밤사이 마을 소식이 오면 하루에 한 번 알려 드립니다.';

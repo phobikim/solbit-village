@@ -12,23 +12,23 @@ export const CROP_NAME: Record<CropKind, string> = {
 
 /** 씨앗 결과(9b)의 이장 말풍선 — SPEC 5장 결과 문구 */
 export const CROP_RESULT_LINE: Record<CropKind, string> = {
-  sunflower: '잘 쉬었나 봅니다. 해바라기가 고개를 듭니다.',
-  strawberry: '나눠 먹으라고 딸기가 납니다.',
-  coffee: '커피콩이 납니다. 무슨 뜻인지 아실 겁니다.',
-  mushroom: '비 오는 날엔 버섯이 잘 자랍니다. 나쁜 날만은 아니네요.',
-  potato: '감자입니다. 감자도 소중합니다.',
+  sunflower: '잘 쉬었나 봐유. 해바라기가 고개를 들어유.',
+  strawberry: '나눠 먹으라구 딸기가 나유.',
+  coffee: '커피콩이 나유. 무슨 뜻인지 아실 거유.',
+  mushroom: '비 오는 날엔 버섯이 잘 자라유. 나쁜 날만은 아니구먼유.',
+  potato: '감자유. 감자두 소중혀유.',
 };
 
 /** 씨앗 결과(9b) 설명 — 왜 이 작물인지 */
 export const CROP_REASON: Record<CropKind, string> = {
-  sunflower: '잘 쉰 날엔 해바라기가 납니다.',
-  strawberry: '이웃과 연락한 날엔 딸기가 납니다.',
-  coffee: '일이 많았던 날엔 커피콩이 납니다.',
-  mushroom: '지친 날엔 버섯이 납니다.',
-  potato: '평범한 날엔 감자가 납니다.',
+  sunflower: '잘 쉰 날엔 해바라기가 나유.',
+  strawberry: '이웃 만난 날엔 딸기가 나유.',
+  coffee: '일 많던 날엔 커피콩이 나유.',
+  mushroom: '지친 날엔 버섯이 나유.',
+  potato: '평범한 날엔 감자가 나유.',
 };
 
-export const GROW_HINT = '3일 뒤에 보세요.';
+export const GROW_HINT = '사흘 뒤에 보슈.';
 
 const METHOD_LABEL = { call: '통화', meet: '만남', message: '메시지' } as const;
 
@@ -57,7 +57,7 @@ export function seedChip(
 }
 
 /** 자동 수확 말풍선 (9c) */
-export const AUTO_HARVEST_LINE = '대신 땄습니다. 창고에 넣어놨습니다.';
+export const AUTO_HARVEST_LINE = '대신 땄슈. 창고에 넣어놨슈.';
 export const autoHarvestDesc = (oldCrop: string, newCrop: string, eul: (w: string) => string) =>
-  `밭이 꽉 차서 제일 오래된 ${eul(oldCrop)} 따고 ${eul(newCrop)} 심었습니다.`;
+  `밭이 꽉 차서 젤 오래된 ${oldCrop} 따구 ${newCrop} 심었슈.`;
 

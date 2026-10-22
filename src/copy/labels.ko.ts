@@ -110,11 +110,11 @@ export const EVENT_TYPE_COLOR = {
 export const EVENT_PAPER_COLOR = { travel: '#EBDDFF', birth: '#FFD6E9', work: '#FFEDBF', meet: '#E5F8CC', etc: '#D3F4FF' } as const;
 /** 행사 등록 시트의 이장 한마디 (분류별) */
 export const EVENT_TYPE_LINE = {
-  travel: '다녀오세요. 마을은 이장이 지킵니다. 대충요.',
-  birth: '빈손으로 가지 마세요.',
-  work: '일은 일이고 밭은 밭입니다.',
-  meet: '늦지 마세요. 이장은 늦습니다.',
-  etc: '적어두면 이장이 기억합니다. 장부가요.',
+  travel: '다녀오슈. 마을은 이장이 지켜유, 대충유.',
+  birth: '빈손으로 가지 마슈.',
+  work: '일은 일이구 밭은 밭이유.',
+  meet: '늦지 마슈. 이장은 늦어유.',
+  etc: '적어두면 이장이 기억혀유. 장부가유.',
 } as const;
 export const ACHIEVEMENT_LABEL = '성취';
 /** 장부 · 대소사가 비었을 때 */

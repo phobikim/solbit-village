@@ -36,7 +36,7 @@ export type VillageSceneParams = {
   building?: string | null;
   /** 마을에 놀러 온 가까운 이웃 (최대 2명 표시) */
   visitors: readonly VillageVisitor[];
-  /** 게시판 쪽지 (가까운 순, 최대 3장). 비면 '붙일 게 없습니다' 쪽지 */
+  /** 게시판 쪽지 (가까운 순, 최대 3장). 비면 '붙일 게 없슈' 쪽지 */
   board: readonly BoardPaper[];
   /** 맨 앞 행사가 오늘이면 '오늘!' 도장 */
   boardToday: boolean;
@@ -204,8 +204,8 @@ function board(p: VillageSceneParams, c: Palette): string {
   if (!papers.length)
     s +=
       `<g transform="rotate(-3 158 120)"><rect x="118" y="100" width="80" height="40" rx="3" fill="#FFF6D6" ${o(2.2)}/>` +
-      txt(124, 114, '붙일 게 없습니다.', 7.4, fonts.bodyHeavy, L, 'start') +
-      txt(124, 124, '평화롭습니다.', 7.4, fonts.bodyHeavy, L, 'start') +
+      txt(124, 114, '붙일 게 없슈.', 7.4, fonts.bodyHeavy, L, 'start') +
+      txt(124, 124, '평화롭구먼유.', 7.4, fonts.bodyHeavy, L, 'start') +
       txt(192, 136, '이장', 9, fonts.sfx, '#FF4FA0', 'end') +
       `<circle cx="158" cy="101" r="3" fill="#FF4FA0" ${o(1.8)}/></g>`;
   return s;
