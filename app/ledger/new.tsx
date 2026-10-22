@@ -52,7 +52,7 @@ export default function EventSheet() {
     setRepeat(editing.repeatYearly);
   }, [editing]);
 
-  const close = () => (router.canGoBack() ? router.back() : router.replace('/ledger'));
+  const close = () => (router.canGoBack() ? router.back() : router.replace({ pathname: '/records', params: { view: 'events' } }));
   const ready = name.trim().length > 0;
   const repeatable = REPEATABLE_TYPES.includes(type);
   const { month, day } = parseDayKey(date);

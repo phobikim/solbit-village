@@ -1,7 +1,7 @@
 // 캐릭터·그림을 react-native-svg의 SvgXml로 그리는 컴포넌트 모음.
 
 import { memo, useMemo, useState } from 'react';
-import { StyleSheet, View, type LayoutChangeEvent, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, View, type LayoutChangeEvent, type StyleProp, type ViewStyle } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
 import type { EventType } from '../../domain/events';
@@ -14,7 +14,7 @@ import { buildingSvg } from './skins';
 import { faceSvg, FACES, npcSvg, type NpcHair } from './neighbors';
 import { soliWithSkinSvg, type SoliMood } from './soli';
 import { wrap } from './svg';
-import { VILLAGE_VIEWBOX, villageSceneSvg, villageSkyTop, type VillageSceneParams } from './village';
+import { BOARD_RECT, VILLAGE_VIEWBOX, villageSceneSvg, villageSkyTop, type VillageSceneParams } from './village';
 
 export type { IjangMood, NpcHair, SoliMood, VillageSceneParams };
 
@@ -75,8 +75,14 @@ export function BannerIcon({ color, pole, size, style }: IconProps & { color: st
   return <SvgXml xml={xml} width={size} height={size} style={style} />;
 }
 
-/** 메인 마을 무대. 부모 크기를 채우고, 땅 쪽(아래)을 기준으로 맞춘다. 누르는 곳은 없다. */
-export const VillageScene = memo(function VillageScene(scene: VillageSceneParams) {
+/**
+ * 메인 마을 무대. 부모 크기를 채우고, 땅 쪽(아래)을 기준으로 맞춘다.
+ * 누르는 곳은 게시판 하나 (장부로 가기). 기록을 입력하는 장치는 두지 않는다 (규칙 5).
+ */
+export const VillageScene = memo(function VillageScene({
+  onBoardPress,
+  ...scene
+}: VillageSceneParams & { onBoardPress?: () => void }) {
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
   const onLayout = (e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
@@ -87,6 +93,19 @@ export const VillageScene = memo(function VillageScene(scene: VillageSceneParams
   return (
     <View style={[StyleSheet.absoluteFill, { backgroundColor: villageSkyTop(scene.timeOfDay) }]} onLayout={onLayout}>
       {size && <SvgXml xml={xml} width={size.w} height={size.h} />}
+      {size && onBoardPress && (() => {
+        // xMidYMax: 가로를 꽉 채우고 아래에 붙인다 (meet · slice 모두 가로 기준 배율)
+        const k = size.w / VILLAGE_VIEWBOX.width;
+        const top = size.h - VILLAGE_VIEWBOX.height * k;
+        return (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="마을 게시판 (장부 대소사)"
+            onPress={onBoardPress}
+            style={{ position: 'absolute', left: BOARD_RECT.x * k, top: top + BOARD_RECT.y * k, width: BOARD_RECT.width * k, height: BOARD_RECT.height * k }}
+          />
+        );
+      })()}
     </View>
   );
 });

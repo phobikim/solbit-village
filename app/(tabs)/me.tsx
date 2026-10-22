@@ -7,7 +7,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { VILLAGE_NAME } from '../../src/copy/labels.ko';
 import { parseDayKey, today as getToday } from '../../src/domain/day';
 import { useFarm } from '../../src/state/farm';
-import { useLedger, useSkins } from '../../src/state/ledger';
+import { useSkins } from '../../src/state/ledger';
 import { useNeighbors } from '../../src/state/neighbors';
 import { useRecords } from '../../src/state/records';
 import { meRange, useMeView } from '../../src/state/tabViews';
@@ -30,17 +30,16 @@ export default function MeScreen() {
   const loadRange = useRecords((s) => s.loadRange);
   const loadFarm = useFarm((s) => s.load);
   const loadNeighbors = useNeighbors((s) => s.load);
-  const loadLedger = useLedger((s) => s.load);
   const loadSkins = useSkins((s) => s.load);
   const me = useMeView(today);
 
   useFocusEffect(
     useCallback(() => {
       const { from, to } = meRange(today);
-      Promise.all([loadRange(from, to), loadFarm(), loadNeighbors(), loadLedger(), loadSkins()]).catch((e) =>
+      Promise.all([loadRange(from, to), loadFarm(), loadNeighbors(), loadSkins()]).catch((e) =>
         console.warn('[me] load failed', e),
       );
-    }, [today, loadRange, loadFarm, loadNeighbors, loadLedger, loadSkins]),
+    }, [today, loadRange, loadFarm, loadNeighbors, loadSkins]),
   );
 
   return (
@@ -77,14 +76,8 @@ export default function MeScreen() {
           ))}
         </View>
 
+        {/* 이장네 장부는 장부 탭으로, 여가 서랍은 쉼터 탭으로 옮겼다 (디자인 TURN 12) */}
         <View style={styles.menuRow}>
-          <MenuCard
-            icon="ledger"
-            iconBg={colors.pink}
-            title="이장네 장부"
-            subtitle={me.upcomingEvents ? `다가오는 행사 ${me.upcomingEvents}개` : '행사와 성취'}
-            onPress={() => router.push('/ledger')}
-          />
           <MenuCard
             icon="storage"
             iconBg={colors.yellow}
@@ -93,10 +86,6 @@ export default function MeScreen() {
             dot={me.canExchange}
             onPress={() => router.push(me.canExchange ? { pathname: '/storage', params: { tab: 'exchange' } } : '/storage')}
           />
-        </View>
-        <View style={styles.menuRow}>
-          {/* 여가 서랍 상세는 SPEC [미정] — 메뉴만 둔다 */}
-          <MenuCard icon="drawer" iconBg={colors.leisure} title="여가 서랍" subtitle="가고 싶은 곳 · 지난 여행" />
           <MenuCard
             icon="locked"
             iconBg={colors.track}

@@ -7,7 +7,7 @@ import type { IndexKind } from '../../domain/types';
 import { colors, fonts } from '../theme';
 import { indexColor } from './IndexCard';
 
-const LABEL: Record<IndexKind, string> = { health: '건강', work: '일', relation: '관계', leisure: '여가' };
+const LABEL: Record<IndexKind, string> = { health: '건강', work: '일', relation: '관계', leisure: '쉼' };
 
 /** values: 오래된 주 → 이번 주, 기록 없는 주는 null */
 type Props = { kind: IndexKind; values: readonly (number | null)[]; summary: string };

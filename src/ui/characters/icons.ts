@@ -45,7 +45,7 @@ export function indexIconSvg(k: IndexKind, col: string, bg: string): string {
   return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="${col}">${b}</svg>`;
 }
 
-export type TabIcon = 'village' | 'records' | 'neighbors' | 'me';
+export type TabIcon = 'village' | 'records' | 'neighbors' | 'rest' | 'me';
 
 /** 하단 탭 아이콘 (선 아이콘) */
 export function tabIconSvg(k: TabIcon, col: string, strokeWidth = 2.4): string {
@@ -53,24 +53,22 @@ export function tabIconSvg(k: TabIcon, col: string, strokeWidth = 2.4): string {
     k === 'village'
       ? `<path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M10 20v-5h4v5"/>`
       : k === 'records'
-        ? `<rect x="5" y="4" width="14" height="16" rx="4"/><path d="M9 9h6M9 13h4"/>`
+        ? `<rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 3.5v17M12.5 8.5h3M12.5 12h3"/>`
         : k === 'neighbors'
           ? `<circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 13.6A4.5 4.5 0 0 1 21 18"/>`
-          : `<circle cx="12" cy="9" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/>`;
+          : k === 'rest'
+            ? `<path d="M2.5 10.5Q8 9.5 12 4q4 5.5 9.5 6.5"/><path d="M5 10.5h14M7 10.5V20M17 10.5V20M4.5 20h15"/>`
+            : `<circle cx="12" cy="9" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/>`;
   return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${col}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${b}</svg>`;
 }
 
-export type MenuIcon = 'ledger' | 'storage' | 'drawer' | 'locked' | 'settings';
+export type MenuIcon = 'storage' | 'locked' | 'settings';
 
 /** 나 탭 메뉴 아이콘 (7d) */
 export function menuIconSvg(k: MenuIcon, col: string): string {
   switch (k) {
-    case 'ledger':
-      return bannerIconSvg('#FFE14D', L);
     case 'storage':
       return `<svg viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="10" r="3.4" fill="#FF8A5C" stroke="${L}" stroke-width="1.6"/><circle cx="13" cy="9" r="3.4" fill="#FFFFFF" stroke="${L}" stroke-width="1.6"/><circle cx="18" cy="10" r="3.4" fill="#A8EB5A" stroke="${L}" stroke-width="1.6"/><rect x="3" y="11" width="20" height="12" rx="3" fill="#E8B070" stroke="${L}" stroke-width="2"/><path d="M6 17h14" stroke="#B57A3E" stroke-width="1.8"/></svg>`;
-    case 'drawer':
-      return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${col}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 12h16M10 8h4M10 16h4"/></svg>`;
     case 'locked':
       return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${col}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="3" fill="${col}"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`;
     case 'settings':

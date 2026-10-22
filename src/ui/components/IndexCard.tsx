@@ -12,7 +12,7 @@ const LABEL: Record<IndexKind, string> = {
   health: '건강',
   work: '일',
   relation: '관계',
-  leisure: '여가',
+  leisure: '쉼',
 };
 
 export function indexColor(kind: IndexKind, value: number): string {

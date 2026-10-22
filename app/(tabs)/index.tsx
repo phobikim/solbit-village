@@ -22,6 +22,9 @@ import { colors, fonts, radius } from '../../src/ui/theme';
 
 const timeLabel = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 
+/** 게시판을 누르면 장부 · 대소사 */
+const openBoard = () => router.push({ pathname: '/records', params: { view: 'events' } });
+
 export default function VillageScreen() {
   const today = getToday();
   const loadRange = useRecords((s) => s.loadRange);
@@ -65,7 +68,7 @@ export default function VillageScreen() {
 
       {/* 마을 무대: 탭하는 장치는 없다 (규칙 5). 수확은 자동이다. */}
       <View style={styles.scene}>
-        <VillageScene {...v.scene} />
+        <VillageScene {...v.scene} onBoardPress={openBoard} />
       </View>
 
       <View style={styles.indices}>

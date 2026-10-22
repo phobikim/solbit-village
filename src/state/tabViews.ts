@@ -11,10 +11,9 @@ import { TREND_WEEKS, trendBand, weeklyTrend, type IndexNeighbor } from '../doma
 import { bestFriendOf, closenessOf, closenessRatio, monthContactCount, type Closeness } from '../domain/neighbors';
 import type { IndexKind } from '../domain/types';
 import { isUnlocked, levelFromXp, UNLOCK_LEVEL } from '../domain/village';
-import { upcomingEvents } from '../domain/events';
 import { equippedSkin, exchangeableSkins } from '../domain/harvest';
 import { useFarm } from './farm';
-import { useLedger, useSkins } from './ledger';
+import { useSkins } from './ledger';
 import { useNeighbors } from './neighbors';
 import { useRecords } from './records';
 
@@ -89,7 +88,6 @@ export type MeView = {
   villageLevel: number;
   patternsLocked: boolean;
   patternsUnlockLevel: number;
-  upcomingEvents: number;
   canExchange: boolean;
   soliSkin: string | null;
   broadcast: string;
@@ -104,7 +102,6 @@ export function useMeView(today: DayKey): MeView {
   const byDate = useRecords((s) => s.byDate);
   const list = useNeighbors((s) => s.list);
   const farm = useFarm();
-  const events = useLedger((s) => s.events);
   const owned = useSkins((s) => s.owned);
   const equipped = useSkins((s) => s.equipped);
   return useMemo(() => {
@@ -131,10 +128,9 @@ export function useMeView(today: DayKey): MeView {
       villageLevel,
       patternsLocked: !isUnlocked('patterns', villageLevel),
       patternsUnlockLevel: UNLOCK_LEVEL.patterns,
-      upcomingEvents: upcomingEvents(events, today).length,
       canExchange: exchangeableSkins(farm.inventory, owned, harvestProgress(farm.totalHarvested).level).length > 0,
       soliSkin: equippedSkin('soli', equipped),
       broadcast,
     };
-  }, [byDate, list, farm, today, events, owned, equipped]);
+  }, [byDate, list, farm, today, owned, equipped]);
 }

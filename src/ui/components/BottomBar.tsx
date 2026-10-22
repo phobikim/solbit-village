@@ -11,12 +11,13 @@ import { tabIconSvg, type TabIcon } from '../characters/icons';
 import { tabOfPath } from '../navigation';
 import { colors, fonts } from '../theme';
 
-type Tab = { key: TabIcon; label: string; href: '/' | '/records' | '/neighbors' | '/me' };
+type Tab = { key: TabIcon; label: string; href: '/' | '/records' | '/neighbors' | '/rest' | '/me' };
 
 const TABS: readonly Tab[] = [
   { key: 'village', label: '마을', href: '/' },
-  { key: 'records', label: '기록', href: '/records' },
+  { key: 'records', label: '장부', href: '/records' },
   { key: 'neighbors', label: '이웃', href: '/neighbors' },
+  { key: 'rest', label: '쉼터', href: '/rest' },
   { key: 'me', label: '나', href: '/me' },
 ];
 
@@ -43,8 +44,8 @@ export function BottomBar() {
           >
             <SvgXml
               xml={tabIconSvg(t.key, on ? colors.line : colors.textMuted, on ? 2.8 : 2.4)}
-              width={on ? 20 : 22}
-              height={on ? 20 : 22}
+              width={on ? 18 : 22}
+              height={on ? 18 : 22}
             />
             <Text style={[styles.label, on && styles.labelOn]}>{t.label}</Text>
           </Pressable>
@@ -75,7 +76,7 @@ const styles = StyleSheet.create({
   tab: { flex: 1, height: 52, alignItems: 'center', justifyContent: 'center', gap: 3, borderRadius: 26 },
   tabOn: {
     flexDirection: 'row',
-    gap: 5,
+    gap: 3,
     marginHorizontal: 2,
     backgroundColor: colors.yellow,
     borderBottomWidth: 3,
@@ -83,5 +84,5 @@ const styles = StyleSheet.create({
   },
   pressed: { opacity: 0.7 },
   label: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.textMuted },
-  labelOn: { fontSize: 13, color: colors.line },
+  labelOn: { fontSize: 12, color: colors.line },
 });

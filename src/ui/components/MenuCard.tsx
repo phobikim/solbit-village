@@ -30,7 +30,7 @@ export function MenuCard({ icon, iconBg, iconColor = colors.line, title, subtitl
       style={({ pressed }) => [styles.card, locked && styles.locked, pressed && styles.pressed, style]}
     >
       <View style={[styles.icon, { backgroundColor: iconBg }]}>
-        <SvgXml xml={menuIconSvg(icon, iconColor)} width={icon === 'ledger' || icon === 'storage' ? 24 : 20} height={icon === 'ledger' || icon === 'storage' ? 24 : 20} />
+        <SvgXml xml={menuIconSvg(icon, iconColor)} width={icon === 'storage' ? 24 : 20} height={icon === 'storage' ? 24 : 20} />
       </View>
       <View style={styles.body}>
         <View style={styles.titleRow}>

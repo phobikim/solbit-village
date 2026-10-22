@@ -15,6 +15,9 @@ import { bud, cloud, flower, L, nest, o, place48, star } from './svg';
 
 export const VILLAGE_VIEWBOX = { width: 366, height: 340 } as const;
 
+/** 게시판(기둥 포함) 자리 — 누르면 장부 · 대소사로 간다 (디자인 TURN 12) */
+export const BOARD_RECT = { x: 102, y: 86, width: 112, height: 84 } as const;
+
 /** 놀러 온 이웃: 얼굴(0-11), 단짝이면 하트 */
 export type VillageVisitor = { face: number; heart?: boolean };
 

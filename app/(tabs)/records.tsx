@@ -1,8 +1,9 @@
-// 7b 기록. 월간 달력(날씨·행사) + 날짜별 기록 카드. 기록은 SQLite에서 읽는다.
+// 12a · 12b 장부 (기록 탭 + 이장네 장부, 디자인 TURN 12). 월간 달력(날씨·행사) 아래
+// 그날그날(날짜별 기록 카드) / 대소사(행사 · 성취)를 고른다. 기록은 SQLite에서 읽는다.
 
-import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { broadcasts, withPrefix } from '../../src/copy/broadcasts.ko';
 import {
@@ -17,9 +18,10 @@ import {
 import { eventDaysInMonth } from '../../src/domain/events';
 import { canCreateRecord, canEditRecord, recordHeadline } from '../../src/domain/records';
 import type { Condition, Weather } from '../../src/domain/types';
-import { isRainy, weatherOn } from '../../src/domain/weather';
+import { weatherOn } from '../../src/domain/weather';
 import { useLedger } from '../../src/state/ledger';
 import { useRecords } from '../../src/state/records';
+import { LedgerEvents, openEventSheet } from '../../src/ui/components/LedgerEvents';
 import { MonthCalendar } from '../../src/ui/components/MonthCalendar';
 import { RecordCard } from '../../src/ui/components/RecordCard';
 import { RoundButton } from '../../src/ui/components/RoundButton';
@@ -28,7 +30,15 @@ import { colors, fonts } from '../../src/ui/theme';
 
 const timeLabel = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 
-export default function RecordsScreen() {
+type View_ = 'days' | 'events';
+
+export default function LedgerScreen() {
+  const params = useLocalSearchParams<{ view?: string }>();
+  const [view, setView] = useState<View_>(params.view === 'events' ? 'events' : 'days');
+  // 게시판을 눌러 들어오면 대소사 (메인 11b)
+  useEffect(() => {
+    if (params.view === 'events') setView('events');
+  }, [params.view]);
   const today = getToday();
   const thisMonth = yearMonthOf(today);
   const [month, setMonth] = useState(thisMonth);
@@ -37,6 +47,8 @@ export default function RecordsScreen() {
   const byDate = useRecords((s) => s.byDate);
   const loadMonth = useRecords((s) => s.loadMonth);
   const events = useLedger((s) => s.events);
+  const achievements = useLedger((s) => s.achievements);
+  const loaded = useLedger((s) => s.loaded);
   const loadLedger = useLedger((s) => s.load);
 
   useFocusEffect(
@@ -61,8 +73,7 @@ export default function RecordsScreen() {
     return { weatherByDay: weather, days: list };
   }, [byDate, month]);
 
-  const rainyDays = Object.values(weatherByDay).filter(isRainy).length;
-  const broadcast = { message: withPrefix(broadcasts.rainyMonth(rainyDays)), time: timeLabel(new Date()) };
+  const broadcast = { message: withPrefix(broadcasts.ledger), time: timeLabel(new Date()) };
 
   const eventDays = useMemo(() => eventDaysInMonth(events, month.year, month.month), [events, month]);
 
@@ -90,7 +101,7 @@ export default function RecordsScreen() {
   );
 
   return (
-    <Screen title="기록" broadcast={broadcast} right={monthNav}>
+    <Screen title="장부" broadcast={broadcast} right={monthNav}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <MonthCalendar
           month={month}
@@ -100,7 +111,22 @@ export default function RecordsScreen() {
           isPressable={(d) => (byDate[d] ? canEditRecord(d, today) : canCreateRecord(d, today))}
           onDayPress={(d) => router.push({ pathname: '/record', params: { date: d } })}
         />
-        {days.length > 0 ? (
+        <View style={styles.seg} accessibilityRole="tablist">
+          {(['days', 'events'] as const).map((k) => (
+            <Pressable
+              key={k}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: view === k }}
+              onPress={() => setView(k)}
+              style={[styles.segItem, view === k && styles.segOn]}
+            >
+              <Text style={[styles.segText, view === k && styles.segTextOn]}>{k === 'days' ? '그날그날' : '대소사'}</Text>
+            </Pressable>
+          ))}
+        </View>
+        {view === 'events' ? (
+          <LedgerEvents today={today} events={events} achievements={achievements} loaded={loaded} />
+        ) : days.length > 0 ? (
           days.map((key) => {
             const r = byDate[key];
             return (
@@ -121,6 +147,9 @@ export default function RecordsScreen() {
           <Text style={styles.empty}>이 달은 기록이 없습니다. 괜찮습니다.</Text>
         )}
       </ScrollView>
+      {view === 'events' && (
+        <RoundButton icon="plus" size={58} accessibilityLabel="행사 등록" onPress={() => openEventSheet()} style={styles.fab} />
+      )}
     </Screen>
   );
 }
@@ -128,7 +157,13 @@ export default function RecordsScreen() {
 const styles = StyleSheet.create({
   nav: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   month: { fontFamily: fonts.number, fontSize: 17, minWidth: 80, textAlign: 'center', color: colors.text },
-  content: { padding: 12, gap: 8, paddingBottom: 24 },
+  content: { padding: 12, gap: 8, paddingBottom: 96 },
+  seg: { flexDirection: 'row', height: 44, borderRadius: 22, backgroundColor: colors.cardSub, padding: 4, gap: 4, marginTop: 2 },
+  segItem: { flex: 1, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  segOn: { backgroundColor: colors.yellow },
+  segText: { fontFamily: fonts.bodyHeavy, fontSize: 14, color: colors.textSub },
+  segTextOn: { color: colors.line },
+  fab: { position: 'absolute', right: 20, bottom: 24 },
   empty: {
     fontFamily: fonts.bodyBold,
     fontSize: 14,

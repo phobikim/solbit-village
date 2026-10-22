@@ -197,7 +197,7 @@ export default function RecordSheet() {
               </View>
 
               <View style={styles.section}>
-                <FieldLabel>여가</FieldLabel>
+                <FieldLabel>쉼</FieldLabel>
                 <LeisurePicker value={draft.leisure} onChange={(v) => update('leisure', v)} />
               </View>
 

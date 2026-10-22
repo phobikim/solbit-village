@@ -117,5 +117,7 @@ export const EVENT_TYPE_LINE = {
   etc: '적어두면 이장이 기억합니다. 장부가요.',
 } as const;
 export const ACHIEVEMENT_LABEL = '성취';
+/** 장부 · 대소사가 비었을 때 */
+export const LEDGER_EMPTY = '게시판에 붙은 쪽지가 없습니다. + 로 행사를 적어 두세요.';
 
 export const SKIN_CATEGORY_LABEL = { soli: '솔이', building: '마을 건물', ijang: '이장 소품' } as const;
