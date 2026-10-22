@@ -95,6 +95,8 @@ export const FREQUENCY_LABEL = { often: '자주', sometimes: '가끔', rarely: '
 
 /** 행사 분류 이름 (디자인 11a) */
 export const EVENT_TYPE_LABEL = { travel: '여행', birth: '생일·기념일', work: '업무', meet: '약속', etc: '기타' } as const;
+/** 달력 범례용 짧은 이름 (디자인 7b) */
+export const EVENT_TYPE_SHORT = { travel: '여행', birth: '생일', work: '업무', meet: '약속', etc: '기타' } as const;
 /** 분류 색 (아이콘 · 칩) — 성취는 장부 '지나간 일' 표시 */
 export const EVENT_TYPE_COLOR = {
   travel: '#C49BFF',

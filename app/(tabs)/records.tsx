@@ -14,6 +14,7 @@ import {
   yearMonthOf,
   type DayKey,
 } from '../../src/domain/day';
+import { eventDaysInMonth } from '../../src/domain/events';
 import { canCreateRecord, canEditRecord, recordHeadline } from '../../src/domain/records';
 import type { Condition, Weather } from '../../src/domain/types';
 import { isRainy, weatherOn } from '../../src/domain/weather';
@@ -63,7 +64,7 @@ export default function RecordsScreen() {
   const rainyDays = Object.values(weatherByDay).filter(isRainy).length;
   const broadcast = { message: withPrefix(broadcasts.rainyMonth(rainyDays)), time: timeLabel(new Date()) };
 
-  const eventDays = useMemo(() => new Set<DayKey>(events.map((e) => e.date)), [events]);
+  const eventDays = useMemo(() => eventDaysInMonth(events, month.year, month.month), [events, month]);
 
   const monthNav = (
     <View style={styles.nav}>

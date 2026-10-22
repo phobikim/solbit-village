@@ -1,18 +1,20 @@
-// 월간 달력: 날짜별 날씨 아이콘 + 행사 현수막 표시 (7b)
+// 월간 달력: 날짜별 날씨 아이콘 + 행사 분류 아이콘 (7b)
 
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { WEATHER_NAME, WEEKDAYS } from '../../copy/labels.ko';
+import { EVENT_TYPE_LABEL, EVENT_TYPE_SHORT, WEATHER_NAME, WEEKDAYS } from '../../copy/labels.ko';
 import { daysBetween, monthGrid, parseDayKey, type DayKey, type YearMonth } from '../../domain/day';
+import { EVENT_TYPES, type EventType } from '../../domain/events';
 import type { Weather } from '../../domain/types';
-import { BannerIcon, WeatherIcon } from '../characters';
+import { EventIcon, WeatherIcon } from '../characters';
 import { colors, fonts } from '../theme';
 
 type Props = {
   month: YearMonth;
   today: DayKey;
   weatherByDay: Record<DayKey, Weather>;
-  eventDays: ReadonlySet<DayKey>;
+  /** 행사가 있는 날 → 분류 */
+  eventDays: ReadonlyMap<DayKey, EventType>;
   /** 눌러서 기록 시트를 열 수 있는 날 (최근 7일) */
   isPressable?: (day: DayKey) => boolean;
   onDayPress?: (day: DayKey) => void;
@@ -38,6 +40,7 @@ export function MonthCalendar({ month, today, weatherByDay, eventDays, isPressab
           const future = daysBetween(today, key) > 0;
           const isToday = key === today;
           const weather = weatherByDay[key];
+          const ev = eventDays.get(key);
           return (
             <Pressable
               key={key}
@@ -48,11 +51,11 @@ export function MonthCalendar({ month, today, weatherByDay, eventDays, isPressab
                 !future && styles.cellPast,
                 isToday && styles.cellToday,
               ]}
-              accessibilityLabel={`${month.month}월 ${day}일${weather ? `, ${WEATHER_NAME[weather]}` : ''}${eventDays.has(key) ? ', 행사' : ''}`}
+              accessibilityLabel={`${month.month}월 ${day}일${weather ? `, ${WEATHER_NAME[weather]}` : ''}${ev ? `, ${EVENT_TYPE_LABEL[ev]}` : ''}`}
             >
-              {eventDays.has(key) && (
+              {ev && (
                 <View style={styles.banner}>
-                  <BannerIcon color={colors.pink} size={15} />
+                  <EventIcon type={ev} size={16} small />
                 </View>
               )}
               <Text
@@ -76,10 +79,14 @@ export function MonthCalendar({ month, today, weatherByDay, eventDays, isPressab
             <Text style={styles.legendText}>{WEATHER_NAME[w]}</Text>
           </View>
         ))}
-        <View style={styles.legendItem}>
-          <BannerIcon color={colors.pink} size={18} />
-          <Text style={styles.legendText}>행사</Text>
-        </View>
+      </View>
+      <View style={styles.legend}>
+        {EVENT_TYPES.map((t) => (
+          <View key={t} style={styles.legendItem}>
+            <EventIcon type={t} size={15} small />
+            <Text style={styles.legendText}>{EVENT_TYPE_SHORT[t]}</Text>
+          </View>
+        ))}
       </View>
     </View>
   );
@@ -119,7 +126,7 @@ const styles = StyleSheet.create({
   dayNum: { fontFamily: fonts.number, fontSize: 11, lineHeight: 12, color: colors.text },
   dayFuture: { color: colors.disabled },
   icon: { width: 22, height: 22 },
-  legend: { flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', gap: 8, paddingTop: 4 },
+  legend: { flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', gap: 8, paddingTop: 2 },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   legendText: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.textSub },
 });

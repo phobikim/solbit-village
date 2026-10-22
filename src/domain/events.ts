@@ -52,6 +52,21 @@ export function nextOccurrence(e: VillageEvent, today: DayKey): DayKey {
   return e.date;
 }
 
+/**
+ * 달력에 표시할 행사 날짜 → 분류 (디자인 7b 개정: 분류 아이콘). 매년 반복은 그해 그날에도 표시한다.
+ * 같은 날 행사가 여럿이면 먼저 적은 행사의 분류.
+ */
+export function eventDaysInMonth(events: readonly VillageEvent[], year: number, month: number): Map<DayKey, EventType> {
+  const prefix = `${year}-${pad(month)}-`;
+  const out = new Map<DayKey, EventType>();
+  for (const e of [...events].sort((a, b) => a.createdAt - b.createdAt)) {
+    const d = e.repeatYearly ? sameDayIn(year, e.date) : e.date;
+    if (!d.startsWith(prefix) || daysBetween(e.date, d) < 0 || out.has(d)) continue;
+    out.set(d, e.type);
+  }
+  return out;
+}
+
 /** 오늘 포함 앞으로의 행사, 가까운 순. date는 다음에 오는 날로 바꿔서 준다. */
 export function upcomingEvents(events: readonly VillageEvent[], today: DayKey): VillageEvent[] {
   return events
