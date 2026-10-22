@@ -1,4 +1,5 @@
 // 11e 행사 등록 시트 ("게시판에 붙이기", 디자인 v5 TURN 11). ?id= 가 있으면 고치기 · 지우기.
+// 쉼터 보따리의 '날짜 잡기'는 ?type=travel&name=…&placeId=… 로 열고, 저장하면 그 곳과 행사를 잇는다.
 
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -16,6 +17,7 @@ import { newId } from '../../src/data/events';
 import { dDayLabel, parseDayKey, today as getToday, weekdayOf, type DayKey } from '../../src/domain/day';
 import { EVENT_NAME_MAX, EVENT_TYPES, REPEATABLE_TYPES, type EventType } from '../../src/domain/events';
 import { useLedger } from '../../src/state/ledger';
+import { usePlaces } from '../../src/state/places';
 import { EventIcon } from '../../src/ui/characters';
 import { DatePicker } from '../../src/ui/components/form';
 import { PrimaryButton } from '../../src/ui/components/PrimaryButton';
@@ -29,16 +31,18 @@ const dateLabel = (d: DayKey) => {
 };
 
 export default function EventSheet() {
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const params = useLocalSearchParams<{ id?: string; type?: string; name?: string; placeId?: string }>();
+  const { id, placeId } = params;
   const today = getToday();
   const events = useLedger((s) => s.events);
   const save = useLedger((s) => s.save);
   const remove = useLedger((s) => s.remove);
   const editing = id ? events.find((e) => e.id === id) : undefined;
 
-  const [name, setName] = useState('');
+  const linkPlace = usePlaces((s) => s.linkEvent);
+  const [name, setName] = useState(params.name ?? '');
   const [date, setDate] = useState<DayKey>(today);
-  const [type, setType] = useState<EventType>('birth');
+  const [type, setType] = useState<EventType>(EVENT_TYPES.includes(params.type as EventType) ? (params.type as EventType) : 'birth');
   // 매년 반복: 생일·기념일에서만 보이고, 처음엔 켜져 있다 (디자인 11e)
   const [repeat, setRepeat] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -61,14 +65,16 @@ export default function EventSheet() {
     if (!ready || saving) return;
     setSaving(true);
     try {
+      const eventId = editing?.id ?? newId('ev');
       await save({
-        id: editing?.id ?? newId('ev'),
+        id: eventId,
         name: name.trim().slice(0, EVENT_NAME_MAX),
         date,
         type,
         repeatYearly: repeatable && repeat,
         createdAt: editing?.createdAt ?? Date.now(),
       });
+      if (placeId) await linkPlace(placeId, eventId);
       close();
     } catch (e) {
       console.warn('[event] save failed', e);

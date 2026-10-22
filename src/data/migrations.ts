@@ -139,6 +139,21 @@ export const MIGRATIONS: readonly string[] = [
   `
   DELETE FROM skin WHERE id IN ('mailbox', 'jars', 'goldMega', 'sunglasses', 'knitHat');
   `,
+
+  // v8 — 디자인 v6 쉼터: 보따리 (가고 싶은 곳 · 다녀온 곳)
+  `
+  CREATE TABLE place (
+    id           TEXT PRIMARY KEY NOT NULL,
+    name         TEXT NOT NULL,
+    duration     TEXT NOT NULL CHECK (duration IN ('short', 'half', 'weekend')),
+    visited      INTEGER NOT NULL DEFAULT 0,
+    event_id     TEXT,                                  -- '날짜 잡기'로 만든 여행 행사
+    visited_date TEXT,                                  -- 다녀온 곳: 출발한 날
+    nights       INTEGER NOT NULL DEFAULT 0,            -- 다녀온 곳: 몇 박 (0 = 당일치기)
+    added_date   TEXT NOT NULL,
+    created_at   INTEGER NOT NULL
+  );
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

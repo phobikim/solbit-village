@@ -95,3 +95,13 @@ export async function saveDayRecordTx(db: SQLiteDatabase, r: DayRecord): Promise
     await db.runAsync('INSERT INTO contact (date, neighbor_id, method) VALUES (?, ?, ?)', r.date, c.neighborId, c.method);
   }
 }
+
+/** 쉼(여가)을 적은 가장 최근 날 (upTo 포함). 쉼터 '마지막 쉼' — 불러온 달 밖의 기록까지 본다. */
+export async function lastLeisureDay(upTo: DayKey): Promise<DayKey | null> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<{ date: string | null }>(
+    "SELECT MAX(date) AS date FROM day_record WHERE leisure <> '[]' AND date <= ?",
+    upTo,
+  );
+  return row?.date ?? null;
+}

@@ -45,6 +45,8 @@ export default function RootLayout() {
             <Stack.Screen name="neighbor-new" options={{ presentation: 'modal' }} />
             <Stack.Screen name="ledger/new" options={{ presentation: 'modal' }} />
             <Stack.Screen name="storage" />
+            <Stack.Screen name="bundle" />
+            <Stack.Screen name="place-new" options={{ presentation: 'modal' }} />
           </Stack>
           {/* 모든 화면에 항상 떠 있는 하단 바 (입력 시트 · 결과 카드는 위를 덮음) */}
           <BottomBar />

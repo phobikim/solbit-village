@@ -99,13 +99,15 @@ export function DatePicker({
   );
 }
 
-/** 뒤로 가기 + 제목 + 방송 라인이 있는 하위 화면 틀 (장부 · 창고) */
+/** 뒤로 가기 + 제목 + 방송 라인이 있는 하위 화면 틀 (창고 · 보따리). back: 쌓인 화면이 없을 때 돌아갈 곳 */
 export function SubScreen({
   title,
   broadcast,
+  back = '/me',
   children,
 }: {
   title: string;
+  back?: '/me' | '/rest';
   broadcast: { message: string; time: string };
   children: ReactNode;
 }) {
@@ -117,7 +119,7 @@ export function SubScreen({
           variant="card"
           size={36}
           accessibilityLabel="뒤로"
-          onPress={() => (router.canGoBack() ? router.back() : router.replace('/me'))}
+          onPress={() => (router.canGoBack() ? router.back() : router.replace(back))}
         />
         <Text style={styles.subTitle}>{title}</Text>
       </View>
