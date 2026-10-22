@@ -55,6 +55,22 @@ export function soliSvg(m: SoliMood): string {
   );
 }
 
+/** 솔이 뒤에 그리는 스킨 (배낭). 없으면 '' */
+export function soliSkinBackSvg(id: string | null): string {
+  if (id === 'pack')
+    return (
+      `<path d="M76 34 Q76 14 100 14 Q124 14 124 34" stroke="${L}" stroke-width="13" stroke-linecap="round" fill="none"/><path d="M76 34 Q76 14 100 14 Q124 14 124 34" stroke="#A8EB5A" stroke-width="6" stroke-linecap="round" fill="none"/>` +
+      `<rect x="18" y="32" width="164" height="168" rx="46" fill="#FF8A5C" ${o(5)}/><path d="M24 84 Q100 58 176 84" stroke="${L}" stroke-width="4" fill="none"/>` +
+      `<rect x="2" y="118" width="30" height="58" rx="12" fill="#FF6B5A" ${o(4.5)}/><rect x="168" y="118" width="30" height="58" rx="12" fill="#FF6B5A" ${o(4.5)}/>`
+    );
+  return '';
+}
+
+/** 스킨을 입은 솔이 (뒤 · 몸 · 앞 순서) */
+export function soliWithSkinSvg(m: SoliMood, id: string | null): string {
+  return soliSkinBackSvg(id) + soliSvg(m) + soliSkinSvg(id);
+}
+
 /** 솔이 스킨 (design skinIn 이식). 솔이 그림 위에 겹쳐 그린다 (시안 미리보기는 보통 표정). viewBox 0 0 200 220. */
 export function soliSkinSvg(id: string | null): string {
   if (id === 'hat')
@@ -63,7 +79,25 @@ export function soliSkinSvg(id: string | null): string {
     return `<path d="M38 100 Q100 34 162 100" stroke="${L}" stroke-width="13" fill="none" stroke-linecap="round"/><path d="M38 100 Q100 34 162 100" stroke="#FF4A5E" stroke-width="7" fill="none" stroke-linecap="round"/>` +
       place48(cropIconInner('strawberry'), 42, 46, 34) + place48(cropIconInner('strawberry'), 124, 46, 34);
   if (id === 'glasses')
-    return `<circle cx="74" cy="130" r="18" fill="#BFEFFF" fill-opacity=".35" ${o(5)}/><circle cx="126" cy="130" r="18" fill="#BFEFFF" fill-opacity=".35" ${o(5)}/><path d="M92 128 Q100 122 108 128 M56 126 L36 120 M144 126 L164 120" stroke="${L}" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M64 122 l6 -4 M116 122 l6 -4" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round"/>`;
+    return `<circle cx="73" cy="130" r="25" fill="none" ${o(6)}/><circle cx="127" cy="130" r="25" fill="none" ${o(6)}/><path d="M97 126 Q100 121 103 126 M48 126 L30 118 M152 126 L170 118" stroke="${L}" stroke-width="6" stroke-linecap="round" fill="none"/>`;
+  if (id === 'pj')
+    return (
+      `<path d="M40 104 Q42 48 94 40 Q126 34 144 20 Q152 52 160 104 Q130 80 100 80 Q70 80 40 104Z" fill="#C49BFF" ${o(5)}/>` +
+      `<path d="M40 102 Q100 70 160 102" stroke="${L}" stroke-width="13" stroke-linecap="round" fill="none"/><path d="M40 102 Q100 70 160 102" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" fill="none"/>` +
+      `<circle cx="145" cy="19" r="11" fill="#FFFFFF" ${o(4.5)}/><path d="M48 128 H34 M152 128 H166" ${o(5)}/>` +
+      `<rect x="48" y="113" width="104" height="32" rx="16" fill="#5A63A8" ${o(5)}/><path d="M62 128 Q74 137 86 128 M114 128 Q126 137 138 128" stroke="#FFE14D" stroke-width="4" stroke-linecap="round" fill="none"/>`
+    );
+  if (id === 'rain')
+    return (
+      `<path d="M32 124 Q26 50 100 46 Q174 50 168 124 Q162 90 100 86 Q38 90 32 124Z" fill="#FFE14D" ${o(5)}/><path d="M60 64 Q76 54 92 52" stroke="#FFF6D6" stroke-width="5" stroke-linecap="round" fill="none"/>` +
+      `<rect x="54" y="180" width="32" height="30" rx="9" fill="#FFC23C" ${o(5)}/><rect x="114" y="180" width="32" height="30" rx="9" fill="#FFC23C" ${o(5)}/><path d="M54 190 H86 M114 190 H146" stroke="${L}" stroke-width="3"/>`
+    );
+  if (id === 'phones')
+    return (
+      `<path d="M34 114 Q100 20 166 114" stroke="${L}" stroke-width="15" stroke-linecap="round" fill="none"/><path d="M34 114 Q100 20 166 114" stroke="#5FD8FF" stroke-width="8" stroke-linecap="round" fill="none"/>` +
+      `<rect x="18" y="96" width="28" height="42" rx="13" fill="#FF4FA0" ${o(5)}/><rect x="154" y="96" width="28" height="42" rx="13" fill="#FF4FA0" ${o(5)}/>` +
+      `<path d="M32 136 Q38 168 74 166" stroke="${L}" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="78" cy="166" r="7" fill="${L}"/>`
+    );
   if (id === 'ice')
     return `<g transform="translate(4 50)"><rect x="158" y="72" width="10" height="26" rx="4" fill="#E8B070" ${o(3.5)}/><path d="M146 40 Q146 20 163 20 Q180 20 180 40 V76 Q180 82 174 82 H152 Q146 82 146 76Z" fill="#7FE0D0" ${o(5)}/><path d="M146 52 H180" stroke="${L}" stroke-width="3" /><path d="M146 40 Q146 20 163 20 Q180 20 180 40 V52 H146Z" fill="#FF8CC6" ${o(5)}/><circle cx="174" cy="24" r="7" fill="#1E2558"/><path d="M154 60 v12 M162 60 v8" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity=".8"/><path d="M178 82 q2 8 0 10" stroke="#7FE0D0" stroke-width="4" stroke-linecap="round" fill="none"/></g>`;
   if (id === 'net')

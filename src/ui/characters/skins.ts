@@ -1,56 +1,76 @@
-// 스킨 그림 — 시안 캐릭터 스타일(선 #10142E, 둥근 외곽선, viewBox 0 0 200 220)로 새로 그림.
-// 솔이 스킨은 soli.ts의 soliSkinSvg, 이장 소품은 ijang.ts의 IjangProps.
+// 마을 건물 스킨 그림 (design bldIn 이식). viewBox 0 0 200 220.
+// 솔이 스킨은 soli.ts의 soliSkinSvg, 이장 소품은 ijang.ts의 ijangSvg(…, skinId).
 
-import { L, o } from './svg';
+import { L, o, svgBodyFont } from './svg';
 
-/** 마을 건물 스킨: 마을 앞마당 왼쪽에 놓인다 */
+const ground = `<ellipse cx="100" cy="206" rx="86" ry="8" fill="#000" opacity=".25"/>`;
+const text = (x: number, y: number, t: string, size: number) =>
+  `<text x="${x}" y="${y}" text-anchor="middle" ${svgBodyFont} font-size="${size}" fill="${L}">${t}</text>`;
+
+/** 마을 건물 스킨: 메인 마을 냇가 오른쪽 언덕에 놓인다 */
 export function buildingSvg(id: string): string {
+  if (id === 'roof')
+    return (
+      ground +
+      `<rect x="40" y="104" width="120" height="98" rx="8" fill="#7A5446" ${o(5)}/>` +
+      `<path d="M22 112 L100 42 L178 112Z" fill="#5FD8FF" ${o(5)}/>` +
+      `<path d="M46 96 L100 50 M70 104 L106 70" stroke="#BFEFFF" stroke-width="4" stroke-linecap="round"/>` +
+      `<rect x="56" y="138" width="30" height="64" rx="5" fill="#B9825A" ${o(4)}/><circle cx="80" cy="172" r="3" fill="${L}"/>` +
+      `<rect x="102" y="128" width="42" height="32" rx="5" fill="#FFE14D" ${o(4)}/><path d="M123 128 V160 M102 144 H144" stroke="${L}" stroke-width="3"/>` +
+      `<path d="M100 42 C100 30 104 26 108 22" stroke="${L}" stroke-width="6" stroke-linecap="round" fill="none"/>` +
+      `<path d="M107 23 C101 14 90 14 86 20 C91 26 101 27 107 23Z M108 22 C114 13 125 12 129 16 C125 24 114 25 108 22Z" fill="#B6F35C" ${o(3)}/>`
+    );
+  if (id === 'post')
+    return (
+      ground +
+      `<rect x="54" y="190" width="92" height="16" rx="5" fill="#6A6F9E" ${o(4.5)}/>` +
+      `<path d="M64 192 V100 Q64 58 100 58 Q136 58 136 100 V192Z" fill="#FF5A4A" ${o(5)}/>` +
+      `<path d="M76 76 Q88 66 102 66" stroke="#FFA49A" stroke-width="5" stroke-linecap="round" fill="none"/>` +
+      `<rect x="78" y="98" width="44" height="9" rx="4.5" fill="${L}"/>` +
+      `<rect x="78" y="126" width="44" height="28" rx="5" fill="#FFFFFF" ${o(3.5)}/>` +
+      text(100, 145, '우편', 13)
+    );
   if (id === 'scarecrow')
     return (
-      `<ellipse cx="100" cy="210" rx="46" ry="7" fill="#000" opacity=".25"/>` +
-      // 기둥과 팔
-      `<path d="M100 208 V96" ${o(12)}/><path d="M100 208 V96" stroke="#B9825A" stroke-width="6" stroke-linecap="round"/>` +
-      `<path d="M30 118 H170" ${o(12)}/><path d="M30 118 H170" stroke="#B9825A" stroke-width="6" stroke-linecap="round"/>` +
-      // 옷 (덧댄 천)
-      `<path d="M60 106 H140 L148 170 Q100 182 52 170Z" fill="#5FD8FF" ${o(5)}/>` +
-      `<rect x="70" y="128" width="20" height="18" rx="3" fill="#FFE14D" ${o(3)}/><path d="M74 132 l12 10 M86 132 l-12 10" stroke="${L}" stroke-width="2" stroke-linecap="round"/>` +
-      `<path d="M120 150 h16" stroke="${L}" stroke-width="3" stroke-linecap="round" stroke-dasharray="3 4"/>` +
-      // 지푸라기 손
-      `<path d="M28 112 l-14 -6 M28 118 h-16 M28 124 l-14 6 M172 112 l14 -6 M172 118 h16 M172 124 l14 6" stroke="#E0B84A" stroke-width="4" stroke-linecap="round"/>` +
-      // 자루 얼굴
-      `<circle cx="100" cy="74" r="32" fill="#F2D6A2" ${o(5)}/>` +
-      `<path d="M86 70 l8 8 M94 70 l-8 8 M106 70 l8 8 M114 70 l-8 8" stroke="${L}" stroke-width="3.5" stroke-linecap="round"/>` +
-      `<path d="M88 88 Q100 94 112 88" stroke="${L}" stroke-width="3.5" stroke-linecap="round" fill="none" stroke-dasharray="2 4"/>` +
-      // 밀짚모자
-      `<ellipse cx="100" cy="48" rx="50" ry="10" fill="#F7D98A" ${o(4.5)}/><path d="M74 48 Q72 18 100 16 Q128 18 126 48Z" fill="#F2CD6B" ${o(4.5)}/><path d="M73.6 40 Q100 46 126.4 40 L126 48 Q100 54 74 48Z" fill="#FF4FA0" ${o(3.5)}/>`
+      ground +
+      `<path d="M100 92 V206" ${o(10)}/><path d="M100 92 V206" stroke="#B9825A" stroke-width="5" stroke-linecap="round"/>` +
+      `<path d="M26 122 H174" ${o(9)}/><path d="M26 122 H174" stroke="#B9825A" stroke-width="4" stroke-linecap="round"/>` +
+      `<path d="M58 110 H142 L134 176 H66Z" fill="#5FD8FF" ${o(5)}/>` +
+      `<rect x="104" y="138" width="18" height="16" rx="3" fill="#FF8CC6" ${o(3)}/>` +
+      `<path d="M20 122 l-8 -6 M20 122 l-9 3 M20 122 l-6 9 M180 122 l8 -6 M180 122 l9 3 M180 122 l6 9 M90 176 l-4 12 M100 176 v13 M110 176 l4 12" stroke="#E8C24A" stroke-width="4" stroke-linecap="round"/>` +
+      `<circle cx="100" cy="76" r="30" fill="#E8C98A" ${o(5)}/>` +
+      `<path d="M84 70 l8 8 M92 70 l-8 8 M108 70 l8 8 M116 70 l-8 8" stroke="${L}" stroke-width="4" stroke-linecap="round"/>` +
+      `<path d="M88 92 h24" stroke="${L}" stroke-width="3.5" stroke-dasharray="4 3" stroke-linecap="round"/>` +
+      `<ellipse cx="100" cy="52" rx="48" ry="9" fill="#F7D98A" ${o(4.5)}/>` +
+      `<path d="M76 52 Q76 26 100 26 Q124 26 124 52Z" fill="#F2CD6B" ${o(4.5)}/>`
     );
-  if (id === 'mailbox')
+  if (id === 'barn')
     return (
-      `<ellipse cx="100" cy="210" rx="40" ry="7" fill="#000" opacity=".25"/>` +
-      `<path d="M100 208 V140" ${o(14)}/><path d="M100 208 V140" stroke="#B9825A" stroke-width="7" stroke-linecap="round"/>` +
-      // 빨간 통 (둥근 지붕)
-      `<path d="M52 140 V92 Q52 56 100 56 Q148 56 148 92 V140Z" fill="#FF4A5E" ${o(6)}/>` +
-      `<path d="M62 92 Q62 66 100 66" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" fill="none" opacity=".45"/>` +
-      // 투입구 · 글씨판
-      `<rect x="74" y="88" width="52" height="9" rx="4.5" fill="${L}"/>` +
-      `<rect x="80" y="108" width="40" height="20" rx="5" fill="#FFF6D6" ${o(3)}/><path d="M88 118 h24" stroke="#FF4A5E" stroke-width="3" stroke-linecap="round"/>` +
-      // 깃발
-      `<path d="M148 100 H164 V70" ${o(5)} fill="none"/><path d="M164 70 L186 78 L164 86Z" fill="#FFE14D" ${o(3.5)}/>`
+      ground +
+      `<path d="M28 202 V104 L100 54 L172 104 V202Z" fill="#FF6B5A" ${o(5)}/>` +
+      `<path d="M20 108 L100 50 L180 108" fill="none" stroke="${L}" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/>` +
+      `<path d="M20 108 L100 50 L180 108" fill="none" stroke="#FFF6D6" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>` +
+      `<rect x="86" y="80" width="28" height="22" rx="4" fill="#FFE14D" ${o(4)}/>` +
+      `<rect x="64" y="130" width="72" height="72" rx="4" fill="#FFF6D6" ${o(4.5)}/>` +
+      `<path d="M68 134 L132 198 M132 134 L68 198" stroke="#FF6B5A" stroke-width="7" stroke-linecap="round"/>` +
+      `<path d="M146 206 Q140 172 156 166 H176 Q192 172 186 206Z" fill="#E8C98A" ${o(4.5)}/>` +
+      `<path d="M156 166 Q166 158 176 166" ${o(4)}/>` +
+      text(166, 194, '씨앗', 11)
     );
-  if (id === 'jars') {
-    const jar = (cx: number, base: number, w: number, h: number, c: string) =>
-      `<path d="M${cx - w * 0.32} ${base - h} Q${cx - w * 0.62} ${base - h * 0.62} ${cx - w * 0.5} ${base - h * 0.2} Q${cx - w * 0.42} ${base} ${cx} ${base} Q${cx + w * 0.42} ${base} ${cx + w * 0.5} ${base - h * 0.2} Q${cx + w * 0.62} ${base - h * 0.62} ${cx + w * 0.32} ${base - h}Z" fill="${c}" ${o(5)}/>` +
-      `<path d="M${cx - w * 0.42} ${base - h * 0.55} Q${cx} ${base - h * 0.47} ${cx + w * 0.42} ${base - h * 0.55}" stroke="#4A2A1E" stroke-width="3" fill="none" opacity=".5"/>` +
-      `<ellipse cx="${cx}" cy="${base - h}" rx="${w * 0.36}" ry="${w * 0.1}" fill="#5A3A2A" ${o(4)}/>` +
-      `<ellipse cx="${cx}" cy="${base - h - w * 0.06}" rx="${w * 0.28}" ry="${w * 0.08}" fill="#8A5A3E" ${o(3.5)}/>`;
+  if (id === 'store')
     return (
-      `<ellipse cx="100" cy="210" rx="86" ry="8" fill="#000" opacity=".25"/>` +
-      // 돌 받침
-      `<path d="M14 206 Q14 186 34 186 H166 Q186 186 186 206Z" fill="#B8BCD8" ${o(5)}/><path d="M50 196 h18 M92 200 h22 M138 194 h16" stroke="#8F96CC" stroke-width="3" stroke-linecap="round"/>` +
-      jar(56, 188, 62, 70, '#8E5A34') +
-      jar(146, 188, 54, 58, '#7A4A2A') +
-      jar(102, 190, 74, 92, '#9A6238')
+      ground +
+      `<rect x="26" y="78" width="148" height="124" rx="8" fill="#E6E8F5" ${o(5)}/>` +
+      `<rect x="56" y="44" width="88" height="28" rx="8" fill="#A8EB5A" ${o(4.5)}/>` +
+      text(100, 65, '24시', 17) +
+      `<path d="M58 72 V78 M142 72 V78" ${o(4)}/>` +
+      [0, 1, 2, 3, 4, 5]
+        .map((i) => `<path d="M${(18 + i * 27.3).toFixed(1)} 84 h27.3 v18 q-13.6 10 -27.3 0z" fill="${i % 2 ? '#FFFFFF' : '#FF4FA0'}" ${o(3.5)}/>`)
+        .join('') +
+      `<rect x="38" y="116" width="76" height="60" rx="5" fill="#5FD8FF" ${o(4)}/>` +
+      `<path d="M50 128 l14 -8 M50 144 l26 -16" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>` +
+      `<rect x="124" y="114" width="38" height="88" rx="5" fill="#BFEFFF" ${o(4)}/>` +
+      `<path d="M143 114 V202" stroke="${L}" stroke-width="3"/>`
     );
-  }
   return '';
 }

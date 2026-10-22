@@ -48,6 +48,12 @@ export const broadcasts = {
   exchangeDone: (skin: string) => `${skin} 들여놓고 바로 써 봤습니다. 잘 어울립니다. 아마도요.`,
   ledger: '장부에 다 적어뒀습니다. 이장은 다 기억합니다. 장부가요.',
   storageQuiet: '창고는 잘 있습니다. 쥐는 없습니다. 아마도요.',
+  /** 교환소 분류 탭별 이장 한마디 (디자인 9e) */
+  shopLine: {
+    soli: '교환은 공정합니다. 아마도요.',
+    building: '건물은 환불 안 됩니다. 철거는 이장이 귀찮습니다.',
+    ijang: '이장 꾸미기는 마을 예산입니다. 여러분 작물이요.',
+  },
   rainyMonth: (days: number) => `이번 달 비 온 날이 ${days}일입니다. 우산은 각자 챙기세요.`,
   weeklySummaryWorkHeavy: '솔이 씨 4주 치 정리했습니다. 일만 열심히 하셨네요.',
   /** 밤사이 자동 수확 (crops: 작물 이름들) */

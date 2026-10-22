@@ -1,9 +1,11 @@
+import { SKINS } from '../../../domain/harvest';
 import type { PlotSlot, Weather } from '../../../domain/types';
 import { workColor } from '../../theme';
 import { cropIconSvg } from '../crops';
 import { ijangSvg } from '../ijang';
 import { FACES, faceSvg, npcSvg } from '../neighbors';
-import { soliSvg } from '../soli';
+import { buildingSvg } from '../skins';
+import { soliSkinBackSvg, soliSkinSvg, soliSvg } from '../soli';
 import { villageSceneSvg, type VillageSceneParams } from '../village';
 
 const base: VillageSceneParams = {
@@ -27,6 +29,13 @@ describe('character svg', () => {
 
   it.each(['base', 'meh', 'cast', 'smile'] as const)('ijang %s', (m) => {
     expect(ijangSvg(m)).not.toMatch(bad);
+  });
+
+  it.each(SKINS.map((s) => [s.id, s.category] as const))('skin %s (%s)', (id, category) => {
+    const art =
+      category === 'soli' ? soliSkinBackSvg(id) + soliSkinSvg(id) : category === 'building' ? buildingSvg(id) : ijangSvg('base', id);
+    expect(art.length).toBeGreaterThan(50);
+    expect(art).not.toMatch(bad);
   });
 
   it('neighbors', () => {

@@ -9,10 +9,10 @@ import type { CropKind, Weather } from '../../domain/types';
 import { cropIconSvg } from './crops';
 import { eventIconSvg } from './eventIcons';
 import { bannerIconSvg, weatherIconSvg } from './icons';
-import { ijangPropsOf, ijangSvg, type IjangMood } from './ijang';
+import { ijangSvg, type IjangMood } from './ijang';
 import { buildingSvg } from './skins';
 import { faceSvg, FACES, npcSvg, type NpcHair } from './neighbors';
-import { soliSkinSvg, soliSvg, type SoliMood } from './soli';
+import { soliWithSkinSvg, type SoliMood } from './soli';
 import { wrap } from './svg';
 import { VILLAGE_VIEWBOX, villageSceneSvg, villageSkyTop, type VillageSceneParams } from './village';
 
@@ -26,12 +26,12 @@ const Char = memo(function Char({ xml, size, style }: CharProps & { xml: string 
 });
 
 export function Soli({ mood, skin, ...rest }: CharProps & { mood: SoliMood; skin?: string | null }) {
-  const xml = useMemo(() => wrap(soliSvg(mood) + soliSkinSvg(skin ?? null)), [mood, skin]);
+  const xml = useMemo(() => wrap(soliWithSkinSvg(mood, skin ?? null)), [mood, skin]);
   return <Char xml={xml} {...rest} />;
 }
 
 export function Ijang({ mood, prop, ...rest }: CharProps & { mood: IjangMood; prop?: string | null }) {
-  const xml = useMemo(() => wrap(ijangSvg(mood, ijangPropsOf(prop ?? null))), [mood, prop]);
+  const xml = useMemo(() => wrap(ijangSvg(mood, prop ?? null)), [mood, prop]);
   return <Char xml={xml} {...rest} />;
 }
 

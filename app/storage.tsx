@@ -3,6 +3,7 @@
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SvgXml } from 'react-native-svg';
 
 import { broadcasts, broadcastText, withPrefix } from '../src/copy/broadcasts.ko';
 import { CROP_NAME } from '../src/copy/crops.ko';
@@ -13,6 +14,7 @@ import {
   exchangeHint,
   HARVEST_PER_LEVEL,
   harvestProgress,
+  isSkinLocked,
   planPayment,
   SKINS,
   type Skin,
@@ -28,6 +30,9 @@ import { colors, fonts } from '../src/ui/theme';
 
 const CROPS: readonly CropKind[] = ['sunflower', 'strawberry', 'coffee', 'mushroom', 'potato'];
 const CATEGORIES = Object.keys(SKIN_CATEGORY_LABEL) as SkinCategory[];
+/** 잠긴 스킨 자물쇠 (디자인 9e) */
+const LOCK_SVG =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="#FFE14D" stroke-width="3" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="3" fill="#FFE14D"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
 const pad = (n: number) => String(n).padStart(2, '0');
 const timeLabel = (d: Date) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 
@@ -64,12 +69,14 @@ export default function Storage() {
   const progress = harvestProgress(totalHarvested);
   const into = progress.total - (progress.level - 1) * HARVEST_PER_LEVEL;
   const stored = CROPS.reduce((a, k) => a + (inventory[k] ?? 0), 0);
-  const ready = exchangeableSkins(inventory, owned);
+  const ready = exchangeableSkins(inventory, owned, progress.level);
   const broadcast = useMemo(() => {
     if (notice) return withPrefix(notice);
+    // 교환소에서는 분류 탭마다 이장 한마디 (디자인 9e)
+    if (tab === 'exchange') return withPrefix(broadcasts.shopLine[category]);
     if (ready[0]) return broadcastText({ kind: 'exchangeReady', ...exchangeHint(ready[0], inventory) });
     return withPrefix(broadcasts.storageQuiet);
-  }, [notice, ready, inventory]);
+  }, [notice, tab, category, ready, inventory]);
 
   const onConfirm = async () => {
     if (!confirming) return;
@@ -141,7 +148,8 @@ export default function Storage() {
               {SKINS.filter((s) => s.category === category).map((s) => {
                 const isOwned = owned.has(s.id);
                 const isOn = equipped.has(s.id);
-                const afford = canAfford(s.cost, inventory);
+                const locked = !isOwned && isSkinLocked(s, progress.level);
+                const afford = !locked && canAfford(s.cost, inventory);
                 const plan = planPayment(s.cost, inventory);
                 const lackText = [
                   ...plan.lacking.map((l) => `${CROP_NAME[l.crop]} ${l.n}개 부족`),
@@ -150,7 +158,14 @@ export default function Storage() {
                 return (
                   <View key={s.id} style={[styles.skin, !isOwned && afford && styles.skinReady, isOn && styles.skinWorn]}>
                     <View style={styles.skinArt}>
-                      <SkinPreview skin={s} />
+                      <View style={locked && styles.lockedArt}>
+                        <SkinPreview skin={s} />
+                      </View>
+                      {locked && (
+                        <View style={styles.lockBadge} accessibilityLabel="잠김">
+                          <SvgXml xml={LOCK_SVG} width={13} height={13} />
+                        </View>
+                      )}
                       {isOn && (
                         <View style={styles.wornBadge}>
                           <Text style={styles.wornText}>착용 중</Text>
@@ -181,6 +196,10 @@ export default function Storage() {
                       >
                         <Text style={[styles.skinBtnText, !isOn && { color: colors.line }]}>{isOn ? '벗기' : '쓰기'}</Text>
                       </Pressable>
+                    ) : locked ? (
+                      <View style={styles.skinBtn}>
+                        <Text style={styles.lockText}>수확 Lv.{s.unlockLevel}에 열림</Text>
+                      </View>
                     ) : afford ? (
                       <Pressable onPress={() => setConfirming(s)} style={[styles.skinBtn, styles.skinBtnOn]}>
                         <Text style={[styles.skinBtnText, { color: colors.line }]}>교환하기</Text>
@@ -286,6 +305,19 @@ const styles = StyleSheet.create({
   skinBtnOn: { backgroundColor: colors.yellow },
   skinBtnOwned: { backgroundColor: colors.track },
   skinBtnText: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.text },
+  lockedArt: { opacity: 0.35 },
+  lockBadge: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lockText: { fontFamily: fonts.bodyHeavy, fontSize: 12, color: colors.textMuted },
   lack: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.pinkSoft, textAlign: 'center' },
   empty: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.textMuted, padding: 12 },
   costAny: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.textSub },

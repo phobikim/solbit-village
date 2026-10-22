@@ -10,7 +10,7 @@ import { plotCrop } from './crops';
 import { eventIconInner } from './eventIcons';
 import { faceSvg, FACES } from './neighbors';
 import { buildingSvg } from './skins';
-import { soliSkinSvg, soliSvg, type SoliMood } from './soli';
+import { soliWithSkinSvg, type SoliMood } from './soli';
 import { bud, cloud, flower, L, nest, o, place48, star } from './svg';
 
 export const VILLAGE_VIEWBOX = { width: 366, height: 340 } as const;
@@ -271,7 +271,7 @@ export function villageSceneSvg(p: VillageSceneParams, fit: 'meet' | 'slice' = '
       s += `<path d="M110 196 C110 189 102 187 100 193 C98 187 90 189 90 196 C90 202 100 207 100 207 C100 207 110 202 110 196Z" fill="#FF4FA0" ${o(2.5)}/>`;
   }
   if (far) s += `<ellipse cx="292" cy="252" rx="24" ry="4.5" fill="#000" opacity=".25"/>` + nest(faceSvg(FACES[far.face] ?? FACES[0]), 259, 186, 66);
-  s += `<ellipse cx="183" cy="258" rx="40" ry="6" fill="#000" opacity=".28"/>` + nest(soliSvg(p.soliMood) + soliSkinSvg(p.soliSkin ?? null), 128, 146, 110);
+  s += `<ellipse cx="183" cy="258" rx="40" ry="6" fill="#000" opacity=".28"/>` + nest(soliWithSkinSvg(p.soliMood, p.soliSkin ?? null), 128, 146, 110);
 
   // 4. 앞: 밭 5칸
   s += `<path d="M-4 262 C120 258 250 260 370 258 V344 H-4Z" fill="${c.front}" ${o(3)}/>`;
