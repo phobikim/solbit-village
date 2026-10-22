@@ -7,13 +7,6 @@ import type { Weather } from '../domain/types';
 
 export const REST_BROADCAST = '쉬는 것도 일이유. 근디 이건 월급 안 나와유.';
 
-/** 쉼터의 쉼 지수 상태 (마을 지수 카드의 꽃 이름과 따로) */
-export const REST_LEVEL: Record<LeisureBand, string> = {
-  full: '가득 참',
-  half: '반쯤 참',
-  bud: '바닥',
-  none: '텅 빔',
-};
 
 export const PLACE_DURATION_LABEL: Record<PlaceDuration, string> = { short: '30분', half: '반나절', weekend: '주말' };
 
@@ -26,10 +19,13 @@ export const signalWork = (streak: number, status: string) => (streak >= 2 ? `${
 
 const SKY: Partial<Record<Weather, string>> = { over: '하늘은 흐리구', rain: '하늘은 비 오구', storm: '하늘은 폭풍 치구' };
 
+/** 지침 신호 '쉼' (신호는 쉼 20 이하에서만 켜져 봉오리 · 잎만 남음뿐) */
+const REST_PHRASE: Partial<Record<LeisureBand, string>> = { bud: '쉼은 봉오리구', none: '쉼은 잎만 남었구' };
+
 /** 지침 신호 이장 말풍선 */
-export function signalLine(streak: number, weather: Weather): string {
+export function signalLine(streak: number, weather: Weather, rest: LeisureBand): string {
   const work = streak >= 2 ? `일은 ${dayNth(streak)} 갈려나가구` : '일은 넘치구';
-  return `${work}, 쉼은 바닥이구, ${SKY[weather] ?? `하늘은 ${WEATHER_NAME[weather]}이구`}. 이장이 보기엔 좀 쉬어야겄슈.`;
+  return `${work}, ${REST_PHRASE[rest] ?? '쉼은 모자라구'}, ${SKY[weather] ?? `하늘은 ${WEATHER_NAME[weather]}이구`}. 이장이 보기엔 좀 쉬어야겄슈.`;
 }
 
 /** 마지막 쉼: 오늘 · 어제 · N일 전 */

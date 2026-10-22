@@ -2,8 +2,8 @@
 
 import { useMemo } from 'react';
 
-import { HEALTH_STATUS, WORK_STATUS } from '../copy/labels.ko';
-import { lastRestLabel, REST_LEVEL, signalLine, signalWork } from '../copy/rest.ko';
+import { HEALTH_STATUS, LEISURE_STATUS, WORK_STATUS } from '../copy/labels.ko';
+import { lastRestLabel, signalLine, signalWork } from '../copy/rest.ko';
 import { addDays, daysBetween, type DayKey } from '../domain/day';
 import { INDEX_WINDOW_DAYS, leisureBand, leisureIndex, workBand, workIndex } from '../domain/indices';
 import {
@@ -48,7 +48,7 @@ export function useRestView(
     const work = workIndex(byDate, today);
     const conditionByDay: Record<DayKey, Condition> = Object.fromEntries(Object.values(byDate).map((r) => [r.date, r.condition]));
     const weather = weatherNow(today, conditionByDay);
-    const restLabel = rest === null ? '기록 전' : REST_LEVEL[leisureBand(rest)];
+    const restLabel = rest === null ? '기록 전' : LEISURE_STATUS[leisureBand(rest)];
     const streak = grindStreak(byDate, today);
     const on = restSignal(work, rest, weather);
     const ya = placeYearAgo(places, today);
@@ -59,7 +59,7 @@ export function useRestView(
       weekDays: restDaysThisWeek(byDate, today),
       signal:
         on && weather && work !== null
-          ? { work: signalWork(streak, WORK_STATUS[workBand(work)]), rest: restLabel, health: HEALTH_STATUS[weather], line: signalLine(streak, weather) }
+          ? { work: signalWork(streak, WORK_STATUS[workBand(work)]), rest: restLabel, health: HEALTH_STATUS[weather], line: signalLine(streak, weather, leisureBand(rest ?? 0)) }
           : null,
       suggestions: restSuggestions(places, today),
       yearAgo: ya ? { date: yearAgo(today), place: ya } : null,

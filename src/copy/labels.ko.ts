@@ -65,11 +65,12 @@ export const RELATION_STATUS: Record<RelationBand, string> = {
   quiet: '조용함',
 };
 
+/** 쉼 상태: 메인 지수 카드와 쉼터가 같이 쓴다 (2026-10-22 사용자 결정, 경계값은 indices.ts leisureBand) */
 export const LEISURE_STATUS: Record<LeisureBand, string> = {
   full: '활짝 핌',
   half: '반만 핌',
   bud: '봉오리',
-  none: '아직 봉오리',
+  none: '잎만 남음',
 };
 
 /** 지수를 계산할 기록이 없을 때 */
