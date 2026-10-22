@@ -96,3 +96,11 @@ export function archiveNeighbor(id: string): Promise<void> {
     await db.runAsync('UPDATE neighbor SET archived = 1 WHERE id = ?', id);
   });
 }
+
+/** 이웃 지우기 (정리, 디자인 13c): 이웃과 같이 쌓은 연락 기록까지 지운다. 이미 심은 작물 · 경험치는 그대로. */
+export function deleteNeighbor(id: string): Promise<void> {
+  return writeTx(async (db) => {
+    await db.runAsync('DELETE FROM contact WHERE neighbor_id = ?', id);
+    await db.runAsync('DELETE FROM neighbor WHERE id = ?', id);
+  });
+}

@@ -6,7 +6,6 @@ import {
   placeYearAgo,
   restDaysThisWeek,
   restSignal,
-  restSuggestions,
   scheduledDate,
   sortPlaces,
   weekStart,
@@ -74,7 +73,7 @@ describe('마지막 쉼 · 이번 주 쉰 날', () => {
   });
 });
 
-describe('보따리 · 쉼 제안', () => {
+describe('보따리', () => {
   const places = [
     place('정자', { duration: 'short', createdAt: 1 }),
     place('공원', { duration: 'short', createdAt: 2 }),
@@ -82,15 +81,6 @@ describe('보따리 · 쉼 제안', () => {
     place('사파', { duration: 'weekend', createdAt: 4, eventId: 'ev1' }),
     place('제주', { duration: 'weekend', visited: true, visitedDate: '2025-10-19', nights: 3, createdAt: 5 }),
   ];
-  it('가고 싶은 곳에서 시간마다 하나, 날짜 잡힌 곳 · 다녀온 곳은 빼고', () => {
-    const s = restSuggestions(places, today);
-    expect(s.map((p) => p.duration)).toEqual(['short', 'half']);
-  });
-  it('같은 날은 같은 제안, 다음 날은 차례로', () => {
-    const a = restSuggestions(places, today)[0].id;
-    expect(restSuggestions(places, today)[0].id).toBe(a);
-    expect(restSuggestions(places, '2026-10-23')[0].id).not.toBe(a);
-  });
   it('가고 싶은 곳은 오래 담은 순, 다녀온 곳은 최근 순', () => {
     expect(sortPlaces(places, false).map((p) => p.id)).toEqual(['정자', '공원', '양평', '사파']);
     const v = [place('a', { visited: true, visitedDate: '2025-01-01' }), place('b', { visited: true, visitedDate: '2026-05-01' })];

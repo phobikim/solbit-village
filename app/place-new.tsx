@@ -5,10 +5,10 @@ import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { PLACE_DURATION_LABEL, restCopy, tripLength } from '../src/copy/rest.ko';
+import { restCopy, tripLength } from '../src/copy/rest.ko';
 import { newId } from '../src/data/events';
 import { today as getToday, type DayKey } from '../src/domain/day';
-import { PLACE_DURATIONS, PLACE_NAME_MAX, PLACE_NIGHTS_MAX, type PlaceDuration } from '../src/domain/rest';
+import { PLACE_NAME_MAX, PLACE_NIGHTS_MAX, type PlaceDuration } from '../src/domain/rest';
 import { usePlaces } from '../src/state/places';
 import { ChoiceChips, DatePicker } from '../src/ui/components/form';
 import { PrimaryButton } from '../src/ui/components/PrimaryButton';
@@ -16,7 +16,6 @@ import { Field, FieldLabel, IjangBubble } from '../src/ui/components/record/pick
 import { RoundButton } from '../src/ui/components/RoundButton';
 import { colors, fonts } from '../src/ui/theme';
 
-const DURATIONS = PLACE_DURATIONS.map((value) => ({ value, label: PLACE_DURATION_LABEL[value] }));
 const STATUS = [
   { value: 'wish', label: restCopy.wish },
   { value: 'visited', label: restCopy.visited },
@@ -31,6 +30,7 @@ export default function PlaceSheet() {
   const editing = id ? places.find((p) => p.id === id) : undefined;
 
   const [name, setName] = useState('');
+  // 걸리는 시간은 쉼 제안용이었다 (v7에서 제안을 뺌). 값은 그대로 저장만 한다.
   const [duration, setDuration] = useState<PlaceDuration>('half');
   const [status, setStatus] = useState<'wish' | 'visited'>(visitedParam === '1' ? 'visited' : 'wish');
   const [visitedDate, setVisitedDate] = useState<DayKey>(today);
@@ -90,11 +90,6 @@ export default function PlaceSheet() {
           <View style={styles.section}>
             <FieldLabel>어디</FieldLabel>
             <Field value={name} onChangeText={setName} placeholder="예: 강릉 바다" maxLength={PLACE_NAME_MAX} style={styles.nameField} />
-          </View>
-
-          <View style={styles.section}>
-            <FieldLabel>얼마나 걸려요</FieldLabel>
-            <ChoiceChips options={DURATIONS} value={duration} onChange={setDuration} activeColor={colors.leisure} />
           </View>
 
           <View style={styles.section}>

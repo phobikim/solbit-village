@@ -1,4 +1,5 @@
 // 12b 장부 · 대소사: 다가오는 행사 + 지나간 일(지난 행사 · 성취). 일상·시스템 기록은 넣지 않는다.
+// 머리에 정리 · + 등록 (디자인 v7). 정리 모드(13b)에서는 행사 줄 끝 휴지통. 성취는 기록 시트에서 고친다.
 
 import { router } from 'expo-router';
 import { useMemo } from 'react';
@@ -9,6 +10,8 @@ import { dDayLabel, parseDayKey, weekdayOf, type DayKey } from '../../domain/day
 import { BOARD_MAX, pastItems, upcomingEvents, type VillageEvent } from '../../domain/events';
 import { BannerIcon, EventIcon } from '../characters';
 import { colors, fonts } from '../theme';
+import { TidyButton } from './TidyButton';
+import { TrashButton } from './TrashButton';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const mdDow = (d: DayKey) => {
@@ -31,18 +34,31 @@ type Props = {
   achievements: readonly { date: DayKey; text: string }[];
   /** 처음 불러오기 전에는 빈 문구를 띄우지 않는다 */
   loaded: boolean;
+  tidy: boolean;
+  onToggleTidy: () => void;
+  onDelete: (e: VillageEvent) => void;
 };
 
-export function LedgerEvents({ today, events, achievements, loaded }: Props) {
+export function LedgerEvents({ today, events, achievements, loaded, tidy, onToggleTidy, onDelete }: Props) {
   const upcoming = upcomingEvents(events, today);
   const past = useMemo(() => pastItems(events, achievements, today), [events, achievements, today]);
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.section}>다가오는 행사</Text>
+      <View style={styles.head}>
+        <Text style={styles.section}>다가오는 행사</Text>
+        <View style={styles.headButtons}>
+          {events.length > 0 && <TidyButton on={tidy} onPress={onToggleTidy} />}
+          {!tidy && (
+            <Pressable accessibilityRole="button" onPress={() => openEventSheet()} style={styles.add}>
+              <Text style={styles.addText}>+ 등록</Text>
+            </Pressable>
+          )}
+        </View>
+      </View>
       {loaded && upcoming.length === 0 && <Text style={styles.empty}>{LEDGER_EMPTY}</Text>}
       {upcoming.map((e, i) => (
-        <Pressable key={e.id} onPress={() => openEventSheet(e.id)} style={[styles.card, i === 0 && styles.cardBanner]}>
+        <Pressable key={e.id} disabled={tidy} onPress={() => openEventSheet(e.id)} style={[styles.card, i === 0 && styles.cardBanner]}>
           <View style={styles.icon}>
             <EventIcon type={e.type} size={30} />
           </View>
@@ -62,13 +78,14 @@ export function LedgerEvents({ today, events, achievements, loaded }: Props) {
           <View style={[styles.dday, i === 0 && styles.ddayBanner]}>
             <Text style={[styles.ddayText, i === 0 && { color: colors.line }]}>{dDayLabel(e.date, today)}</Text>
           </View>
+          {tidy && <TrashButton label={e.name} onPress={() => onDelete(e)} />}
         </Pressable>
       ))}
 
       {past.length > 0 && <Text style={[styles.section, { marginTop: 8 }]}>지나간 일</Text>}
       {past.map((p) =>
         p.kind === 'event' ? (
-          <Pressable key={`e${p.event.id}`} onPress={() => openEventSheet(p.event.id)} style={styles.card}>
+          <Pressable key={`e${p.event.id}`} disabled={tidy} onPress={() => openEventSheet(p.event.id)} style={[styles.card, styles.cardPast]}>
             <View style={styles.icon}>
               <EventIcon type={p.event.type} size={30} />
             </View>
@@ -83,6 +100,7 @@ export function LedgerEvents({ today, events, achievements, loaded }: Props) {
               </View>
             </View>
             <Text style={styles.pastDate}>{md(p.date)}</Text>
+            {tidy && <TrashButton label={p.event.name} onPress={() => onDelete(p.event)} />}
           </Pressable>
         ) : (
           <View key={`a${p.date}`} style={styles.card}>
@@ -107,6 +125,10 @@ export function LedgerEvents({ today, events, achievements, loaded }: Props) {
 
 const styles = StyleSheet.create({
   wrap: { gap: 8 },
+  head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  headButtons: { flexDirection: 'row', gap: 6 },
+  add: { height: 32, paddingHorizontal: 12, borderRadius: 16, backgroundColor: colors.pink, justifyContent: 'center', borderBottomWidth: 3, borderBottomColor: '#B32A6E' },
+  addText: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.line },
   section: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.textSub, paddingLeft: 4, marginTop: 4 },
   empty: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.textMuted, padding: 8 },
   card: {
@@ -121,6 +143,7 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   cardBanner: { borderColor: colors.yellow },
+  cardPast: { backgroundColor: '#181F4C' },
   icon: { width: 40, height: 40, borderRadius: 14, backgroundColor: colors.night, alignItems: 'center', justifyContent: 'center' },
   body: { flex: 1, gap: 3 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },

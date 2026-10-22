@@ -1,4 +1,4 @@
-// 12c · 12d 쉼터: 쉼 지수 · 지침 신호 · 오늘의 쉼 제안 · 보따리 · 1년 전 오늘.
+// 12c · 12d 쉼터: 쉼 지수 · 지침 신호 · 보따리 · 1년 전 오늘. (오늘의 쉼 제안은 디자인 v7에서 뺐다)
 
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -6,7 +6,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
 import { withPrefix } from '../../src/copy/broadcasts.ko';
-import { PLACE_DURATION_LABEL, REST_BROADCAST, restCopy, yearAgoLine } from '../../src/copy/rest.ko';
+import { REST_BROADCAST, restCopy, yearAgoLine } from '../../src/copy/rest.ko';
 import { lastLeisureDay } from '../../src/data/records';
 import { parseDayKey, today as getToday, type DayKey } from '../../src/domain/day';
 import { scheduledDate, sortPlaces } from '../../src/domain/rest';
@@ -113,29 +113,20 @@ export default function RestScreen() {
         )}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{restCopy.suggestTitle}</Text>
-          {v.suggestions.length ? (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.suggests}>
-              {v.suggestions.map((p, i) => (
-                <Pressable key={p.id} onPress={() => openPlace(p)} style={[styles.suggest, { backgroundColor: SUGGEST_BG[i] }]}>
-                  <Text style={styles.suggestChip}>{PLACE_DURATION_LABEL[p.duration]}</Text>
-                  <Text style={styles.suggestName} numberOfLines={2}>
-                    {p.name}
-                  </Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-          ) : (
-            <Text style={styles.empty}>{restCopy.suggestEmpty}</Text>
-          )}
-        </View>
-
-        <View style={styles.section}>
           <View style={styles.bundleHead}>
             <Text style={styles.sectionTitle}>{restCopy.bundleTitle}</Text>
-            <Text style={styles.sectionTitle} onPress={() => router.push('/bundle')} accessibilityRole="link">
-              {restCopy.seeAll}
-            </Text>
+            <View style={styles.bundleActions}>
+              <Text style={styles.sectionTitle} onPress={() => router.push('/bundle')} accessibilityRole="link">
+                {restCopy.seeAll}
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => router.push({ pathname: '/place-new', params: tab === 'visited' ? { visited: '1' } : {} })}
+                style={styles.add}
+              >
+                <Text style={styles.addText}>{restCopy.add}</Text>
+              </Pressable>
+            </View>
           </View>
           <View style={styles.chips}>
             {(['wish', 'visited'] as const).map((k) => (
@@ -180,8 +171,6 @@ export default function RestScreen() {
   );
 }
 
-const SUGGEST_BG = ['#2A2F6E', '#262B66', '#22285E'];
-
 const styles = StyleSheet.create({
   content: { padding: 12, gap: 12, paddingBottom: 24 },
   card: { backgroundColor: colors.cardSub, borderRadius: 24, paddingVertical: 14, paddingHorizontal: 16, gap: 12 },
@@ -211,21 +200,10 @@ const styles = StyleSheet.create({
   bubbleText: { fontFamily: fonts.bodyHeavy, fontSize: 13, lineHeight: 20, color: colors.line },
   section: { gap: 8 },
   sectionTitle: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.textSub, paddingHorizontal: 4 },
-  suggests: { gap: 8 },
-  suggest: { width: 148, height: 104, borderRadius: 22, paddingVertical: 12, paddingHorizontal: 14, justifyContent: 'space-between' },
-  suggestChip: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.leisure,
-    color: colors.line,
-    borderRadius: 99,
-    paddingVertical: 3,
-    paddingHorizontal: 10,
-    overflow: 'hidden',
-    fontFamily: fonts.bodyHeavy,
-    fontSize: 12,
-  },
-  suggestName: { fontFamily: fonts.bodyHeavy, fontSize: 16, lineHeight: 21, color: colors.text },
   bundleHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  bundleActions: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  add: { height: 32, paddingHorizontal: 12, borderRadius: 16, backgroundColor: colors.pink, justifyContent: 'center', borderBottomWidth: 3, borderBottomColor: '#B32A6E' },
+  addText: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.line },
   chips: { flexDirection: 'row', gap: 6 },
   chip: { height: 34, paddingHorizontal: 14, borderRadius: 17, backgroundColor: colors.cardSub, justifyContent: 'center' },
   chipOn: { backgroundColor: colors.leisure },

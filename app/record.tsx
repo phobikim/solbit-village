@@ -33,7 +33,6 @@ import {
 import type { DayRecord } from '../src/domain/types';
 import { useNeighbors } from '../src/state/neighbors';
 import { useRecords } from '../src/state/records';
-import { BannerIcon } from '../src/ui/characters';
 import { PrimaryButton } from '../src/ui/components/PrimaryButton';
 import { NeighborPicker } from '../src/ui/components/record/NeighborPicker';
 import {
@@ -169,7 +168,6 @@ export default function RecordSheet() {
                   returnKeyType="done"
                 />
                 <View style={styles.hint}>
-                  <BannerIcon color={colors.yellow} size={14} />
                   <Text style={styles.hintText}>적으면 이장네 장부에 올라갑니다</Text>
                 </View>
               </View>

@@ -84,20 +84,6 @@ export type Place = {
 export const PLACE_NAME_MAX = 20;
 export const PLACE_NIGHTS_MAX = 14;
 
-/**
- * 오늘의 쉼 제안: 가고 싶은 곳에서 걸리는 시간마다 하나씩 (날짜가 이미 잡힌 곳은 뺀다).
- * 같은 날에는 같은 제안, 날이 바뀌면 차례로 돌아간다 (확률 없음).
- */
-export function restSuggestions(places: readonly Place[], today: DayKey): Place[] {
-  const dayNo = daysBetween('2000-01-01', today);
-  const out: Place[] = [];
-  for (const d of PLACE_DURATIONS) {
-    const pool = places.filter((p) => !p.visited && !p.eventId && p.duration === d).sort((a, b) => a.createdAt - b.createdAt);
-    if (pool.length) out.push(pool[dayNo % pool.length]);
-  }
-  return out;
-}
-
 /** 가고 싶은 곳은 오래 담아둔 순, 다녀온 곳은 최근에 다녀온 순 */
 export function sortPlaces(places: readonly Place[], visited: boolean): Place[] {
   return places

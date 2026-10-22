@@ -8,6 +8,7 @@ import { Face } from '../characters';
 import { NEIGHBOR_COLORS } from '../characters/neighbors';
 import { colors, fonts } from '../theme';
 import { Avatar } from './Avatar';
+import { TrashButton } from './TrashButton';
 
 type ListedCloseness = keyof typeof CLOSENESS_LABEL;
 
@@ -22,6 +23,8 @@ type Props = {
   monthCount: number;
   bestFriend?: boolean;
   onPress?: () => void;
+  /** 정리 모드: 줄 끝 휴지통 (누르면 확인 시트) */
+  onDelete?: () => void;
 };
 
 /** 가까움 단계 → 막대 칸 수 · 색. 뜸함은 경고색 대신 차분한 회색 계열. */
@@ -33,7 +36,7 @@ const CLOSENESS_STYLE: Record<ListedCloseness, { segs: number; color: string }> 
 
 const heart = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="${colors.line}"><path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z"/></svg>`;
 
-export function NeighborCard({ name, relation, face, color, closeness, monthCount, bestFriend, onPress }: Props) {
+export function NeighborCard({ name, relation, face, color, closeness, monthCount, bestFriend, onPress, onDelete }: Props) {
   const cs = CLOSENESS_STYLE[closeness];
   return (
     <Pressable
@@ -71,6 +74,7 @@ export function NeighborCard({ name, relation, face, color, closeness, monthCoun
         <Text style={[styles.countNum, bestFriend && styles.countBest]}>{monthCount}번</Text>
         <Text style={styles.countLabel}>{bestFriend ? '이번 달 만남' : '이번 달'}</Text>
       </View>
+      {onDelete && <TrashButton label={name} onPress={onDelete} />}
     </Pressable>
   );
 }

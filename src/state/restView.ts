@@ -11,7 +11,6 @@ import {
   placeYearAgo,
   restDaysThisWeek,
   restSignal,
-  restSuggestions,
   weekStart,
   yearAgo,
   type Place,
@@ -33,7 +32,6 @@ export type RestView = {
   weekDays: number;
   /** 지침 신호가 켜졌을 때만 */
   signal: { work: string; rest: string; health: string; line: string } | null;
-  suggestions: Place[];
   yearAgo: { date: DayKey; place: Place } | null;
 };
 
@@ -61,7 +59,6 @@ export function useRestView(
         on && weather && work !== null
           ? { work: signalWork(streak, WORK_STATUS[workBand(work)]), rest: restLabel, health: HEALTH_STATUS[weather], line: signalLine(streak, weather, leisureBand(rest ?? 0)) }
           : null,
-      suggestions: restSuggestions(places, today),
       yearAgo: ya ? { date: yearAgo(today), place: ya } : null,
     };
   }, [byDate, places, lastLeisure, today]);

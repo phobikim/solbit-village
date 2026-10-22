@@ -21,7 +21,12 @@ import type { Condition, Weather } from '../../src/domain/types';
 import { weatherOn } from '../../src/domain/weather';
 import { useLedger } from '../../src/state/ledger';
 import { useRecords } from '../../src/state/records';
-import { LedgerEvents, openEventSheet } from '../../src/ui/components/LedgerEvents';
+import { DELETE_EVENT_LINE, deleteEventTitle } from '../../src/copy/tidy.ko';
+import { EVENT_TYPE_LABEL } from '../../src/copy/labels.ko';
+import type { VillageEvent } from '../../src/domain/events';
+import { EventIcon } from '../../src/ui/characters';
+import { DeleteSheet } from '../../src/ui/components/DeleteSheet';
+import { LedgerEvents } from '../../src/ui/components/LedgerEvents';
 import { MonthCalendar } from '../../src/ui/components/MonthCalendar';
 import { RecordCard } from '../../src/ui/components/RecordCard';
 import { RoundButton } from '../../src/ui/components/RoundButton';
@@ -50,6 +55,9 @@ export default function LedgerScreen() {
   const achievements = useLedger((s) => s.achievements);
   const loaded = useLedger((s) => s.loaded);
   const loadLedger = useLedger((s) => s.load);
+  const removeEvent = useLedger((s) => s.remove);
+  const [tidy, setTidy] = useState(false);
+  const [deleting, setDeleting] = useState<VillageEvent | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -125,7 +133,15 @@ export default function LedgerScreen() {
           ))}
         </View>
         {view === 'events' ? (
-          <LedgerEvents today={today} events={events} achievements={achievements} loaded={loaded} />
+          <LedgerEvents
+            today={today}
+            events={events}
+            achievements={achievements}
+            loaded={loaded}
+            tidy={tidy && events.length > 0}
+            onToggleTidy={() => setTidy(!(tidy && events.length > 0))}
+            onDelete={setDeleting}
+          />
         ) : days.length > 0 ? (
           days.map((key) => {
             const r = byDate[key];
@@ -147,9 +163,19 @@ export default function LedgerScreen() {
           <Text style={styles.empty}>이 달은 기록이 없습니다. 괜찮습니다.</Text>
         )}
       </ScrollView>
-      {view === 'events' && (
-        <RoundButton icon="plus" size={58} accessibilityLabel="행사 등록" onPress={() => openEventSheet()} style={styles.fab} />
-      )}
+      <DeleteSheet
+        visible={!!deleting}
+        art={deleting && <EventIcon type={deleting.type} size={30} />}
+        title={deleting ? deleteEventTitle(deleting.name) : ''}
+        sub={deleting ? `${EVENT_TYPE_LABEL[deleting.type]} · ${deleting.date.slice(5).replace('-', '.')}` : ''}
+        line={DELETE_EVENT_LINE}
+        onKeep={() => setDeleting(null)}
+        onDelete={async () => {
+          if (!deleting) return;
+          await removeEvent(deleting.id);
+          setDeleting(null);
+        }}
+      />
     </Screen>
   );
 }
@@ -157,13 +183,12 @@ export default function LedgerScreen() {
 const styles = StyleSheet.create({
   nav: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   month: { fontFamily: fonts.number, fontSize: 17, minWidth: 80, textAlign: 'center', color: colors.text },
-  content: { padding: 12, gap: 8, paddingBottom: 96 },
+  content: { padding: 12, gap: 8, paddingBottom: 24 },
   seg: { flexDirection: 'row', height: 44, borderRadius: 22, backgroundColor: colors.cardSub, padding: 4, gap: 4, marginTop: 2 },
   segItem: { flex: 1, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   segOn: { backgroundColor: colors.yellow },
   segText: { fontFamily: fonts.bodyHeavy, fontSize: 14, color: colors.textSub },
   segTextOn: { color: colors.line },
-  fab: { position: 'absolute', right: 20, bottom: 24 },
   empty: {
     fontFamily: fonts.bodyBold,
     fontSize: 14,
