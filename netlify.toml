@@ -1,0 +1,20 @@
+# 임시 확인용 웹 배포 (Expo 웹은 개발 확인용 — iOS가 1차 타깃)
+[build]
+  command = "npm run build:web"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# expo-sqlite 웹(wa-sqlite + OPFS)용 교차 출처 격리 헤더
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Embedder-Policy = "credentialless"
+
+# expo-router 정적 SPA: 새로고침해도 404가 나지 않게
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
