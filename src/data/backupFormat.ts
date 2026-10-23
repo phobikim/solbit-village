@@ -17,7 +17,8 @@ export const BACKUP_TABLES = {
   village_xp: ['id', 'date', 'amount', 'reason', 'at'],
   event: ['id', 'name', 'date', 'type', 'repeat_yearly', 'created_at'],
   skin: ['id', 'owned', 'equipped'],
-  place: ['id', 'name', 'duration', 'visited', 'memo', 'note', 'event_id', 'visited_date', 'nights', 'added_date', 'created_at'],
+  place: ['id', 'name', 'duration', 'visited', 'memo', 'note', 'event_id', 'log_id', 'visited_date', 'nights', 'added_date', 'created_at'],
+  rest_log: ['id', 'date', 'text', 'tags', 'size', 'created_at'],
 } as const;
 
 export type BackupTable = keyof typeof BACKUP_TABLES;
@@ -36,6 +37,34 @@ const OLD_EVENT_TYPE: Record<string, string> = { anniversary: 'birth', schedule:
 
 /** 스키마 v7에서 목록에서 빠진 스킨 (마이그레이션 v7과 같음) */
 const REMOVED_SKINS: readonly string[] = ['mailbox', 'jars', 'goldMega', 'sunglasses', 'knitHat'];
+
+/**
+ * 스키마 v11 전 백업에는 쉼 기록이 없다 — 마이그레이션 v11과 같이 기존 여가/쉼 기록(day_record.leisure)을
+ * 그날의 쉼 기록(크기 '장작')으로 옮긴다. id는 'rec_' + 날짜.
+ */
+export function restLogsFromLeisure(dayRecords: readonly Row[]): Row[] {
+  const out: Row[] = [];
+  for (const r of dayRecords) {
+    let labels: unknown;
+    try {
+      labels = JSON.parse(String(r.leisure ?? '[]'));
+    } catch {
+      continue;
+    }
+    if (!Array.isArray(labels)) continue;
+    const tags = labels.filter((l): l is string => typeof l === 'string').map((label) => ({ kind: 'activity', label }));
+    if (!tags.length) continue;
+    out.push({
+      id: `rec_${String(r.date)}`,
+      date: String(r.date),
+      text: '',
+      tags: JSON.stringify(tags),
+      size: 'firewood',
+      created_at: typeof r.created_at === 'number' ? r.created_at : 0,
+    });
+  }
+  return out;
+}
 
 /** 기기 안에만 남기는 설정 (가져오기로 덮지 않음): 오늘 소식을 본 날 */
 export const DEVICE_ONLY_SETTINGS: readonly string[] = ['news_seen_date'];
@@ -93,6 +122,9 @@ export function parseBackup(text: string, currentSchemaVersion: number): ParseRe
       continue;
     }
     tables[name] = name === 'settings' ?clean.filter((r) => !DEVICE_ONLY_SETTINGS.includes(String(r.key))) : clean;
+  }
+  if (o.schemaVersion < 11 && tables.rest_log === undefined && tables.day_record) {
+    tables.rest_log = restLogsFromLeisure(tables.day_record);
   }
   return {
     ok: true,

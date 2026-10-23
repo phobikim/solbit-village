@@ -25,4 +25,6 @@ export const SETTING = {
   newsAlarmOn: 'news_alarm_on',
   /** 아침 알림 시각 'HH:MM' */
   newsAlarmTime: 'news_alarm_time',
+  /** 쪽지 제안 기억 (JSON: 장소별 마지막 제안일 · 오늘의 쪽지) */
+  restNote: 'rest_note',
 } as const;

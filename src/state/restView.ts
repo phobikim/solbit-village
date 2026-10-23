@@ -1,27 +1,25 @@
-// 쉼터 화면용 뷰 모델 (쉼 상태 · 가고 싶은 곳 · 다녀온 곳). 규칙은 src/domain/rest.ts · indices.ts에서 계산한다.
+// 쉼터 화면용 뷰 모델 (모닥불 · 쪽지 · 보따리). 규칙은 src/domain/fire.ts · rest.ts · restNote.ts에서 계산한다.
 
 import { useMemo } from 'react';
 
 import { HEALTH_STATUS, LEISURE_STATUS, WORK_STATUS } from '../copy/labels.ko';
-import { lastRestLabel, signalLine, signalWork } from '../copy/rest.ko';
-import { addDays, daysBetween, type DayKey } from '../domain/day';
-import { INDEX_WINDOW_DAYS, leisureBand, leisureIndex, workBand, workIndex, type LeisureBand } from '../domain/indices';
+import { signalLine, signalWork } from '../copy/rest.ko';
+import { addDays, type DayKey } from '../domain/day';
+import { daysSinceFire, fireBand, fireIndex, fireWeek, type FireBand } from '../domain/fire';
+import { INDEX_WINDOW_DAYS, workBand, workIndex } from '../domain/indices';
 import {
   grindStreak,
-  lastRestDay,
   placeYearAgo,
   restSignal,
-  restSuggestions,
-  restWeek,
   tripDays,
   visitCounts,
   visitedList,
   weekStart,
   wishList,
   yearAgo,
-  type DurationFilter,
   type Place,
 } from '../domain/rest';
+import type { RestLog } from '../domain/fire';
 import type { Condition, DayRecord } from '../domain/types';
 import { WEATHER_WINDOW_DAYS, weatherNow } from '../domain/weather';
 
@@ -34,55 +32,52 @@ export function restRange(today: DayKey): { from: DayKey; to: DayKey } {
 
 export type RestView = {
   rest: number | null;
-  band: LeisureBand | null;
-  /** 꽃 상태 (활짝 핌 …) */
-  restLabel: string;
-  /** 이번 주 월 ~ 일: 쉰 날 */
+  band: FireBand | null;
+  /** 불 상태 이름 (활활 …) */
+  bandLabel: string;
+  /** 이번 주 월 ~ 일: 장작이 들어온 날 */
   week: boolean[];
-  lastRest: string;
+  /** 장작 안 들어온 지 n일 (한 번도 없으면 null) */
+  sinceFire: number | null;
   wish: Place[];
   visited: Place[];
   /** 다녀온 곳 카드 id → "n번 감" */
   visitCounts: Map<string, number>;
   // 꺼 둔 기능 (src/ui/features.ts)
   signal: { work: string; rest: string; health: string; line: string } | null;
-  suggestions: Place[];
   yearAgo: { date: DayKey; place: Place } | null;
 };
 
 export function useRestView(
   byDate: Readonly<Record<DayKey, DayRecord>>,
   places: readonly Place[],
-  lastLeisure: DayKey | null,
+  logs: readonly RestLog[],
   today: DayKey,
-  filter: DurationFilter,
 ): RestView {
   return useMemo(() => {
-    const trips = tripDays(places);
-    const rest = leisureIndex(byDate, today, trips);
-    const band = rest === null ? null : leisureBand(rest);
+    const rest = { logs, trips: tripDays(places) };
+    const value = fireIndex(rest, today, (d) => !!byDate[d]);
+    const band = value === null ? null : fireBand(value);
+    const bandLabel = band === null ? '기록 전' : LEISURE_STATUS[band];
     const work = workIndex(byDate, today);
     const conditionByDay: Record<DayKey, Condition> = Object.fromEntries(Object.values(byDate).map((r) => [r.date, r.condition]));
     const weather = weatherNow(today, conditionByDay);
-    const restLabel = band === null ? '기록 전' : LEISURE_STATUS[band];
-    const last = lastRestDay(lastLeisure, trips, today);
     const streak = grindStreak(byDate, today);
     const ya = placeYearAgo(places, today);
     return {
-      rest,
+      rest: value,
       band,
-      restLabel,
-      week: restWeek(byDate, trips, today),
-      lastRest: lastRestLabel(last ? daysBetween(last, today) : null),
-      wish: wishList(places, filter, band),
+      bandLabel,
+      week: fireWeek(rest, weekStart(today), today),
+      sinceFire: daysSinceFire(rest, today),
+      wish: wishList(places),
       visited: visitedList(places),
       visitCounts: visitCounts(places),
       signal:
-        restSignal(work, rest, weather) && weather && work !== null && band
-          ? { work: signalWork(streak, WORK_STATUS[workBand(work)]), rest: restLabel, health: HEALTH_STATUS[weather], line: signalLine(streak, weather, band) }
+        restSignal(work, value, weather) && weather && work !== null && band
+          ? { work: signalWork(streak, WORK_STATUS[workBand(work)]), rest: bandLabel, health: HEALTH_STATUS[weather], line: signalLine(streak, weather, band) }
           : null,
-      suggestions: restSuggestions(places, today),
       yearAgo: ya ? { date: yearAgo(today), place: ya } : null,
     };
-  }, [byDate, places, lastLeisure, today, filter]);
+  }, [byDate, places, logs, today]);
 }

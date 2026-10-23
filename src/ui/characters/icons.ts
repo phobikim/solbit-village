@@ -41,7 +41,7 @@ export function indexIconSvg(k: IndexKind, col: string, bg: string): string {
         ? `<path d="M12 13C12 8 8.5 6 4 6c0 4.5 3.5 7 8 7z"/><path d="M12 11c0-3.6 3-6 7-6 0 3.6-3 6-7 6z"/><rect x="10.8" y="10" width="2.4" height="11" rx="1.2"/>`
         : k === 'relation'
           ? `<circle cx="9" cy="8" r="3.4"/><path d="M3 20a6 6 0 0 1 12 0z"/><circle cx="17" cy="9" r="2.6"/><path d="M15.6 13.4A4.6 4.6 0 0 1 21 20h-4.6a7 7 0 0 0-.8-6.6z"/>`
-          : `<circle cx="12" cy="6.5" r="3.3"/><circle cx="17.2" cy="10.3" r="3.3"/><circle cx="15.2" cy="16.4" r="3.3"/><circle cx="8.8" cy="16.4" r="3.3"/><circle cx="6.8" cy="10.3" r="3.3"/><circle cx="12" cy="12" r="2.4" fill="${bg}"/>`;
+          : `<path d="M12 2.5C15.2 6.4 18 9 18 13.6A6 6 0 0 1 6 13.6C6 11 7.4 9.3 8.8 7.6 9.3 9.4 10.2 10 10.8 10 11.4 7.6 10.8 5 12 2.5z"/><path d="M12 20.6a3.2 3.2 0 0 1-3.2-3.2c0-1.7 1.5-2.6 3.2-4.4 1.7 1.8 3.2 2.7 3.2 4.4a3.2 3.2 0 0 1-3.2 3.2z" fill="${bg}"/>`;
   return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="${col}">${b}</svg>`;
 }
 

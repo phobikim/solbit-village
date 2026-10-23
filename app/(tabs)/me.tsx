@@ -9,6 +9,7 @@ import { parseDayKey, today as getToday } from '../../src/domain/day';
 import { useFarm } from '../../src/state/farm';
 import { useSkins } from '../../src/state/ledger';
 import { usePlaces } from '../../src/state/places';
+import { useRestLogs } from '../../src/state/restLogs';
 import { useNeighbors } from '../../src/state/neighbors';
 import { useRecords } from '../../src/state/records';
 import { meRange, useMeView } from '../../src/state/tabViews';
@@ -33,15 +34,16 @@ export default function MeScreen() {
   const loadNeighbors = useNeighbors((s) => s.load);
   const loadSkins = useSkins((s) => s.load);
   const loadPlaces = usePlaces((s) => s.load);
+  const loadRestLogs = useRestLogs((s) => s.load);
   const me = useMeView(today);
 
   useFocusEffect(
     useCallback(() => {
       const { from, to } = meRange(today);
-      Promise.all([loadRange(from, to), loadFarm(), loadNeighbors(), loadSkins(), loadPlaces()]).catch((e) =>
+      Promise.all([loadRange(from, to), loadFarm(), loadNeighbors(), loadSkins(), loadPlaces(), loadRestLogs()]).catch((e) =>
         console.warn('[me] load failed', e),
       );
-    }, [today, loadRange, loadFarm, loadNeighbors, loadSkins, loadPlaces]),
+    }, [today, loadRange, loadFarm, loadNeighbors, loadSkins, loadPlaces, loadRestLogs]),
   );
 
   return (

@@ -2,7 +2,8 @@
 // SPEC 3장 [확정] 2026-10-20 — 최근 7일 기록 기준, 0~100. 값 조정은 이 파일의 상수만 바꾸면 된다.
 
 import { addDays, daysBetween, type DayKey } from './day';
-import { FREQUENCY_WINDOW_DAYS, type Frequency } from './neighbors';
+import { fireBand, fireIndex, logContacts, NO_REST, type FireBand, type RestSource } from './fire';
+import { FREQUENCY_WINDOW_DAYS, mergeContacts, type ContactDays, type Frequency } from './neighbors';
 import type { Condition, DayRecord, IndexKind, WorkLevel } from './types';
 
 export type { Frequency };
@@ -22,8 +23,8 @@ export type IndexNeighbor = { id: string; frequency: Frequency; lastContact: Day
 export type Indices = Record<IndexKind, number | null>;
 
 /** end 포함 최근 n일 기록 (end에서 i일 전 → i) */
-function windowRecords(records: Readonly<Record<DayKey, DayRecord>>, end: DayKey, n: number) {
-  const out: { ago: number; r: DayRecord }[] = [];
+function windowRecords<T>(records: Readonly<Record<DayKey, T>>, end: DayKey, n: number) {
+  const out: { ago: number; r: T }[] = [];
   for (let i = 0; i < n; i++) {
     const r = records[addDays(end, -i)];
     if (r) out.push({ ago: i, r });
@@ -55,7 +56,7 @@ export function workIndex(records: Readonly<Record<DayKey, DayRecord>>, end: Day
 
 /** 기준일(end) 시점의 마지막 연락 날짜. end 이후 연락은 보지 않는다. */
 function lastContactAsOf(
-  records: Readonly<Record<DayKey, DayRecord>>,
+  records: ContactDays,
   n: IndexNeighbor,
   end: DayKey,
 ): DayKey | null {
@@ -73,7 +74,7 @@ function lastContactAsOf(
  * 등록한 이웃이 없거나 최근 7일 기록이 없으면 null.
  */
 export function relationIndex(
-  records: Readonly<Record<DayKey, DayRecord>>,
+  records: ContactDays,
   neighbors: readonly IndexNeighbor[],
   end: DayKey,
 ): number | null {
@@ -89,41 +90,27 @@ export function relationIndex(
   return Math.round((100 * (countScore + freqScore)) / 2);
 }
 
-/** 다녀온 곳이 없을 때 */
-const NO_TRIPS: ReadonlySet<DayKey> = new Set();
-
 /**
- * 쉼(여가): 최근 7일 중 쉰 날 비율.
- * 쉰 날 = 기록에 쉼이 있는 날 + 쉬는 날로 적은 날 + 다녀온 곳 날짜(trips, rest.ts tripDays). 겹치면 한 번만 센다 (2026-10-23).
- * 7일 안에 기록도 다녀온 날도 없으면 null.
+ * 쉼 = 모닥불 (디자인 v8 TURN 15): 최근 7일 장작 점수 합, 상한 100. 계산은 fire.ts.
+ * 기록도 장작도 다녀온 곳도 7일 안에 없으면 null.
  */
-export function leisureIndex(
-  records: Readonly<Record<DayKey, DayRecord>>,
-  end: DayKey,
-  trips: ReadonlySet<DayKey> = NO_TRIPS,
-): number | null {
-  let seen = false;
-  let days = 0;
-  for (let i = 0; i < INDEX_WINDOW_DAYS; i++) {
-    const d = addDays(end, -i);
-    const r = records[d];
-    if (r || trips.has(d)) seen = true;
-    if (r?.leisure.length || r?.dayType === 'rest' || trips.has(d)) days++;
-  }
-  return seen ? Math.round((100 * days) / INDEX_WINDOW_DAYS) : null;
+export function leisureIndex(records: Readonly<Record<DayKey, DayRecord>>, end: DayKey, rest: RestSource = NO_REST): number | null {
+  return fireIndex(rest, end, (d) => !!records[d]);
 }
 
 export function computeIndices(
   records: Readonly<Record<DayKey, DayRecord>>,
   neighbors: readonly IndexNeighbor[],
   end: DayKey,
-  trips: ReadonlySet<DayKey> = NO_TRIPS,
+  rest: RestSource = NO_REST,
 ): Indices {
+  // 쉼 기록의 이웃 태그는 그날 '만남' 연락으로 센다
+  const contacts = mergeContacts(records, logContacts(rest.logs, (id) => neighbors.some((n) => n.id === id)));
   return {
     health: healthIndex(records, end),
     work: workIndex(records, end),
-    relation: relationIndex(records, neighbors, end),
-    leisure: leisureIndex(records, end, trips),
+    relation: relationIndex(contacts, neighbors, end),
+    leisure: leisureIndex(records, end, rest),
   };
 }
 
@@ -140,10 +127,9 @@ export function relationBand(v: number, hasBestFriend: boolean): RelationBand {
   return v >= 60 ? 'lively' : v >= 30 ? 'normal' : 'quiet';
 }
 
-export type LeisureBand = 'full' | 'half' | 'bud' | 'none';
-export function leisureBand(v: number): LeisureBand {
-  return v >= 70 ? 'full' : v >= 40 ? 'half' : v > 0 ? 'bud' : 'none';
-}
+/** 쉼 상태 = 불 상태 (활활 / 타오름 / 사그라듦 / 꺼져감) */
+export type LeisureBand = FireBand;
+export const leisureBand = fireBand;
 
 /** 일 과열 기준 (등불·방송) */
 export const WORK_OVERHEAT = 80;
@@ -160,10 +146,10 @@ export function weeklyTrend(
   records: Readonly<Record<DayKey, DayRecord>>,
   neighbors: readonly IndexNeighbor[],
   end: DayKey,
-  trips: ReadonlySet<DayKey> = NO_TRIPS,
+  rest: RestSource = NO_REST,
 ): (number | null)[] {
   const out: (number | null)[] = [];
-  for (let w = TREND_WEEKS - 1; w >= 0; w--) out.push(computeIndices(records, neighbors, addDays(end, -7 * w), trips)[kind]);
+  for (let w = TREND_WEEKS - 1; w >= 0; w--) out.push(computeIndices(records, neighbors, addDays(end, -7 * w), rest)[kind]);
   return out;
 }
 

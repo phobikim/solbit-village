@@ -1,7 +1,27 @@
 // 이웃 규칙 (SPEC 7장). 가까운 이웃을 부각하고, 소홀한 이웃을 경고처럼 다루지 않는다 (CLAUDE.md 규칙 6).
 
 import { addDays, daysBetween, parseDayKey, type DayKey, type YearMonth } from './day';
-import type { DayRecord } from './types';
+import type { Contact, DayRecord } from './types';
+
+/** 연락만 담은 하루 (기록의 연락 + 쉼 기록 이웃 태그). DayRecord도 그대로 들어간다. */
+export type ContactDay = Pick<DayRecord, 'date' | 'contacts'>;
+export type ContactDays = Readonly<Record<DayKey, ContactDay>>;
+
+/**
+ * 하루 기록의 연락에 쉼 기록의 이웃 태그(만남)를 더한다. 같은 이웃은 하루 한 번 — 기록 쪽이 먼저.
+ * 기록이 없는 날도 연락이 있으면 들어간다 (장작만 던진 날은 기록일이 아니지만 만난 건 만난 것).
+ */
+export function mergeContacts(records: Readonly<Record<DayKey, DayRecord>>, extra: ReadonlyMap<DayKey, readonly Contact[]>): ContactDays {
+  const out: Record<DayKey, ContactDay> = { ...records };
+  for (const [date, list] of extra) {
+    const base = out[date];
+    const have = new Set((base?.contacts ?? []).map((c) => c.neighborId));
+    const add = list.filter((c) => !have.has(c.neighborId));
+    if (!add.length) continue;
+    out[date] = { date, contacts: [...(base?.contacts ?? []), ...add] };
+  }
+  return out;
+}
 
 /** 이웃 이름 최대 길이 */
 export const NEIGHBOR_NAME_MAX = 12;
@@ -39,7 +59,7 @@ export function closenessOf(ratio: number): Closeness {
 
 /** 이번 달 연락 횟수 */
 export function monthContactCount(
-  records: Readonly<Record<DayKey, DayRecord>>,
+  records: ContactDays,
   month: YearMonth,
   neighborId: string,
 ): number {
@@ -60,7 +80,7 @@ export const VISITOR_LOOKBACK_DAYS = 14;
  * 이번 달 단짝: 이번 달 연락(만남·통화·메시지)이 가장 많은 이웃.
  * 같으면 더 최근에 연락한 이웃. 한 번도 없으면 null.
  */
-export function bestFriendOf(records: Readonly<Record<DayKey, DayRecord>>, month: YearMonth): string | null {
+export function bestFriendOf(records: ContactDays, month: YearMonth): string | null {
   const count = new Map<string, { n: number; last: DayKey }>();
   for (const r of Object.values(records)) {
     const { year, month: m } = parseDayKey(r.date);
@@ -82,7 +102,7 @@ export function bestFriendOf(records: Readonly<Record<DayKey, DayRecord>>, month
  * 자리가 남으면 최근 14일 연락이 많은 가까운 이웃으로 채운다.
  */
 export function villageVisitors(
-  records: Readonly<Record<DayKey, DayRecord>>,
+  records: ContactDays,
   today: DayKey,
   activeIds: ReadonlySet<string>,
   max = VILLAGE_VISITOR_MAX,
@@ -107,7 +127,7 @@ export function villageVisitors(
 }
 
 /** 어제 연락한 이웃이 마을에 와 있는가 (방송용) */
-export function visitedFromYesterday(records: Readonly<Record<DayKey, DayRecord>>, today: DayKey, id: string): boolean {
+export function visitedFromYesterday(records: ContactDays, today: DayKey, id: string): boolean {
   return !!records[addDays(today, -1)]?.contacts.some((c) => c.neighborId === id);
 }
 

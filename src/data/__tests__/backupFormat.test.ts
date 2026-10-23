@@ -81,3 +81,54 @@ describe('예전 백업의 스킨', () => {
     expect(r.backup.tables.skin?.map((s) => s.id)).toEqual(['hat']);
   });
 });
+
+describe('쉼 기록(스키마 v11) 백업', () => {
+  const day = (date: string, leisure: string) => ({
+    date,
+    condition: 2,
+    day_type: 'work',
+    work: 1,
+    achievement: null,
+    memo: null,
+    leisure,
+    created_at: 7,
+    updated_at: 7,
+  });
+
+  it('새 백업은 rest_log와 place.log_id를 그대로 왕복한다', () => {
+    const backup = buildBackup(11, {
+      rest_log: [{ id: 'rl_1', date: '2026-10-20', text: '한강 산책', tags: '[{"kind":"place","label":"한강"}]', size: 'twig', created_at: 1 }],
+      place: [{ id: 'p1', name: '한강', duration: 'half', visited: 1, log_id: 'rl_1', visited_date: '2026-10-20', nights: 0, added_date: '2026-10-20', created_at: 1 }],
+    });
+    const r = parseBackup(JSON.stringify(backup), 11);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.backup.tables.rest_log?.[0]).toMatchObject({ id: 'rl_1', size: 'twig' });
+      expect(r.backup.tables.place?.[0].log_id).toBe('rl_1');
+    }
+  });
+
+  it('v11 전 백업은 가져올 때 여가 칩을 쉼 기록(장작)으로 옮긴다', () => {
+    const old = buildBackup(10, { day_record: [day('2026-10-20', '["산책","영화"]'), day('2026-10-21', '[]'), day('2026-10-22', '망가짐')] });
+    const r = parseBackup(JSON.stringify(old), 11);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const logs = r.backup.tables.rest_log ?? [];
+    expect(logs).toHaveLength(1);
+    expect(logs[0]).toMatchObject({ id: 'rec_2026-10-20', date: '2026-10-20', size: 'firewood', created_at: 7 });
+    expect(JSON.parse(String(logs[0].tags))).toEqual([
+      { kind: 'activity', label: '산책' },
+      { kind: 'activity', label: '영화' },
+    ]);
+  });
+
+  it('rest_log가 이미 들어 있는 백업은 다시 만들지 않는다', () => {
+    const b = buildBackup(10, { day_record: [day('2026-10-20', '["산책"]')], rest_log: [] });
+    const r = parseBackup(JSON.stringify(b), 11);
+    expect(r.ok && r.backup.tables.rest_log).toEqual([]);
+  });
+
+  it('지금 앱보다 새 백업은 받지 않는다', () => {
+    expect(parseBackup(JSON.stringify(buildBackup(12, {})), 11)).toEqual({ ok: false, reason: 'tooNew' });
+  });
+});

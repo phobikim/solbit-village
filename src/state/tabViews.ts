@@ -8,16 +8,18 @@ import type { Relation } from '../copy/labels.ko';
 import { addDays, dayKeyOf, type DayKey, yearMonthOf } from '../domain/day';
 import { harvestProgress, type HarvestProgress } from '../domain/harvest';
 import { TREND_WEEKS, trendBand, weeklyTrend, type IndexNeighbor } from '../domain/indices';
-import { bestFriendOf, closenessOf, closenessRatio, monthContactCount, type Closeness } from '../domain/neighbors';
+import { bestFriendOf, closenessOf, closenessRatio, mergeContacts, monthContactCount, type Closeness } from '../domain/neighbors';
 import type { IndexKind } from '../domain/types';
 import { isUnlocked, levelFromXp, UNLOCK_LEVEL } from '../domain/village';
 import { equippedSkin, exchangeableSkins } from '../domain/harvest';
 import { useFarm } from './farm';
 import { useSkins } from './ledger';
 import { usePlaces } from './places';
+import { logContacts } from '../domain/fire';
 import { tripDays } from '../domain/rest';
 import { useNeighbors } from './neighbors';
 import { useRecords } from './records';
+import { useRestLogs } from './restLogs';
 
 // ── 7c 이웃 ─────────────────────────────────────────────────────────────
 
@@ -43,8 +45,11 @@ export type NeighborsView = {
 
 export function useNeighborsView(today: DayKey): NeighborsView {
   const list = useNeighbors((s) => s.list);
-  const byDate = useRecords((s) => s.byDate);
+  const records = useRecords((s) => s.byDate);
+  const restLogs = useRestLogs((s) => s.logs);
   return useMemo(() => {
+    // 장작 던지기의 이웃 태그는 그날 만남으로 센다
+    const byDate = mergeContacts(records, logContacts(restLogs, (id) => list.some((n) => n.id === id)));
     const month = yearMonthOf(today);
     const bestId = bestFriendOf(byDate, month);
     const rows = list
@@ -76,7 +81,7 @@ export function useNeighborsView(today: DayKey): NeighborsView {
         ? withPrefix(broadcasts.bestFriend(best.name))
         : withPrefix(broadcasts.neighborsQuiet);
     return { listed, askAfter, total: list.length, broadcast };
-  }, [list, byDate, today]);
+  }, [list, records, restLogs, today]);
 }
 
 // ── 7d 나 ───────────────────────────────────────────────────────────────
@@ -107,12 +112,13 @@ export function useMeView(today: DayKey): MeView {
   const owned = useSkins((s) => s.owned);
   const equipped = useSkins((s) => s.equipped);
   const places = usePlaces((s) => s.places);
+  const restLogs = useRestLogs((s) => s.logs);
   return useMemo(() => {
-    const trips = tripDays(places);
+    const rest = { logs: restLogs, trips: tripDays(places) };
     const neighbors: IndexNeighbor[] = list.map((n) => ({ id: n.id, frequency: n.frequency, lastContact: n.lastContact }));
     const kinds: IndexKind[] = ['health', 'work', 'relation', 'leisure'];
     const trends = kinds.map((kind) => {
-      const values = weeklyTrend(kind, byDate, neighbors, today, trips);
+      const values = weeklyTrend(kind, byDate, neighbors, today, rest);
       return { kind, values, summary: TREND_LABEL[trendBand(values)] };
     });
     const bands = Object.fromEntries(kinds.map((k, i) => [k, trendBand(trends[i].values)]));
@@ -136,5 +142,5 @@ export function useMeView(today: DayKey): MeView {
       soliSkin: equippedSkin('soli', equipped),
       broadcast,
     };
-  }, [byDate, list, farm, today, owned, equipped, places]);
+  }, [byDate, list, farm, today, owned, equipped, places, restLogs]);
 }

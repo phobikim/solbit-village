@@ -5,9 +5,11 @@ import { create } from 'zustand';
 import { commitDayRecord, type CommitResult } from '../data/farm';
 import { getDayRecord, listDayRecords } from '../data/records';
 import { addDays, daysInMonth, makeDayKey, today as getToday, type DayKey, type YearMonth } from '../domain/day';
+import type { RestLog } from '../domain/fire';
 import type { DayRecord } from '../domain/types';
 import { WEATHER_WINDOW_DAYS } from '../domain/weather';
 import { useFarm } from './farm';
+import { useRestLogs } from './restLogs';
 
 type State = {
   byDate: Record<DayKey, DayRecord>;
@@ -18,7 +20,7 @@ type State = {
   loadRange: (from: DayKey, to: DayKey) => Promise<void>;
   loadDay: (date: DayKey) => Promise<DayRecord | null>;
   /** 기록 저장 + (오늘 처음이면) 씨앗 심기 + 경험치. 결과로 씨앗 결과 화면을 띄운다. */
-  save: (r: DayRecord) => Promise<CommitResult>;
+  save: (r: DayRecord, restLog?: RestLog | null) => Promise<CommitResult>;
   /** 백업을 가져온 뒤 등: 읽어 둔 기록을 비운다 */
   reset: () => void;
 };
@@ -53,10 +55,10 @@ export const useRecords = create<State>((set, get) => ({
     set({ byDate: {}, loadedMonths: {} });
   },
 
-  async save(r) {
-    const result = await commitDayRecord(r, getToday());
+  async save(r, restLog = null) {
+    const result = await commitDayRecord(r, getToday(), Date.now(), restLog);
     set((s) => ({ byDate: { ...s.byDate, [r.date]: r } }));
-    await useFarm.getState().load();
+    await Promise.all([useFarm.getState().load(), useRestLogs.getState().load()]);
     return result;
   },
 }));

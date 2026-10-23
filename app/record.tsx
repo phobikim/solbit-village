@@ -21,6 +21,7 @@ import { ijangLines } from '../src/copy/broadcasts.ko';
 import { seedChip } from '../src/copy/crops.ko';
 import { DAY_TYPE_LABEL, recordCopy, WEEKDAYS } from '../src/copy/labels.ko';
 import { seedSampleNeighbors } from '../src/data/devSeed';
+import { recordLogId } from '../src/data/restLogs';
 import { parseDayKey, today as getToday, weekdayOf, type DayKey } from '../src/domain/day';
 import {
   canCreateRecord,
@@ -30,12 +31,14 @@ import {
   emptyDraft,
   isDraftComplete,
   normalizeDraft,
+  restLogOfRecord,
   TEXT_MAX_LENGTH,
   type RecordDraft,
 } from '../src/domain/records';
 import type { DayRecord, DayType } from '../src/domain/types';
 import { useNeighbors } from '../src/state/neighbors';
 import { useRecords } from '../src/state/records';
+import { useRestLogs } from '../src/state/restLogs';
 import { PrimaryButton } from '../src/ui/components/PrimaryButton';
 import { NeighborPicker } from '../src/ui/components/record/NeighborPicker';
 import {
@@ -46,6 +49,7 @@ import {
   LeisurePicker,
   WorkPicker,
 } from '../src/ui/components/record/pickers';
+import { SizePicker } from '../src/ui/components/record/SizePicker';
 import { colors, fonts } from '../src/ui/theme';
 
 type Mode = 'loading' | 'create' | 'edit' | 'tooOld' | 'noBackfill';
@@ -76,6 +80,7 @@ export default function RecordSheet() {
   const save = useRecords((s) => s.save);
   const neighbors = useNeighbors((s) => s.list);
   const loadNeighbors = useNeighbors((s) => s.load);
+  const loadRestLogs = useRestLogs((s) => s.load);
 
   const [mode, setMode] = useState<Mode>('loading');
   const [existing, setExisting] = useState<DayRecord | null>(null);
@@ -87,13 +92,14 @@ export default function RecordSheet() {
   useEffect(() => {
     let alive = true;
     loadNeighbors().catch((e) => console.warn('[neighbors] load failed', e));
-    loadDay(date)
-      .then((r) => {
+    // 쉼 칸의 장작 크기는 그날 시트 쉼 기록(rec_날짜)에서 가져온다
+    Promise.all([loadDay(date), loadRestLogs().then(() => useRestLogs.getState().logs.find((l) => l.id === recordLogId(date)) ?? null)])
+      .then(([r, log]) => {
         if (!alive) return;
         setExisting(r);
         if (r) {
           setMode(canEditRecord(date, today) ? 'edit' : 'tooOld');
-          const d = draftFromRecord(r);
+          const d = draftFromRecord(r, log?.size);
           setDraft(d);
           setOpen(openFor(d));
         } else {
@@ -107,7 +113,7 @@ export default function RecordSheet() {
     return () => {
       alive = false;
     };
-  }, [date, today, loadDay, loadNeighbors]);
+  }, [date, today, loadDay, loadNeighbors, loadRestLogs]);
 
   const update = <K extends keyof RecordDraft>(k: K, v: RecordDraft[K]) => setDraft((d) => ({ ...d, [k]: v }));
   const setDayType = (t: DayType) => {
@@ -131,7 +137,10 @@ export default function RecordSheet() {
     setError(null);
     try {
       const record = normalizeDraft(date, draft, Date.now(), existing);
-      const { seed } = await save(record);
+      // 쉼 칸을 적었으면 같은 저장에서 쉼 기록(장작)으로도 남긴다 (칸이 비었으면 그날 시트 쉼 기록을 지운다)
+      const id = recordLogId(date);
+      const prev = useRestLogs.getState().logs.find((l) => l.id === id) ?? null;
+      const { seed } = await save(record, restLogOfRecord(record, draft.restSize, id, prev));
       if (seed) {
         const nameOf = (id: string) => neighbors.find((n) => n.id === id)?.name;
         router.replace({
@@ -220,7 +229,17 @@ export default function RecordSheet() {
           )}
         </View>
       ),
-    leisure: () => <LeisurePicker value={draft.leisure} onChange={(v) => update('leisure', v)} />,
+    leisure: () => (
+      <>
+        <LeisurePicker value={draft.leisure} onChange={(v) => update('leisure', v)} />
+        {draft.leisure.length > 0 && (
+          <>
+            <Text style={styles.hintText}>얼마나 쉬었슈?</Text>
+            <SizePicker value={draft.restSize} onChange={(v) => update('restSize', v)} />
+          </>
+        )}
+      </>
+    ),
   };
   // 펼친 칸은 그날 종류의 기본 칸부터
   const order: readonly Extra[] = draft.dayType === 'work' ? ['work', 'achievement', 'contacts', 'leisure'] : ['leisure', 'contacts', 'achievement', 'work'];

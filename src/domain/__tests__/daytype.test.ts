@@ -2,7 +2,7 @@ import { byDate, rec } from '../__fixtures__/records';
 import { cropFor } from '../crops';
 import { leisureIndex, workIndex } from '../indices';
 import { defaultDayType, emptyDraft, isDraftComplete, normalizeDraft } from '../records';
-import { isRestDay, restWeek, tripDays } from '../rest';
+import { tripDays } from '../rest';
 import { areasEntered, xpForRecord } from '../village';
 
 const restDay = (date: string, over = {}) => rec(date, { dayType: 'rest', work: null, ...over });
@@ -38,19 +38,19 @@ describe('일 지수: 쉬는 날에 일 강도가 없으면 일 0', () => {
   });
 });
 
-describe('쉼 지수: 쉬는 날 = 쉰 날', () => {
-  it('쉼 항목이 없어도 쉬는 날이면 쉰 날', () => {
+describe('쉼 지수(모닥불): 장작(쉼 기록)만 센다', () => {
+  // TODO(사용자 확인): 예전엔 쉬는 날로 적으면 쉼 칸이 비어도 쉰 날이었다. 모닥불은 쉼 기록만 센다.
+  it('쉼 기록이 없으면 쉬는 날이어도 점수 0 (기록은 있으니 null은 아니다)', () => {
     const r = byDate(restDay('2026-10-24'), rec('2026-10-23'));
-    expect(leisureIndex(r, '2026-10-24')).toBe(14); // 1/7
-    expect(isRestDay('2026-10-24', r, new Set())).toBe(true);
+    expect(leisureIndex(r, '2026-10-24')).toBe(0);
   });
-  it('쉬는 날 + 쉼 항목 + 다녀온 곳이 같은 날이면 한 번만', () => {
+  it('쉬는 날 + 쉼 기록 + 다녀온 곳이 같은 날이면 하루 최대 35', () => {
     const r = byDate(restDay('2026-10-24', { leisure: ['산책'] }));
     const trips = tripDays([
-      { id: 'a', name: '공원', duration: 'short', visited: true, memo: null, note: null, eventId: null, visitedDate: '2026-10-24', nights: 0, addedDate: '2026-10-24', createdAt: 0 },
+      { id: 'a', name: '공원', duration: 'short', visited: true, memo: null, note: null, eventId: null, logId: null, visitedDate: '2026-10-24', nights: 0, addedDate: '2026-10-24', createdAt: 0 },
     ]);
-    expect(leisureIndex(r, '2026-10-24', trips)).toBe(14);
-    expect(restWeek(r, trips, '2026-10-25').filter(Boolean)).toHaveLength(1);
+    const log = { id: 'rec_2026-10-24', date: '2026-10-24', text: '', tags: [], size: 'log' as const, createdAt: 0 };
+    expect(leisureIndex(r, '2026-10-24', { logs: [log], trips })).toBe(35);
   });
 });
 

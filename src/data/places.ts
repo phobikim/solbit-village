@@ -1,5 +1,7 @@
 // 보따리 저장소 (쉼터: 가고 싶은 곳 · 다녀온 곳)
 
+import type { SQLiteDatabase } from 'expo-sqlite';
+
 import type { Place, PlaceDuration } from '../domain/rest';
 import { getDb, writeTx } from './db';
 
@@ -11,6 +13,7 @@ type Row = {
   memo: string | null;
   note: string | null;
   event_id: string | null;
+  log_id: string | null;
   visited_date: string | null;
   nights: number;
   added_date: string;
@@ -25,6 +28,7 @@ const toPlace = (r: Row): Place => ({
   memo: r.memo,
   note: r.note,
   eventId: r.event_id,
+  logId: r.log_id,
   visitedDate: r.visited_date,
   nights: r.nights,
   addedDate: r.added_date,
@@ -37,26 +41,36 @@ export async function listPlaces(): Promise<Place[]> {
   return rows.map(toPlace);
 }
 
+export async function savePlaceTx(db: SQLiteDatabase, p: Place): Promise<void> {
+  await db.runAsync(
+    `INSERT INTO place (id, name, duration, visited, memo, note, event_id, log_id, visited_date, nights, added_date, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET
+       name = excluded.name, duration = excluded.duration, visited = excluded.visited, memo = excluded.memo, note = excluded.note,
+       event_id = excluded.event_id, log_id = excluded.log_id, visited_date = excluded.visited_date, nights = excluded.nights`,
+    p.id,
+    p.name,
+    p.duration,
+    p.visited ? 1 : 0,
+    p.memo,
+    p.note,
+    p.eventId,
+    p.logId,
+    p.visitedDate,
+    p.nights,
+    p.addedDate,
+    p.createdAt,
+  );
+}
+
 export function savePlace(p: Place): Promise<void> {
+  return writeTx((db) => savePlaceTx(db, p));
+}
+
+/** 여러 곳을 한 번에 (깃발 → 발자국 정산) */
+export function savePlaces(list: readonly Place[]): Promise<void> {
   return writeTx(async (db) => {
-    await db.runAsync(
-      `INSERT INTO place (id, name, duration, visited, memo, note, event_id, visited_date, nights, added_date, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-       ON CONFLICT(id) DO UPDATE SET
-         name = excluded.name, duration = excluded.duration, visited = excluded.visited, memo = excluded.memo, note = excluded.note,
-         event_id = excluded.event_id, visited_date = excluded.visited_date, nights = excluded.nights`,
-      p.id,
-      p.name,
-      p.duration,
-      p.visited ? 1 : 0,
-      p.memo,
-      p.note,
-      p.eventId,
-      p.visitedDate,
-      p.nights,
-      p.addedDate,
-      p.createdAt,
-    );
+    for (const p of list) await savePlaceTx(db, p);
   });
 }
 

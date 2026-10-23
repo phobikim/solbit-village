@@ -1,6 +1,7 @@
 // 하루 기록 규칙 (SPEC 4장).
 
 import { daysBetween, weekdayOf, type DayKey } from './day';
+import { DEFAULT_REST_SIZE, type RestLog, type RestSize } from './fire';
 import type { Condition, Contact, DayRecord, DayType, WorkLevel } from './types';
 
 /**
@@ -44,6 +45,8 @@ export type RecordDraft = {
   achievement: string;
   memo: string;
   leisure: string[];
+  /** 쉼 칸의 장작 크기 (쉼 칸에 적었을 때만 쓴다) */
+  restSize: RestSize;
   contacts: Contact[];
 };
 
@@ -54,10 +57,11 @@ export const emptyDraft = (dayType: DayType = 'work'): RecordDraft => ({
   achievement: '',
   memo: '',
   leisure: [],
+  restSize: DEFAULT_REST_SIZE,
   contacts: [],
 });
 
-export function draftFromRecord(r: DayRecord): RecordDraft {
+export function draftFromRecord(r: DayRecord, restSize: RestSize = DEFAULT_REST_SIZE): RecordDraft {
   return {
     dayType: r.dayType,
     condition: r.condition,
@@ -65,6 +69,7 @@ export function draftFromRecord(r: DayRecord): RecordDraft {
     achievement: r.achievement ?? '',
     memo: r.memo ?? '',
     leisure: [...r.leisure],
+    restSize,
     contacts: r.contacts.map((c) => ({ ...c })),
   };
 }
@@ -100,6 +105,22 @@ export function normalizeDraft(
     contacts,
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
+  };
+}
+
+/**
+ * 기록 시트 쉼 칸 → 그날의 쉼 기록(장작). 칸이 비었으면 null (이미 있던 시트 쉼 기록은 저장하면서 지운다).
+ * 하루 하나(id = rec_날짜)라 다시 저장하면 덮어쓴다. 칩은 활동 태그가 된다.
+ */
+export function restLogOfRecord(r: DayRecord, size: RestSize, id: string, existing?: RestLog | null): RestLog | null {
+  if (!r.leisure.length) return null;
+  return {
+    id,
+    date: r.date,
+    text: existing?.text ?? '',
+    tags: r.leisure.map((label) => ({ kind: 'activity' as const, label })),
+    size,
+    createdAt: existing?.createdAt ?? r.createdAt,
   };
 }
 

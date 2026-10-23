@@ -10,6 +10,7 @@ import { today as getToday } from '../../src/domain/day';
 import { useFarm } from '../../src/state/farm';
 import { useLedger, useSkins } from '../../src/state/ledger';
 import { usePlaces } from '../../src/state/places';
+import { useRestLogs } from '../../src/state/restLogs';
 import { useNeighbors } from '../../src/state/neighbors';
 import { needsMorningNews } from '../../src/state/newsView';
 import { useRecords } from '../../src/state/records';
@@ -34,6 +35,7 @@ export default function VillageScreen() {
   const loadLedger = useLedger((s) => s.load);
   const loadSkins = useSkins((s) => s.load);
   const loadPlaces = usePlaces((s) => s.load);
+  const loadRestLogs = useRestLogs((s) => s.load);
   const [now, setNow] = useState(() => new Date());
   const v = useVillageView(today, now);
 
@@ -45,10 +47,10 @@ export default function VillageScreen() {
         .then((show) => show && router.push('/morning-news'))
         .catch((e) => console.warn('[news] check failed', e));
       const { from, to } = villageRange(today);
-      Promise.all([loadRange(from, to), loadFarm(), loadNeighbors(), loadLedger(), loadSkins(), loadPlaces()]).catch((e) =>
+      Promise.all([loadRange(from, to), loadFarm(), loadNeighbors(), loadLedger(), loadSkins(), loadPlaces(), loadRestLogs()]).catch((e) =>
         console.warn('[village] load failed', e),
       );
-    }, [today, loadRange, loadFarm, loadNeighbors, loadLedger, loadSkins, loadPlaces]),
+    }, [today, loadRange, loadFarm, loadNeighbors, loadLedger, loadSkins, loadPlaces, loadRestLogs]),
   );
 
   return (

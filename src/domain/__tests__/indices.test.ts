@@ -80,16 +80,21 @@ describe('관계 지수: 연락 수 점수와 연락 주기 충족 비율의 평
   });
 });
 
-describe('여가 지수: 최근 7일 중 여가 기록 있는 날 비율', () => {
-  it('7일 중 2일 → 29', () => {
-    const records = byDate(rec(today, { leisure: ['산책'] }), rec('2026-10-17', { leisure: ['영화'] }), rec('2026-10-16'));
-    expect(leisureIndex(records, today)).toBe(29);
+describe('쉼 지수: 모닥불 (최근 7일 장작 점수 합) — 자세한 건 fire.test.ts', () => {
+  it('기록의 여가 칩만으로는 점수가 없다 (쉼 기록이 있어야 한다)', () => {
+    const records = byDate(rec(today, { leisure: ['산책'] }), rec('2026-10-17'));
+    expect(leisureIndex(records, today)).toBe(0);
+  });
+  it('장작 점수', () => {
+    const log = (id: string, date: string, size: 'twig' | 'firewood' | 'log') => ({ id, date, text: '', tags: [], size, createdAt: 0 });
+    const rest = { logs: [log('a', today, 'firewood'), log('b', '2026-10-17', 'twig')], trips: new Set<string>() };
+    expect(leisureIndex({}, today, rest)).toBe(30);
   });
   it('단계', () => {
-    expect(leisureBand(80)).toBe('full');
-    expect(leisureBand(50)).toBe('half');
-    expect(leisureBand(10)).toBe('bud');
-    expect(leisureBand(0)).toBe('none');
+    expect(leisureBand(80)).toBe('blaze');
+    expect(leisureBand(50)).toBe('burning');
+    expect(leisureBand(24)).toBe('dying');
+    expect(leisureBand(10)).toBe('out');
   });
 });
 

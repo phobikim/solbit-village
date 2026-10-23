@@ -23,7 +23,8 @@ import {
   workBand,
   type Frequency,
 } from '../domain/indices';
-import { bestFriendOf, villageVisitors, visitedFromYesterday } from '../domain/neighbors';
+import { logContacts } from '../domain/fire';
+import { bestFriendOf, mergeContacts, villageVisitors, visitedFromYesterday } from '../domain/neighbors';
 import { recordHeadline } from '../domain/records';
 import type { Condition, DayRecord, IndexKind } from '../domain/types';
 import { levelFromXp, type LevelProgress } from '../domain/village';
@@ -36,6 +37,7 @@ import { useFarm } from './farm';
 import { useLedger, useSkins } from './ledger';
 import { useNeighbors } from './neighbors';
 import { usePlaces } from './places';
+import { useRestLogs } from './restLogs';
 import { tripDays } from '../domain/rest';
 import { useRecords } from './records';
 
@@ -64,6 +66,7 @@ export function useVillageView(today: DayKey, now: Date): VillageView {
   const farm = useFarm();
   const events = useLedger((s) => s.events);
   const places = usePlaces((s) => s.places);
+  const restLogs = useRestLogs((s) => s.logs);
   const owned = useSkins((s) => s.owned);
   const equipped = useSkins((s) => s.equipped);
 
@@ -80,15 +83,17 @@ export function useVillageView(today: DayKey, now: Date): VillageView {
       frequency: n.frequency as Frequency,
       lastContact: n.lastContact,
     }));
-    // 다녀온 곳의 날짜도 쉰 날로 센다 (쉼 지수)
-    const idx = computeIndices(byDate, indexNeighbors, today, tripDays(places));
+    // 쉼 지수(모닥불): 최근 7일 장작 + 다녀온 곳의 날짜 (통나무)
+    const idx = computeIndices(byDate, indexNeighbors, today, { logs: restLogs, trips: tripDays(places) });
+    // 장작 던지기의 이웃 태그는 그날 만남으로 센다
+    const contactDays = mergeContacts(byDate, logContacts(restLogs, (id) => neighbors.some((n) => n.id === id)));
 
     const nameOf = new Map(neighbors.map((n) => [n.id, n]));
-    const bestId = bestFriendOf(byDate, yearMonthOf(today));
+    const bestId = bestFriendOf(contactDays, yearMonthOf(today));
     const best = bestId ? nameOf.get(bestId) ?? null : null;
-    const visitorIds = villageVisitors(byDate, today, new Set(nameOf.keys()));
+    const visitorIds = villageVisitors(contactDays, today, new Set(nameOf.keys()));
     const visitors = visitorIds.map((id) => ({ face: nameOf.get(id)!.face, heart: id === bestId }));
-    const fromYesterday = visitorIds.find((id) => visitedFromYesterday(byDate, today, id));
+    const fromYesterday = visitorIds.find((id) => visitedFromYesterday(contactDays, today, id));
 
     const level = levelFromXp(farm.totalXp);
     const levelBefore = levelFromXp(farm.totalXp - farm.xpGainedToday).level;
@@ -161,5 +166,5 @@ export function useVillageView(today: DayKey, now: Date): VillageView {
       indices,
       recordedToday: !!todayRec,
     };
-  }, [byDate, neighbors, farm, today, now, events, places, owned, equipped]);
+  }, [byDate, neighbors, farm, today, now, events, places, restLogs, owned, equipped]);
 }

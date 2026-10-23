@@ -1,11 +1,11 @@
-// 쉼터 — SPEC 15장. 2026-10-23 정리: 다녀온 곳 / 가고 싶은 곳 / 쉼 지수 세 가지.
-// 쉼 지수 = 여가 지수. 다녀온 곳의 날짜 범위(출발일 ~ 출발일 + n박)도 쉰 날로 센다 (같은 날 기록의 쉼과 겹치면 한 번).
+// 쉼터 — 보따리(가고 싶은 곳 = 깃발 · 다녀온 곳 = 발자국). 쉼 지수(모닥불)는 fire.ts.
+// 다녀온 곳의 날짜 범위(출발일 ~ 출발일 + n박)는 머문 날마다 통나무로 센다 (장작 기록에서 찍은 발자국은 제외 — 그날은 장작 기록이 센다).
 // 다녀온 곳은 기록이 아니어서 이미 심은 작물 · 경험치는 바뀌지 않는다 (규칙 3).
-// 지침 신호 · 오늘의 쉼 제안 · 1년 전 오늘 · 날짜 잡기는 코드만 두고 화면에서는 끈다 (src/ui/features.ts).
+// 지침 신호 · 1년 전 오늘은 코드만 두고 화면에서는 끈다 (src/ui/features.ts).
 
 import { addDays, daysBetween, parseDayKey, weekdayOf, type DayKey } from './day';
 import type { VillageEvent } from './events';
-import { LEISURE_LOW, WORK_OVERHEAT, type LeisureBand } from './indices';
+import { LEISURE_LOW, WORK_OVERHEAT } from './indices';
 import type { DayRecord, Weather } from './types';
 
 // ── 보따리 (가고 싶은 곳 · 다녀온 곳) ───────────────────────────────────
@@ -26,9 +26,11 @@ export type Place = {
   note: string | null;
   /** '날짜 잡기'로 만든 여행 행사 (지금은 꺼 둔 기능) */
   eventId: string | null;
+  /** 장작 던지기에서 '발자국 찍어둘게유'로 만든 곳 — 그 쉼 기록 id (머문 날을 통나무로 세지 않는다) */
+  logId: string | null;
   /** 다녀온 곳: 출발한 날 */
   visitedDate: DayKey | null;
-  /** 다녀온 곳: 몇 박 (0 = 당일치기) */
+  /** 다녀온 곳: 몇 박 (0 = 당일치기). 날짜 잡은 깃발은 계획한 박 수 */
   nights: number;
   /** 보따리에 담은 날 */
   addedDate: DayKey;
@@ -39,66 +41,28 @@ export const PLACE_NAME_MAX = 20;
 export const PLACE_TEXT_MAX = 40;
 export const PLACE_NIGHTS_MAX = 14;
 
-// ── 쉰 날 (기록의 쉼 + 다녀온 곳) ──────────────────────────────────────
+// ── 다녀온 날 (쉼 지수에서 통나무로 센다) ───────────────────────────────
 
-/** 다녀온 곳이 차지하는 날 (출발일 ~ 출발일 + n박). 여러 곳이 겹쳐도 한 번씩. */
+/** 다녀온 곳이 차지하는 날 (출발일 ~ 출발일 + n박). 여러 곳이 겹쳐도 한 번씩. 장작에서 찍은 발자국은 뺀다. */
 export function tripDays(places: readonly Place[]): Set<DayKey> {
   const out = new Set<DayKey>();
   for (const p of places) {
-    if (!p.visited || !p.visitedDate) continue;
+    if (!p.visited || !p.visitedDate || p.logId) continue;
     for (let i = 0; i <= p.nights; i++) out.add(addDays(p.visitedDate, i));
   }
   return out;
 }
 
-/** 쉰 날인가: 그날 기록에 쉼이 있거나, 쉬는 날로 적었거나, 다녀온 곳 날짜 안이거나 */
-export function isRestDay(day: DayKey, records: Readonly<Record<DayKey, DayRecord>>, trips: ReadonlySet<DayKey>): boolean {
-  const r = records[day];
-  return !!r?.leisure.length || r?.dayType === 'rest' || trips.has(day);
-}
-
-/** 이번 주 첫날 (월요일) — 기록을 불러올 범위 */
+/** 이번 주 첫날 (월요일) */
 export function weekStart(today: DayKey): DayKey {
   return addDays(today, -((weekdayOf(today) + 6) % 7));
 }
 
-/** 이번 주 월 ~ 일 7칸: 쉰 날이면 true (아직 안 온 날은 false) */
-export function restWeek(records: Readonly<Record<DayKey, DayRecord>>, trips: ReadonlySet<DayKey>, today: DayKey): boolean[] {
-  const mon = weekStart(today);
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = addDays(mon, i);
-    return daysBetween(d, today) >= 0 && isRestDay(d, records, trips);
-  });
-}
-
-/** 이번 주(월요일부터 오늘까지) 쉰 날 수 */
-export function restDaysThisWeek(records: Readonly<Record<DayKey, DayRecord>>, today: DayKey, trips: ReadonlySet<DayKey> = new Set()): number {
-  return restWeek(records, trips, today).filter(Boolean).length;
-}
-
-/**
- * 마지막으로 쉰 날 (오늘 포함, 미래 제외). 없으면 null.
- * lastLeisure: 기록에서 쉼을 적었거나 쉬는 날로 적은 가장 최근 날 (불러온 범위 밖까지 data에서 찾아 넘긴다).
- */
-export function lastRestDay(lastLeisure: DayKey | null, trips: ReadonlySet<DayKey>, today: DayKey): DayKey | null {
-  let best = lastLeisure && daysBetween(lastLeisure, today) >= 0 ? lastLeisure : null;
-  for (const d of trips) if (daysBetween(d, today) >= 0 && (!best || d > best)) best = d;
-  return best;
-}
-
 // ── 가고 싶은 곳 ───────────────────────────────────────────────────────
 
-export type DurationFilter = 'all' | PlaceDuration;
-
-/** 쉼 상태가 이 이하이면 30분 항목을 맨 위로 (봉오리 · 잎만 남음) */
-export const SHORT_FIRST_BANDS: readonly LeisureBand[] = ['bud', 'none'];
-
-/** 가고 싶은 곳: 걸리는 시간으로 거르고, 오래 담아둔 순. 쉼이 봉오리 이하이면 30분이 맨 위. */
-export function wishList(places: readonly Place[], filter: DurationFilter, band: LeisureBand | null): Place[] {
-  const shortFirst = band !== null && SHORT_FIRST_BANDS.includes(band);
-  return places
-    .filter((p) => !p.visited && (filter === 'all' || p.duration === filter))
-    .sort((a, b) => (shortFirst ? Number(b.duration === 'short') - Number(a.duration === 'short') : 0) || a.createdAt - b.createdAt);
+/** 가고 싶은 곳(깃발): 오래 담아둔 순 */
+export function wishList(places: readonly Place[]): Place[] {
+  return places.filter((p) => !p.visited).sort((a, b) => a.createdAt - b.createdAt);
 }
 
 /** [다녀왔슈]: 가고 싶은 곳 → 다녀온 곳 (메모는 그대로 둔다) */
@@ -144,6 +108,7 @@ export function wishAgain(p: Place, places: readonly Place[], id: string, today:
     memo: p.memo,
     note: null,
     eventId: null,
+    logId: null,
     visitedDate: null,
     nights: 0,
     addedDate: today,
@@ -182,20 +147,6 @@ export function grindStreak(records: Readonly<Record<DayKey, DayRecord>>, today:
   return n;
 }
 
-/**
- * 오늘의 쉼 제안: 가고 싶은 곳에서 걸리는 시간마다 하나씩 (날짜가 이미 잡힌 곳은 뺀다).
- * 같은 날에는 같은 제안, 날이 바뀌면 차례로 돌아간다 (확률 없음).
- */
-export function restSuggestions(places: readonly Place[], today: DayKey): Place[] {
-  const dayNo = daysBetween('2000-01-01', today);
-  const out: Place[] = [];
-  for (const d of PLACE_DURATIONS) {
-    const pool = places.filter((p) => !p.visited && !p.eventId && p.duration === d).sort((a, b) => a.createdAt - b.createdAt);
-    if (pool.length) out.push(pool[dayNo % pool.length]);
-  }
-  return out;
-}
-
 /** 1년 전 오늘 (2월 29일 → 2월 28일) */
 export function yearAgo(today: DayKey): DayKey {
   const { year, month, day } = parseDayKey(today);
@@ -217,4 +168,63 @@ export function placeYearAgo(places: readonly Place[], today: DayKey): Place | n
 export function scheduledDate(p: Place, events: readonly VillageEvent[], today: DayKey): DayKey | null {
   const e = p.eventId ? events.find((x) => x.id === p.eventId) : undefined;
   return e && daysBetween(today, e.date) >= 0 ? e.date : null;
+}
+
+// ── 깃발 → 발자국 ───────────────────────────────────────────────────────
+
+/** 오래된 깃발 말풍선이 뜨는 기준 (깃발 꽂은 지 며칠) */
+// TODO(사용자 확인): 디자인은 "석 달"만 보여준다. '오래된'의 기준을 정해 주세요.
+export const FLAG_OLD_DAYS = 60;
+
+/**
+ * 날짜 잡은 깃발은 행사 날이 지나면(마지막 날 다음 날부터) 발자국으로 옮긴다.
+ * 출발일 ~ 박 수가 다녀온 곳 날짜가 되어 머문 날마다 통나무로 센다.
+ * 행사를 지워서 날짜가 사라진 깃발은 평범한 깃발로 돌린다. 바뀐 곳만 돌려준다.
+ */
+export function settleTrips(places: readonly Place[], events: readonly VillageEvent[], today: DayKey): Place[] {
+  const out: Place[] = [];
+  for (const p of places) {
+    if (p.visited || !p.eventId) continue;
+    const e = events.find((x) => x.id === p.eventId);
+    if (!e) {
+      out.push({ ...p, eventId: null, nights: 0 });
+      continue;
+    }
+    if (e.repeatYearly) continue;
+    if (daysBetween(addDays(e.date, p.nights), today) > 0) out.push(markVisited(p, e.date, p.nights, null));
+  }
+  return out;
+}
+
+/** 장소 이름이 같은지 (띄어쓰기 무시) */
+export const samePlace = (a: string, b: string) => placeKey(a) === placeKey(b);
+
+/**
+ * 장작 던지기의 장소 태그 → 지도에 발자국. 가고 싶은 곳(깃발)에 같은 이름이 있으면 그 깃발이 발자국이 되고,
+ * 없으면 새 발자국을 만든다. 장작 기록에서 찍은 발자국이라 logId를 단다.
+ */
+export function footprintFor(
+  name: string,
+  date: DayKey,
+  logId: string,
+  places: readonly Place[],
+  newId: string,
+  now: number,
+): Place {
+  const flag = places.find((p) => !p.visited && samePlace(p.name, name));
+  if (flag) return { ...markVisited(flag, date, 0, null), logId };
+  return {
+    id: newId,
+    name: name.trim().slice(0, PLACE_NAME_MAX),
+    duration: 'half',
+    visited: true,
+    memo: null,
+    note: null,
+    eventId: null,
+    logId,
+    visitedDate: date,
+    nights: 0,
+    addedDate: date,
+    createdAt: now,
+  };
 }

@@ -10,6 +10,7 @@ import { ASK_AFTER_TITLE, RELATION_LABEL } from '../../src/copy/labels.ko';
 import { DELETE_NEIGHBOR_LINE, deleteNeighborTitle } from '../../src/copy/tidy.ko';
 import { deleteNeighbor } from '../../src/data/neighbors';
 import { today as getToday, yearMonthOf } from '../../src/domain/day';
+import { useRestLogs } from '../../src/state/restLogs';
 import { useNeighbors } from '../../src/state/neighbors';
 import { useRecords } from '../../src/state/records';
 import { useNeighborsView } from '../../src/state/tabViews';
@@ -28,6 +29,7 @@ const timeLabel = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${Strin
 export default function NeighborsScreen() {
   const today = getToday();
   const loadNeighbors = useNeighbors((s) => s.load);
+  const loadRestLogs = useRestLogs((s) => s.load);
   const loadMonth = useRecords((s) => s.loadMonth);
   const v = useNeighborsView(today);
   const [tidyMode, setTidy] = useState(false);
@@ -37,10 +39,10 @@ export default function NeighborsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      Promise.all([loadNeighbors(), loadMonth(yearMonthOf(today), true)]).catch((e) =>
+      Promise.all([loadNeighbors(), loadMonth(yearMonthOf(today), true), loadRestLogs()]).catch((e) =>
         console.warn('[neighbors] load failed', e),
       );
-    }, [loadNeighbors, loadMonth, today]),
+    }, [loadNeighbors, loadMonth, loadRestLogs, today]),
   );
 
   const addNeighbor = () => router.push('/neighbor-new');

@@ -23,7 +23,9 @@ app/                    expo-router 화면
   record.tsx            오늘 기록 시트 (모달)
   seed-result.tsx       씨앗 결과
   ledger/new.tsx        행사 등록 시트
-  place-new.tsx         쉼터 가고 싶은 곳 · 다녀온 곳 담기 · [다녀왔슈] 시트
+  place-new.tsx         쉼터 깃발 · 발자국 담기 · [다녀왔슈] · [날짜 잡기] 시트
+  rest-throw.tsx        장작 던지기 시트 (쉼 기록 입력 두 곳 중 하나)
+  place-map.tsx         보따리 지도
   storage.tsx           수확 창고 (창고 / 교환소 탭)
   neighbor-new.tsx      이웃 등록
   morning-news.tsx      밤사이 마을 소식
@@ -31,6 +33,8 @@ src/
   domain/               게임 규칙. 순수 TS, React/RN import 금지
     crops.ts            작물 결정 · 성장 단계 · 밭 5칸 · 자동 수확
     indices.ts          지수 4개 계산
+    fire.ts             쉼 지수 = 모닥불 (장작 점수 · 불 상태 · 이웃 태그 만남)
+    rest.ts · restTags.ts · restNote.ts · placeMap.ts   보따리(깃발/발자국) · 태그 인식 · 쪽지 제안 · 지도 배치
     weather.ts          컨디션 → 날씨 단계
     village.ts          마을 경험치 · 레벨 · 해금
     harvest.ts          수확 레벨 · 농부 칭호 · 스킨 교환

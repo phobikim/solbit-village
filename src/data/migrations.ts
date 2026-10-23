@@ -197,6 +197,31 @@ export const MIGRATIONS: readonly string[] = [
   DROP TABLE contact_v10;
   CREATE INDEX contact_neighbor ON contact(neighbor_id, date);
   `,
+  // v11 — 디자인 v8 TURN 15 쉼터(모닥불): 쉼 기록 테이블 하나로 통합 (날짜 · 한 줄 · 태그들 · 크기).
+  //       기록 시트의 쉼 칸과 '장작 던지기'가 같은 테이블에 저장한다.
+  //       기존 여가/쉼 기록(day_record.leisure)은 그날의 쉼 기록으로 옮기고 크기는 '장작'으로 둔다.
+  //       (leisure 열은 기록 시트 · 작물 결정이 계속 쓰므로 남긴다. 기록 시트 쉼 기록 id = 'rec_' + 날짜)
+  //       place.log_id: 장작 던지기에서 찍은 발자국이 어느 쉼 기록에서 왔는지.
+  `
+  CREATE TABLE rest_log (
+    id         TEXT PRIMARY KEY NOT NULL,
+    date       TEXT NOT NULL,
+    text       TEXT NOT NULL DEFAULT '',
+    tags       TEXT NOT NULL DEFAULT '[]',            -- JSON: [{kind, label, ref?}]
+    size       TEXT NOT NULL CHECK (size IN ('twig', 'firewood', 'log')),
+    created_at INTEGER NOT NULL
+  );
+  CREATE INDEX rest_log_date ON rest_log(date);
+
+  INSERT INTO rest_log (id, date, text, tags, size, created_at)
+    SELECT 'rec_' || date, date, '',
+           (SELECT json_group_array(json_object('kind', 'activity', 'label', value)) FROM json_each(day_record.leisure)),
+           'firewood', created_at
+      FROM day_record
+     WHERE leisure <> '[]' AND json_valid(leisure) AND json_array_length(leisure) > 0;
+
+  ALTER TABLE place ADD COLUMN log_id TEXT;
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

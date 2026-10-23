@@ -3,6 +3,7 @@
 import type { Relation } from '../copy/labels.ko';
 import type { NeighborContactStat } from '../domain/neighbors';
 import { getDb, writeTx } from './db';
+import { parseTags, restContactStat } from './restLogs';
 
 export type Frequency = 'often' | 'sometimes' | 'rarely';
 
@@ -43,7 +44,9 @@ export async function listNeighbors(): Promise<NeighborWithStats[]> {
       GROUP BY n.id
       ORDER BY n.created_at`,
   );
-  return rows.map((r) => ({
+  // 장작 던지기에서 이웃 태그로 만난 날도 만남으로 센다 (기록의 연락과 같은 날이면 한 번)
+  const stats = await Promise.all(rows.map((r) => restContactStat(r.id)));
+  return rows.map((r, i) => ({
     id: r.id,
     name: r.name,
     face: r.face,
@@ -51,8 +54,8 @@ export async function listNeighbors(): Promise<NeighborWithStats[]> {
     relation: r.relation,
     frequency: r.frequency,
     createdAt: r.created_at,
-    contactCount: r.contact_count,
-    lastContact: r.last_contact,
+    contactCount: r.contact_count + stats[i].count,
+    lastContact: [r.last_contact, stats[i].last].filter((d): d is string => !!d).sort().pop() ?? null,
   }));
 }
 
@@ -101,6 +104,12 @@ export function archiveNeighbor(id: string): Promise<void> {
 export function deleteNeighbor(id: string): Promise<void> {
   return writeTx(async (db) => {
     await db.runAsync('DELETE FROM contact WHERE neighbor_id = ?', id);
+    // 쉼 기록의 이웃 태그도 뗀다 (한 줄 글은 그대로)
+    const logs = await db.getAllAsync<{ id: string; tags: string }>('SELECT id, tags FROM rest_log WHERE tags LIKE ?', `%"ref":${JSON.stringify(id)}%`);
+    for (const l of logs) {
+      const kept = parseTags(l.tags).filter((t) => t.ref !== id);
+      await db.runAsync('UPDATE rest_log SET tags = ? WHERE id = ?', JSON.stringify(kept), l.id);
+    }
     await db.runAsync('DELETE FROM neighbor WHERE id = ?', id);
   });
 }

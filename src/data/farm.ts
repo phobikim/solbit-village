@@ -9,7 +9,9 @@ import { dayKeyOf, type DayKey } from '../domain/day';
 import type { CropKind, DayRecord } from '../domain/types';
 import { xpDelta, xpForRecord } from '../domain/village';
 import { getDb, writeTx } from './db';
+import type { RestLog } from '../domain/fire';
 import { saveDayRecordTx } from './records';
+import { deleteRestLogTx, recordLogId, saveRestLogTx } from './restLogs';
 
 type PlantingRow = { id: number; crop: CropKind; planted_date: string; slot: number };
 
@@ -127,12 +129,21 @@ export type CommitResult = {
  * - 그날 기록의 씨앗이 아직 없고 최근 7일 안이면: 기록대로 작물을 정해 오늘 밭에 심는다
  *   (지난날 빈칸 기록도 씨앗은 오늘 심는다. 그래도 꽉 차 있으면 가장 오래된 작물을 대신 딴다).
  *   기록을 고쳐도 이미 심은 작물은 바뀌지 않는다.
+ * - 쉼 칸을 적었으면 같은 트랜잭션에서 쉼 기록(장작)으로도 남긴다. 장작만 던진 날은 기록일이 아니고, 씨앗 · 경험치는 이 저장에서만 받는다.
  * - 경험치: 그날 기록으로 받은 경험치보다 많아질 때만 차이를 준다 (줄지 않는다).
  */
-export function commitDayRecord(record: DayRecord, today: DayKey, now = Date.now()): Promise<CommitResult> {
+export function commitDayRecord(
+  record: DayRecord,
+  today: DayKey,
+  now = Date.now(),
+  /** 기록 시트 쉼 칸의 쉼 기록 (없으면 그날 시트 쉼 기록을 지운다) */
+  restLog: RestLog | null = null,
+): Promise<CommitResult> {
   const result: CommitResult = { seed: null, xpGained: 0 };
   return writeTx(async (db) => {
     await saveDayRecordTx(db, record);
+    if (restLog) await saveRestLogTx(db, restLog);
+    else await deleteRestLogTx(db, recordLogId(record.date));
     await settleAutoHarvestTx(db, today);
 
     if (canEditRecord(record.date, today)) {

@@ -54,6 +54,7 @@ describe('기록 입력값', () => {
         achievement: '  ',
         memo: ' 산책함 ',
         leisure: ['산책', ' 산책 ', '', '독서'],
+        restSize: 'firewood',
         contacts: [
           { neighborId: 'a', method: 'call' },
           { neighborId: 'a', method: 'meet' },

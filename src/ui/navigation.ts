@@ -6,7 +6,7 @@ export type TabKey = 'village' | 'records' | 'neighbors' | 'rest' | 'me';
 const PAGES: readonly [TabKey, readonly string[]][] = [
   ['records', ['/records']],
   ['neighbors', ['/neighbors']],
-  ['rest', ['/rest']],
+  ['rest', ['/rest', '/place-map']],
   ['me', ['/me', '/storage', '/settings']],
 ];
 
