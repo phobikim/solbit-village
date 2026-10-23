@@ -51,9 +51,10 @@ export function tripDays(places: readonly Place[]): Set<DayKey> {
   return out;
 }
 
-/** 쉰 날인가: 그날 기록에 쉼이 있거나, 다녀온 곳 날짜 안이거나 */
+/** 쉰 날인가: 그날 기록에 쉼이 있거나, 쉬는 날로 적었거나, 다녀온 곳 날짜 안이거나 */
 export function isRestDay(day: DayKey, records: Readonly<Record<DayKey, DayRecord>>, trips: ReadonlySet<DayKey>): boolean {
-  return !!records[day]?.leisure.length || trips.has(day);
+  const r = records[day];
+  return !!r?.leisure.length || r?.dayType === 'rest' || trips.has(day);
 }
 
 /** 이번 주 첫날 (월요일) — 기록을 불러올 범위 */
@@ -77,7 +78,7 @@ export function restDaysThisWeek(records: Readonly<Record<DayKey, DayRecord>>, t
 
 /**
  * 마지막으로 쉰 날 (오늘 포함, 미래 제외). 없으면 null.
- * lastLeisure: 기록에서 쉼을 적은 가장 최근 날 (불러온 범위 밖까지 data에서 찾아 넘긴다).
+ * lastLeisure: 기록에서 쉼을 적었거나 쉬는 날로 적은 가장 최근 날 (불러온 범위 밖까지 data에서 찾아 넘긴다).
  */
 export function lastRestDay(lastLeisure: DayKey | null, trips: ReadonlySet<DayKey>, today: DayKey): DayKey | null {
   let best = lastLeisure && daysBetween(lastLeisure, today) >= 0 ? lastLeisure : null;

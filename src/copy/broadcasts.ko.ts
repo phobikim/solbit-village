@@ -69,6 +69,7 @@ export const broadcasts = {
 /** 이장 한마디 (방송 라인이 아닌 말풍선) */
 export const ijangLines = {
   sheetNew: '대충 적어도 돼유. 이장도 대충 읽어유.',
+  sheetRest: '쉬는 날이유? 일 얘긴 넣어둬유.',
   sheetEdit: '고쳐두 돼유. 이미 심은 작물은 그대루유.',
   sheetTooOld: '그날 기록은 인제 장부에 굳었슈. 7일 지난 기록은 못 고쳐유.',
   sheetNoBackfill: '일주일 넘은 빈칸은 그대루 둬유. 비어 있어두 괜찮어유.',

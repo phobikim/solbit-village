@@ -49,7 +49,8 @@ export function healthIndex(records: Readonly<Record<DayKey, DayRecord>>, end: D
 export function workIndex(records: Readonly<Record<DayKey, DayRecord>>, end: DayKey): number | null {
   const w = windowRecords(records, end, INDEX_WINDOW_DAYS);
   if (!w.length) return null;
-  return Math.round(w.reduce((a, { r }) => a + WORK_SCORE[r.work], 0) / w.length);
+  // 쉬는 날에 일 강도를 안 적었으면 일 0으로 센다 (2026-10-23 사용자 결정)
+  return Math.round(w.reduce((a, { r }) => a + (r.work ? WORK_SCORE[r.work] : 0), 0) / w.length);
 }
 
 /** 기준일(end) 시점의 마지막 연락 날짜. end 이후 연락은 보지 않는다. */
@@ -93,7 +94,7 @@ const NO_TRIPS: ReadonlySet<DayKey> = new Set();
 
 /**
  * 쉼(여가): 최근 7일 중 쉰 날 비율.
- * 쉰 날 = 기록에 쉼이 있는 날 + 다녀온 곳 날짜(trips, rest.ts tripDays). 같은 날이 둘 다면 한 번만 센다 (2026-10-23).
+ * 쉰 날 = 기록에 쉼이 있는 날 + 쉬는 날로 적은 날 + 다녀온 곳 날짜(trips, rest.ts tripDays). 겹치면 한 번만 센다 (2026-10-23).
  * 7일 안에 기록도 다녀온 날도 없으면 null.
  */
 export function leisureIndex(
@@ -107,7 +108,7 @@ export function leisureIndex(
     const d = addDays(end, -i);
     const r = records[d];
     if (r || trips.has(d)) seen = true;
-    if (r?.leisure.length || trips.has(d)) days++;
+    if (r?.leisure.length || r?.dayType === 'rest' || trips.has(d)) days++;
   }
   return seen ? Math.round((100 * days) / INDEX_WINDOW_DAYS) : null;
 }

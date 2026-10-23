@@ -33,9 +33,14 @@ export const UNLOCK_LEVEL = {
   patterns: 10,
 } as const;
 
-/** 그날 기록에서 입력한 영역 수 (건강 · 일은 필수) */
+/**
+ * 그날 기록에서 입력한 영역 수. 건강은 늘 들어간다.
+ * 일한 날은 일이 기본, 쉬는 날은 쉼이 기본으로 들어간다 (쉬어도 경험치가 줄지 않게, 2026-10-23 사용자 결정).
+ */
 export function areasEntered(r: DayRecord): number {
-  return 2 + (r.contacts.length > 0 ? 1 : 0) + (r.leisure.length > 0 ? 1 : 0);
+  const work = r.dayType === 'work' || r.work !== null;
+  const leisure = r.dayType === 'rest' || r.leisure.length > 0;
+  return 1 + (work ? 1 : 0) + (r.contacts.length > 0 ? 1 : 0) + (leisure ? 1 : 0);
 }
 
 /** 그날 기록이 주는 경험치 */

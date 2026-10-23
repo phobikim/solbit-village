@@ -3,13 +3,14 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { DayKey } from '../domain/day';
-import type { Condition, Contact, ContactMethod, DayRecord, WorkLevel } from '../domain/types';
+import type { Condition, Contact, ContactMethod, DayRecord, DayType, WorkLevel } from '../domain/types';
 import { getDb } from './db';
 
 type RecordRow = {
   date: string;
   condition: number;
-  work: number;
+  day_type: string;
+  work: number | null;
   achievement: string | null;
   memo: string | null;
   leisure: string;
@@ -32,7 +33,8 @@ function toRecord(row: RecordRow, contacts: Contact[]): DayRecord {
   return {
     date: row.date,
     condition: row.condition as Condition,
-    work: row.work as WorkLevel,
+    dayType: (row.day_type === 'rest' ? 'rest' : 'work') as DayType,
+    work: row.work === null ? null : (row.work as WorkLevel),
     achievement: row.achievement,
     memo: row.memo,
     leisure: parseLeisure(row.leisure),
@@ -72,10 +74,11 @@ export async function getDayRecord(date: DayKey): Promise<DayRecord | null> {
 /** 기록 저장 (같은 날이면 내용만 갱신). 연락 목록은 통째로 바꾼다. 트랜잭션 안에서 부른다. */
 export async function saveDayRecordTx(db: SQLiteDatabase, r: DayRecord): Promise<void> {
   await db.runAsync(
-    `INSERT INTO day_record (date, condition, work, achievement, memo, leisure, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO day_record (date, condition, day_type, work, achievement, memo, leisure, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(date) DO UPDATE SET
        condition = excluded.condition,
+       day_type = excluded.day_type,
        work = excluded.work,
        achievement = excluded.achievement,
        memo = excluded.memo,
@@ -83,6 +86,7 @@ export async function saveDayRecordTx(db: SQLiteDatabase, r: DayRecord): Promise
        updated_at = excluded.updated_at`,
     r.date,
     r.condition,
+    r.dayType,
     r.work,
     r.achievement,
     r.memo,
@@ -96,11 +100,11 @@ export async function saveDayRecordTx(db: SQLiteDatabase, r: DayRecord): Promise
   }
 }
 
-/** 쉼(여가)을 적은 가장 최근 날 (upTo 포함). 쉼터 '마지막 쉼' — 불러온 달 밖의 기록까지 본다. */
+/** 쉼(여가)을 적었거나 쉬는 날로 적은 가장 최근 날 (upTo 포함). 쉼터 '마지막 쉼' — 불러온 달 밖의 기록까지 본다. */
 export async function lastLeisureDay(upTo: DayKey): Promise<DayKey | null> {
   const db = await getDb();
   const row = await db.getFirstAsync<{ date: string | null }>(
-    "SELECT MAX(date) AS date FROM day_record WHERE leisure <> '[]' AND date <= ?",
+    "SELECT MAX(date) AS date FROM day_record WHERE (leisure <> '[]' OR day_type = 'rest') AND date <= ?",
     upTo,
   );
   return row?.date ?? null;

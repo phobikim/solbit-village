@@ -118,6 +118,17 @@ export const EVENT_TYPE_LINE = {
   etc: '적어두면 이장이 기억혀유. 장부가유.',
 } as const;
 export const ACHIEVEMENT_LABEL = '성취';
+/** 기록 시트: 일한 날 / 쉬는 날 (디자인 14a · 14b) */
+export const DAY_TYPE_LABEL = { work: '일한 날', rest: '쉬는 날' } as const;
+export const recordCopy = {
+  weekendRest: (dow: string) => `${dow}요일이라 쉬는 날로 골라놨슈. 연차도 여기유.`,
+  memoPlaceholder: '오늘 어땠슈? 한 줄이면 돼유',
+  more: '더 적고 싶으면',
+  needWork: '컨디션과 일 강도만 고르면 됩니다.',
+  needRest: '컨디션만 고르면 됩니다.',
+};
+/** 기록 카드: 쉬는 날에 일 강도를 안 적었을 때 */
+export const REST_DAY_LABEL = '쉬는 날';
 /** 장부 · 대소사가 비었을 때 */
 export const LEDGER_EMPTY = '게시판에 붙은 쪽지가 없습니다. + 로 행사를 적어 두세요.';
 

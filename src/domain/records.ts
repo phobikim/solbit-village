@@ -1,7 +1,7 @@
 // 하루 기록 규칙 (SPEC 4장).
 
-import { daysBetween, type DayKey } from './day';
-import type { Condition, Contact, DayRecord, WorkLevel } from './types';
+import { daysBetween, weekdayOf, type DayKey } from './day';
+import type { Condition, Contact, DayRecord, DayType, WorkLevel } from './types';
 
 /**
  * 지난 기록 수정 허용 기간 (오늘 포함 일수). 오늘과 지난 6일까지 고칠 수 있다.
@@ -30,8 +30,15 @@ export function canCreateRecord(date: DayKey, today: DayKey): boolean {
   return canEditRecord(date, today);
 }
 
+/** 새 기록의 일한 날 / 쉬는 날 기본값: 토 · 일은 쉬는 날 (연차는 직접 고른다) */
+export function defaultDayType(date: DayKey): DayType {
+  const w = weekdayOf(date);
+  return w === 0 || w === 6 ? 'rest' : 'work';
+}
+
 /** 기록 시트 입력값 */
 export type RecordDraft = {
+  dayType: DayType;
   condition: Condition | null;
   work: WorkLevel | null;
   achievement: string;
@@ -40,7 +47,8 @@ export type RecordDraft = {
   contacts: Contact[];
 };
 
-export const emptyDraft = (): RecordDraft => ({
+export const emptyDraft = (dayType: DayType = 'work'): RecordDraft => ({
+  dayType,
   condition: null,
   work: null,
   achievement: '',
@@ -51,6 +59,7 @@ export const emptyDraft = (): RecordDraft => ({
 
 export function draftFromRecord(r: DayRecord): RecordDraft {
   return {
+    dayType: r.dayType,
     condition: r.condition,
     work: r.work,
     achievement: r.achievement ?? '',
@@ -60,9 +69,9 @@ export function draftFromRecord(r: DayRecord): RecordDraft {
   };
 }
 
-/** 저장 가능한가: 컨디션과 일 강도는 필수, 나머지는 선택 */
-export function isDraftComplete(d: RecordDraft): d is RecordDraft & { condition: Condition; work: WorkLevel } {
-  return d.condition !== null && d.work !== null;
+/** 저장 가능한가: 컨디션은 필수, 일한 날은 일 강도도 필수. 나머지는 선택 */
+export function isDraftComplete(d: RecordDraft): d is RecordDraft & { condition: Condition } {
+  return d.condition !== null && (d.dayType === 'rest' || d.work !== null);
 }
 
 const clean = (s: string, max: number): string | null => {
@@ -73,7 +82,7 @@ const clean = (s: string, max: number): string | null => {
 /** 입력값 → 저장할 기록. 공백 정리, 여가 중복 제거, 같은 이웃 중복 연락 제거. */
 export function normalizeDraft(
   date: DayKey,
-  d: RecordDraft & { condition: Condition; work: WorkLevel },
+  d: RecordDraft & { condition: Condition },
   now: number,
   existing?: DayRecord | null,
 ): DayRecord {
@@ -83,6 +92,7 @@ export function normalizeDraft(
   return {
     date,
     condition: d.condition,
+    dayType: d.dayType,
     work: d.work,
     achievement: clean(d.achievement, TEXT_MAX_LENGTH),
     memo: clean(d.memo, TEXT_MAX_LENGTH),

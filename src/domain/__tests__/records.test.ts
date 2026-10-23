@@ -48,6 +48,7 @@ describe('기록 입력값', () => {
     const r = normalizeDraft(
       '2026-10-20',
       {
+        dayType: 'work',
         condition: 3,
         work: 2,
         achievement: '  ',

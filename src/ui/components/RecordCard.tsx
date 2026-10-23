@@ -2,7 +2,7 @@
 
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { WEEKDAYS, WORK_LABEL } from '../../copy/labels.ko';
+import { REST_DAY_LABEL, WEEKDAYS, WORK_LABEL } from '../../copy/labels.ko';
 import { parseDayKey, weekdayOf, type DayKey } from '../../domain/day';
 import type { Condition, Weather, WorkLevel } from '../../domain/types';
 import { Soli, WeatherIcon, type SoliMood } from '../characters';
@@ -11,7 +11,8 @@ import { colors, fonts, radius, workColor } from '../theme';
 type Props = {
   date: DayKey;
   condition: Condition;
-  work: WorkLevel;
+  /** 쉬는 날에 일 강도를 안 적었으면 null */
+  work: WorkLevel | null;
   /** 메모·성취·여가 한 줄. 없으면 "기록만 한 날" */
   headline: string | null;
   weather: Weather | null;
@@ -42,10 +43,8 @@ export function RecordCard({ date, condition, work, headline, weather, onPress }
       <View style={styles.body}>
         <Text style={[styles.note, !headline && styles.noteEmpty]}>{headline ?? '기록만 한 날'}</Text>
         <View style={styles.workRow}>
-          <View style={[styles.dot, { backgroundColor: WORK_DOT[work] }]} />
-          <Text style={styles.work}>
-            일 강도 {work} · {WORK_LABEL[work]}
-          </Text>
+          <View style={[styles.dot, { backgroundColor: work ? WORK_DOT[work] : colors.leisure }]} />
+          <Text style={styles.work}>{work ? `일 강도 ${work} · ${WORK_LABEL[work]}` : REST_DAY_LABEL}</Text>
         </View>
       </View>
       <View style={styles.weather}>{weather && <WeatherIcon weather={weather} size={26} />}</View>

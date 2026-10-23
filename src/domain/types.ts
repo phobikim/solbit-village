@@ -27,11 +27,16 @@ export type ContactMethod = 'call' | 'meet' | 'message';
 
 export type Contact = { neighborId: string; method: ContactMethod };
 
+/** 일한 날 / 쉬는 날 (디자인 v7 TURN 14, 2026-10-23) */
+export type DayType = 'work' | 'rest';
+
 /** 하루 기록 (SPEC 4장). date는 day.ts 기준 'YYYY-MM-DD'. */
 export type DayRecord = {
   date: string;
   condition: Condition;
-  work: WorkLevel;
+  dayType: DayType;
+  /** 일 강도. 일한 날은 필수, 쉬는 날은 적을 때만 (없으면 null) */
+  work: WorkLevel | null;
   /** 오늘의 성취 (선택, 장부로 감) */
   achievement: string | null;
   memo: string | null;

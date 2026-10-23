@@ -8,7 +8,7 @@ export const BACKUP_APP = 'solbit-village';
  */
 export const BACKUP_TABLES = {
   settings: ['key', 'value'],
-  day_record: ['date', 'condition', 'work', 'achievement', 'memo', 'leisure', 'created_at', 'updated_at'],
+  day_record: ['date', 'condition', 'day_type', 'work', 'achievement', 'memo', 'leisure', 'created_at', 'updated_at'],
   neighbor: ['id', 'name', 'face', 'color', 'relation', 'frequency', 'created_at', 'archived'],
   contact: ['id', 'date', 'neighbor_id', 'method'],
   planting: ['id', 'crop', 'record_date', 'planted_date', 'slot', 'harvested_date', 'auto_harvested'],

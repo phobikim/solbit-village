@@ -5,6 +5,7 @@ export function rec(date: string, over: Partial<DayRecord> = {}): DayRecord {
   return {
     date,
     condition: 2,
+    dayType: 'work',
     work: 1,
     achievement: null,
     memo: null,

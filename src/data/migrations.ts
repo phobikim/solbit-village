@@ -160,6 +160,43 @@ export const MIGRATIONS: readonly string[] = [
   ALTER TABLE place ADD COLUMN memo TEXT;
   ALTER TABLE place ADD COLUMN note TEXT;
   `,
+
+  // v10 — 디자인 v7 TURN 14: 일한 날 / 쉬는 날. 쉬는 날은 일 강도를 비워 둘 수 있다 (work NULL 허용).
+  //       NOT NULL을 풀려면 day_record를 다시 만들어야 한다. contact가 day_record를 ON DELETE CASCADE로 보고 있어서
+  //       그냥 지우면 연락 기록이 같이 지워지므로, contact를 먼저 옮겨 두고 다시 만든 뒤 되돌린다.
+  //       예전 기록은 모두 일한 날.
+  `
+  CREATE TABLE contact_v10 AS SELECT id, date, neighbor_id, method FROM contact;
+  DROP TABLE contact;
+
+  CREATE TABLE day_record_v10 (
+    date        TEXT PRIMARY KEY NOT NULL,
+    condition   INTEGER NOT NULL CHECK (condition BETWEEN 1 AND 3),
+    day_type    TEXT NOT NULL DEFAULT 'work' CHECK (day_type IN ('work', 'rest')),
+    work        INTEGER CHECK (work BETWEEN 1 AND 3),
+    achievement TEXT,
+    memo        TEXT,
+    leisure     TEXT NOT NULL DEFAULT '[]',
+    created_at  INTEGER NOT NULL,
+    updated_at  INTEGER NOT NULL,
+    CHECK (day_type = 'rest' OR work IS NOT NULL)
+  );
+  INSERT INTO day_record_v10 (date, condition, day_type, work, achievement, memo, leisure, created_at, updated_at)
+    SELECT date, condition, 'work', work, achievement, memo, leisure, created_at, updated_at FROM day_record;
+  DROP TABLE day_record;
+  ALTER TABLE day_record_v10 RENAME TO day_record;
+
+  CREATE TABLE contact (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    date        TEXT NOT NULL REFERENCES day_record(date) ON DELETE CASCADE,
+    neighbor_id TEXT NOT NULL REFERENCES neighbor(id),
+    method      TEXT NOT NULL CHECK (method IN ('call', 'meet', 'message')),
+    UNIQUE (date, neighbor_id)
+  );
+  INSERT INTO contact (id, date, neighbor_id, method) SELECT id, date, neighbor_id, method FROM contact_v10;
+  DROP TABLE contact_v10;
+  CREATE INDEX contact_neighbor ON contact(neighbor_id, date);
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;
