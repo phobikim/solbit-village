@@ -154,6 +154,12 @@ export const MIGRATIONS: readonly string[] = [
     created_at   INTEGER NOT NULL
   );
   `,
+
+  // v9 — 쉼터 정리 (2026-10-23): 가고 싶은 곳 메모 · 다녀온 곳 한 줄 소감
+  `
+  ALTER TABLE place ADD COLUMN memo TEXT;
+  ALTER TABLE place ADD COLUMN note TEXT;
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

@@ -52,19 +52,32 @@ export const tripLength = (nights: number) => (nights === 0 ? '당일치기' : `
 
 export const yearAgoLine = (place: string) => `1년 전 오늘, 솔이 씨는 ${place}에 있었슈. 이장은 마을에 있었구유.`;
 
+/** 쉼 상태 카드 7칸 (월 ~ 일) */
+export const WEEK_LABELS = ['월', '화', '수', '목', '금', '토', '일'] as const;
+export const lastRestLine = (label: string) => `마지막 쉼 ${label}`;
+export const visitCountLabel = (n: number) => `${n}번 감`;
+
 export const restCopy = {
   signalTitle: '지침 신호',
   signalSub: '일·쉼이 겹쳤어요',
-  bundleTitle: '보따리',
-  seeAll: '전체 보기 ›',
+  suggestTitle: '오늘의 쉼 제안',
+  statusTitle: '쉼 상태',
   add: '+ 남기기',
   wish: '가고 싶은 곳',
   visited: '다녀온 곳',
+  filterAll: '전체',
+  visitedBtn: '다녀왔슈',
+  wishAgainBtn: '또 가고 싶슈',
+  wishAgainDone: '가고 싶은 곳에 다시 담았슈.',
+  wishAgainExists: '가고 싶은 곳에 이미 있슈.',
   scheduled: '날짜 잡힘',
   schedule: '날짜 잡기',
   wishEmpty: '아직 담아둔 곳이 없슈. + 남기기로 가고 싶은 곳을 담아 보슈.',
-  visitedEmpty: '다녀온 곳을 적어두면 1년 뒤에 이장이 꺼내 드려유.',
+  wishFilterEmpty: '이 시간으로 갈 데는 아직 없슈.',
+  visitedEmpty: '다녀온 곳을 적어두면 쉰 날로 쳐 드려유.',
   yearAgoTitle: '1년 전 오늘',
-  placeNew: '보따리에 담을 곳 적어 주슈. 언제 갈진 몰라두 일단 담아유.',
+  placeNew: '가고 싶은 데 적어 주슈. 언제 갈진 몰라두 일단 담아유.',
+  visitedNew: '다녀온 데 적어두슈. 다녀온 날은 쉰 날로 쳐 드려유.',
+  visitNow: '다녀오셨슈? 언제, 며칠 갔는지만 알려 주슈.',
   placeEdit: '고칠 거 있으면 고치슈.',
 };

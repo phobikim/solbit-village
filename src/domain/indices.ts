@@ -88,24 +88,41 @@ export function relationIndex(
   return Math.round((100 * (countScore + freqScore)) / 2);
 }
 
-/** 여가: 최근 7일 중 여가 기록이 있는 날 비율 */
-export function leisureIndex(records: Readonly<Record<DayKey, DayRecord>>, end: DayKey): number | null {
-  const w = windowRecords(records, end, INDEX_WINDOW_DAYS);
-  if (!w.length) return null;
-  const days = w.filter(({ r }) => r.leisure.length > 0).length;
-  return Math.round((100 * days) / INDEX_WINDOW_DAYS);
+/** 다녀온 곳이 없을 때 */
+const NO_TRIPS: ReadonlySet<DayKey> = new Set();
+
+/**
+ * 쉼(여가): 최근 7일 중 쉰 날 비율.
+ * 쉰 날 = 기록에 쉼이 있는 날 + 다녀온 곳 날짜(trips, rest.ts tripDays). 같은 날이 둘 다면 한 번만 센다 (2026-10-23).
+ * 7일 안에 기록도 다녀온 날도 없으면 null.
+ */
+export function leisureIndex(
+  records: Readonly<Record<DayKey, DayRecord>>,
+  end: DayKey,
+  trips: ReadonlySet<DayKey> = NO_TRIPS,
+): number | null {
+  let seen = false;
+  let days = 0;
+  for (let i = 0; i < INDEX_WINDOW_DAYS; i++) {
+    const d = addDays(end, -i);
+    const r = records[d];
+    if (r || trips.has(d)) seen = true;
+    if (r?.leisure.length || trips.has(d)) days++;
+  }
+  return seen ? Math.round((100 * days) / INDEX_WINDOW_DAYS) : null;
 }
 
 export function computeIndices(
   records: Readonly<Record<DayKey, DayRecord>>,
   neighbors: readonly IndexNeighbor[],
   end: DayKey,
+  trips: ReadonlySet<DayKey> = NO_TRIPS,
 ): Indices {
   return {
     health: healthIndex(records, end),
     work: workIndex(records, end),
     relation: relationIndex(records, neighbors, end),
-    leisure: leisureIndex(records, end),
+    leisure: leisureIndex(records, end, trips),
   };
 }
 
@@ -142,9 +159,10 @@ export function weeklyTrend(
   records: Readonly<Record<DayKey, DayRecord>>,
   neighbors: readonly IndexNeighbor[],
   end: DayKey,
+  trips: ReadonlySet<DayKey> = NO_TRIPS,
 ): (number | null)[] {
   const out: (number | null)[] = [];
-  for (let w = TREND_WEEKS - 1; w >= 0; w--) out.push(computeIndices(records, neighbors, addDays(end, -7 * w))[kind]);
+  for (let w = TREND_WEEKS - 1; w >= 0; w--) out.push(computeIndices(records, neighbors, addDays(end, -7 * w), trips)[kind]);
   return out;
 }
 

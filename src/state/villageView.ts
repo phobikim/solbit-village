@@ -35,6 +35,8 @@ import { dDayLabel } from '../domain/day';
 import { useFarm } from './farm';
 import { useLedger, useSkins } from './ledger';
 import { useNeighbors } from './neighbors';
+import { usePlaces } from './places';
+import { tripDays } from '../domain/rest';
 import { useRecords } from './records';
 
 const MOOD: Record<Condition, SoliMood> = { 1: 'tired', 2: 'normal', 3: 'happy' };
@@ -61,6 +63,7 @@ export function useVillageView(today: DayKey, now: Date): VillageView {
   const neighbors = useNeighbors((s) => s.list);
   const farm = useFarm();
   const events = useLedger((s) => s.events);
+  const places = usePlaces((s) => s.places);
   const owned = useSkins((s) => s.owned);
   const equipped = useSkins((s) => s.equipped);
 
@@ -77,7 +80,8 @@ export function useVillageView(today: DayKey, now: Date): VillageView {
       frequency: n.frequency as Frequency,
       lastContact: n.lastContact,
     }));
-    const idx = computeIndices(byDate, indexNeighbors, today);
+    // 다녀온 곳의 날짜도 쉰 날로 센다 (쉼 지수)
+    const idx = computeIndices(byDate, indexNeighbors, today, tripDays(places));
 
     const nameOf = new Map(neighbors.map((n) => [n.id, n]));
     const bestId = bestFriendOf(byDate, yearMonthOf(today));
@@ -157,5 +161,5 @@ export function useVillageView(today: DayKey, now: Date): VillageView {
       indices,
       recordedToday: !!todayRec,
     };
-  }, [byDate, neighbors, farm, today, now, events, owned, equipped]);
+  }, [byDate, neighbors, farm, today, now, events, places, owned, equipped]);
 }

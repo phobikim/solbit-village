@@ -17,7 +17,7 @@ export const BACKUP_TABLES = {
   village_xp: ['id', 'date', 'amount', 'reason', 'at'],
   event: ['id', 'name', 'date', 'type', 'repeat_yearly', 'created_at'],
   skin: ['id', 'owned', 'equipped'],
-  place: ['id', 'name', 'duration', 'visited', 'event_id', 'visited_date', 'nights', 'added_date', 'created_at'],
+  place: ['id', 'name', 'duration', 'visited', 'memo', 'note', 'event_id', 'visited_date', 'nights', 'added_date', 'created_at'],
 } as const;
 
 export type BackupTable = keyof typeof BACKUP_TABLES;

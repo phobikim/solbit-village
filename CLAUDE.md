@@ -23,7 +23,7 @@ app/                    expo-router 화면
   record.tsx            오늘 기록 시트 (모달)
   seed-result.tsx       씨앗 결과
   ledger/new.tsx        행사 등록 시트
-  bundle.tsx · place-new.tsx  쉼터 보따리 전체 보기 · 담기 시트
+  place-new.tsx         쉼터 가고 싶은 곳 · 다녀온 곳 담기 · [다녀왔슈] 시트
   storage.tsx           수확 창고 (창고 / 교환소 탭)
   neighbor-new.tsx      이웃 등록
   morning-news.tsx      밤사이 마을 소식

@@ -8,6 +8,8 @@ type Row = {
   name: string;
   duration: PlaceDuration;
   visited: number;
+  memo: string | null;
+  note: string | null;
   event_id: string | null;
   visited_date: string | null;
   nights: number;
@@ -20,6 +22,8 @@ const toPlace = (r: Row): Place => ({
   name: r.name,
   duration: r.duration,
   visited: r.visited === 1,
+  memo: r.memo,
+  note: r.note,
   eventId: r.event_id,
   visitedDate: r.visited_date,
   nights: r.nights,
@@ -36,15 +40,17 @@ export async function listPlaces(): Promise<Place[]> {
 export function savePlace(p: Place): Promise<void> {
   return writeTx(async (db) => {
     await db.runAsync(
-      `INSERT INTO place (id, name, duration, visited, event_id, visited_date, nights, added_date, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO place (id, name, duration, visited, memo, note, event_id, visited_date, nights, added_date, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
-         name = excluded.name, duration = excluded.duration, visited = excluded.visited, event_id = excluded.event_id,
-         visited_date = excluded.visited_date, nights = excluded.nights`,
+         name = excluded.name, duration = excluded.duration, visited = excluded.visited, memo = excluded.memo, note = excluded.note,
+         event_id = excluded.event_id, visited_date = excluded.visited_date, nights = excluded.nights`,
       p.id,
       p.name,
       p.duration,
       p.visited ? 1 : 0,
+      p.memo,
+      p.note,
       p.eventId,
       p.visitedDate,
       p.nights,

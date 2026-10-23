@@ -44,16 +44,18 @@ export function ChoiceChips<T extends string>({
   );
 }
 
-/** 달력에서 날짜 고르기. min 이전 날짜는 고를 수 없다. selectedColor: 고른 날 배경 (행사 분류 색 등) */
+/** 달력에서 날짜 고르기. min 이전 · max 이후 날짜는 고를 수 없다. selectedColor: 고른 날 배경 (행사 분류 색 등) */
 export function DatePicker({
   value,
   onChange,
   min,
+  max,
   selectedColor = colors.yellow,
 }: {
   value: DayKey;
   onChange: (d: DayKey) => void;
   min?: DayKey;
+  max?: DayKey;
   selectedColor?: string;
 }) {
   const [month, setMonth] = useState(() => yearMonthOf(value));
@@ -77,7 +79,7 @@ export function DatePicker({
       <View style={styles.calGrid}>
         {cells.map((key, i) => {
           if (!key) return <View key={`e${i}`} style={styles.calCell} />;
-          const disabled = !!min && key < min;
+          const disabled = (!!min && key < min) || (!!max && key > max);
           const on = key === value;
           return (
             <Pressable

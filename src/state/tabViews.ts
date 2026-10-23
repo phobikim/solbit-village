@@ -14,6 +14,8 @@ import { isUnlocked, levelFromXp, UNLOCK_LEVEL } from '../domain/village';
 import { equippedSkin, exchangeableSkins } from '../domain/harvest';
 import { useFarm } from './farm';
 import { useSkins } from './ledger';
+import { usePlaces } from './places';
+import { tripDays } from '../domain/rest';
 import { useNeighbors } from './neighbors';
 import { useRecords } from './records';
 
@@ -104,11 +106,13 @@ export function useMeView(today: DayKey): MeView {
   const farm = useFarm();
   const owned = useSkins((s) => s.owned);
   const equipped = useSkins((s) => s.equipped);
+  const places = usePlaces((s) => s.places);
   return useMemo(() => {
+    const trips = tripDays(places);
     const neighbors: IndexNeighbor[] = list.map((n) => ({ id: n.id, frequency: n.frequency, lastContact: n.lastContact }));
     const kinds: IndexKind[] = ['health', 'work', 'relation', 'leisure'];
     const trends = kinds.map((kind) => {
-      const values = weeklyTrend(kind, byDate, neighbors, today);
+      const values = weeklyTrend(kind, byDate, neighbors, today, trips);
       return { kind, values, summary: TREND_LABEL[trendBand(values)] };
     });
     const bands = Object.fromEntries(kinds.map((k, i) => [k, trendBand(trends[i].values)]));
@@ -132,5 +136,5 @@ export function useMeView(today: DayKey): MeView {
       soliSkin: equippedSkin('soli', equipped),
       broadcast,
     };
-  }, [byDate, list, farm, today, owned, equipped]);
+  }, [byDate, list, farm, today, owned, equipped, places]);
 }

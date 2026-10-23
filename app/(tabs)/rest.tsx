@@ -1,4 +1,5 @@
-// 12c · 12d 쉼터: 쉼 지수 · 지침 신호 · 보따리 · 1년 전 오늘. (오늘의 쉼 제안은 디자인 v7에서 뺐다)
+// 쉼터 (2026-10-23 정리): 쉼 상태 · 가고 싶은 곳 · 다녀온 곳.
+// 지침 신호 · 오늘의 쉼 제안 · 1년 전 오늘 · 날짜 잡기는 src/ui/features.ts에서 꺼 두었다.
 
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -6,18 +7,20 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
 import { withPrefix } from '../../src/copy/broadcasts.ko';
-import { REST_BROADCAST, restCopy, yearAgoLine } from '../../src/copy/rest.ko';
+import { lastRestLine, PLACE_DURATION_LABEL, REST_BROADCAST, restCopy, WEEK_LABELS, yearAgoLine } from '../../src/copy/rest.ko';
+import { newId } from '../../src/data/events';
 import { lastLeisureDay } from '../../src/data/records';
 import { parseDayKey, today as getToday, type DayKey } from '../../src/domain/day';
-import { scheduledDate, sortPlaces } from '../../src/domain/rest';
+import { PLACE_DURATIONS, scheduledDate, wishAgain, type DurationFilter, type Place } from '../../src/domain/rest';
 import { useLedger } from '../../src/state/ledger';
 import { usePlaces } from '../../src/state/places';
 import { useRecords } from '../../src/state/records';
 import { restRange, useRestView } from '../../src/state/restView';
 import { Ijang } from '../../src/ui/characters';
 import { indexIconSvg } from '../../src/ui/characters/icons';
-import { openPlace, PlaceRow, schedulePlace } from '../../src/ui/components/PlaceRow';
+import { openPlace, VisitedCard, WishCard } from '../../src/ui/components/PlaceRow';
 import { Screen } from '../../src/ui/components/Screen';
+import { REST_FEATURES } from '../../src/ui/features';
 import { colors, fonts } from '../../src/ui/theme';
 
 const timeLabel = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -25,22 +28,34 @@ const dotted = (d: DayKey) => {
   const { year, month, day } = parseDayKey(d);
   return `${year}.${String(month).padStart(2, '0')}.${String(day).padStart(2, '0')}`;
 };
-/** 쉼터 첫 화면에 보이는 보따리 줄 수 */
-const BUNDLE_PREVIEW = 3;
+const FILTERS: readonly DurationFilter[] = ['all', ...PLACE_DURATIONS];
+
+/** 쉰 날 꽃 */
+const FLOWER_SVG = `<svg viewBox="0 0 24 24"><g fill="${colors.leisure}" stroke="${colors.line}" stroke-width="1.2">${[0, 1, 2, 3, 4]
+  .map((i) => {
+    const a = i * 1.2566;
+    return `<circle cx="${(12 + Math.sin(a) * 5).toFixed(1)}" cy="${(12 - Math.cos(a) * 5).toFixed(1)}" r="4.2"/>`;
+  })
+  .join('')}</g><circle cx="12" cy="12" r="3" fill="${colors.yellow}" stroke="${colors.line}" stroke-width="1.2"/></svg>`;
 
 export default function RestScreen() {
   const today = getToday();
   const [tab, setTab] = useState<'wish' | 'visited'>('wish');
+  const [filter, setFilter] = useState<DurationFilter>('all');
+  const [notice, setNotice] = useState<string | null>(null);
   const [lastLeisure, setLastLeisure] = useState<DayKey | null>(null);
   const byDate = useRecords((s) => s.byDate);
   const loadRange = useRecords((s) => s.loadRange);
   const places = usePlaces((s) => s.places);
+  const loaded = usePlaces((s) => s.loaded);
   const loadPlaces = usePlaces((s) => s.load);
+  const savePlace = usePlaces((s) => s.save);
   const events = useLedger((s) => s.events);
   const loadLedger = useLedger((s) => s.load);
 
   useFocusEffect(
     useCallback(() => {
+      setNotice(null);
       const { from, to } = restRange(today);
       Promise.all([loadRange(from, to), loadPlaces(), loadLedger(), lastLeisureDay(today).then(setLastLeisure)]).catch((e) =>
         console.warn('[rest] load failed', e),
@@ -48,41 +63,45 @@ export default function RestScreen() {
     }, [today, loadRange, loadPlaces, loadLedger]),
   );
 
-  const v = useRestView(byDate, places, lastLeisure, today);
-  const wish = sortPlaces(places, false);
-  const visited = sortPlaces(places, true);
-  const list = (tab === 'wish' ? wish : visited).slice(0, BUNDLE_PREVIEW);
+  const v = useRestView(byDate, places, lastLeisure, today, filter);
+  const wishCount = places.filter((p) => !p.visited).length;
+
+  const onWishAgain = async (p: Place) => {
+    const copy = wishAgain(p, places, newId('pl'), today, Date.now());
+    if (copy) await savePlace(copy);
+    setNotice(copy ? restCopy.wishAgainDone : restCopy.wishAgainExists);
+    setTab('wish');
+    setFilter('all');
+  };
+  const add = () => router.push({ pathname: '/place-new', params: tab === 'visited' ? { visited: '1' } : {} });
 
   return (
-    <Screen title="쉼터" broadcast={{ message: withPrefix(REST_BROADCAST), time: timeLabel(new Date()) }}>
+    <Screen title="쉼터" broadcast={{ message: withPrefix(notice ?? REST_BROADCAST), time: timeLabel(new Date()) }}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.card}>
           <View style={styles.restHead}>
-            <Text style={styles.cardTitle}>쉼 지수</Text>
+            <Text style={styles.cardTitle}>{restCopy.statusTitle}</Text>
             <View style={styles.restValue}>
-              <Text style={styles.restNum}>{v.rest ?? '-'}</Text>
               <Text style={styles.restLabel}>{v.restLabel}</Text>
+              <Text style={styles.restNum}>{v.rest ?? '-'}</Text>
             </View>
           </View>
-          <View style={styles.track}>
-            <View style={[styles.fill, { width: `${v.rest ?? 0}%` }]} />
+          <View style={styles.week}>
+            {WEEK_LABELS.map((w, i) => (
+              <View key={w} style={styles.day}>
+                <View style={[styles.dayCell, v.week[i] && styles.dayRest]}>
+                  {v.week[i] && <SvgXml xml={FLOWER_SVG} width={22} height={22} />}
+                </View>
+                <Text style={[styles.dayLabel, i === 6 && { color: colors.pinkSoft }]}>{w}</Text>
+              </View>
+            ))}
           </View>
-          <View style={styles.stats}>
-            <View style={styles.stat}>
-              <Text style={styles.statLabel}>마지막 쉼</Text>
-              <Text style={styles.statValue}>{v.lastRest}</Text>
-            </View>
-            <View style={styles.stat}>
-              <Text style={styles.statLabel}>이번 주 쉰 날</Text>
-              <Text style={styles.statValue}>{v.weekDays}일</Text>
-            </View>
-          </View>
+          <Text style={styles.lastRest}>{lastRestLine(v.lastRest)}</Text>
         </View>
 
-        {v.signal && (
+        {REST_FEATURES.signal && v.signal && (
           <View style={styles.signal}>
             <View style={styles.signalHead}>
-              <View style={styles.signalDot} />
               <Text style={styles.signalTitle}>{restCopy.signalTitle}</Text>
               <Text style={styles.signalSub}>{restCopy.signalSub}</Text>
             </View>
@@ -95,69 +114,85 @@ export default function RestScreen() {
                 ] as const
               ).map(([k, label, value]) => (
                 <View key={k} style={styles.signalCell}>
-                  <View style={styles.signalIcon}>
-                    <SvgXml xml={indexIconSvg(k, colors.leisure, '#2E3775')} width={18} height={18} />
-                  </View>
+                  <SvgXml xml={indexIconSvg(k, colors.leisure, '#2E3775')} width={18} height={18} />
                   <Text style={styles.signalLabel}>{label}</Text>
                   <Text style={styles.signalValue}>{value}</Text>
                 </View>
               ))}
             </View>
-            <View style={styles.bubbleRow}>
-              <Ijang mood="base" size={46} />
-              <View style={styles.bubble}>
-                <Text style={styles.bubbleText}>{v.signal.line}</Text>
-              </View>
-            </View>
+            <Text style={styles.signalLine}>{v.signal.line}</Text>
+          </View>
+        )}
+
+        {REST_FEATURES.suggestions && v.suggestions.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{restCopy.suggestTitle}</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.suggests}>
+              {v.suggestions.map((p) => (
+                <Pressable key={p.id} onPress={() => openPlace(p)} style={styles.suggest}>
+                  <Text style={styles.chip}>{PLACE_DURATION_LABEL[p.duration]}</Text>
+                  <Text style={styles.suggestName} numberOfLines={2}>
+                    {p.name}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
           </View>
         )}
 
         <View style={styles.section}>
-          <View style={styles.bundleHead}>
-            <Text style={styles.sectionTitle}>{restCopy.bundleTitle}</Text>
-            <View style={styles.bundleActions}>
-              <Text style={styles.sectionTitle} onPress={() => router.push('/bundle')} accessibilityRole="link">
-                {restCopy.seeAll}
-              </Text>
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => router.push({ pathname: '/place-new', params: tab === 'visited' ? { visited: '1' } : {} })}
-                style={styles.add}
-              >
-                <Text style={styles.addText}>{restCopy.add}</Text>
-              </Pressable>
+          <View style={styles.listHead}>
+            <View style={styles.seg} accessibilityRole="tablist">
+              {(['wish', 'visited'] as const).map((k) => (
+                <Pressable
+                  key={k}
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: tab === k }}
+                  onPress={() => setTab(k)}
+                  style={[styles.segItem, tab === k && styles.segOn]}
+                >
+                  <Text style={[styles.segText, tab === k && styles.segTextOn]}>
+                    {k === 'wish' ? `${restCopy.wish} ${wishCount}` : `${restCopy.visited} ${v.visited.length}`}
+                  </Text>
+                </Pressable>
+              ))}
             </View>
+            <Pressable accessibilityRole="button" onPress={add} style={styles.add}>
+              <Text style={styles.addText}>{restCopy.add}</Text>
+            </Pressable>
           </View>
-          <View style={styles.chips}>
-            {(['wish', 'visited'] as const).map((k) => (
-              <Pressable key={k} onPress={() => setTab(k)} style={[styles.chip, tab === k && styles.chipOn]}>
-                <Text style={[styles.chipText, tab === k && styles.chipTextOn]}>
-                  {k === 'wish' ? `${restCopy.wish} ${wish.length}` : `${restCopy.visited} ${visited.length}`}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-          {list.length ? (
-            list.map((p) => (
-              <PlaceRow
-                key={p.id}
-                place={p}
-                scheduled={scheduledDate(p, events, today)}
-                today={today}
-                onPress={() => openPlace(p)}
-                onSchedule={() => schedulePlace(p)}
-              />
-            ))
+
+          {tab === 'wish' ? (
+            <>
+              <View style={styles.filters}>
+                {FILTERS.map((f) => (
+                  <Pressable key={f} onPress={() => setFilter(f)} style={[styles.filter, filter === f && styles.filterOn]}>
+                    <Text style={[styles.filterText, filter === f && styles.segTextOn]}>
+                      {f === 'all' ? restCopy.filterAll : PLACE_DURATION_LABEL[f]}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+              {v.wish.map((p) => (
+                <WishCard key={p.id} place={p} scheduled={scheduledDate(p, events, today)} today={today} />
+              ))}
+              {loaded && v.wish.length === 0 && (
+                <Text style={styles.empty}>{wishCount === 0 ? restCopy.wishEmpty : restCopy.wishFilterEmpty}</Text>
+              )}
+            </>
           ) : (
-            <Text style={styles.empty}>{tab === 'wish' ? restCopy.wishEmpty : restCopy.visitedEmpty}</Text>
+            <>
+              {v.visited.map((p) => (
+                <VisitedCard key={p.id} place={p} count={v.visitCounts.get(p.id)} onWishAgain={() => onWishAgain(p)} />
+              ))}
+              {loaded && v.visited.length === 0 && <Text style={styles.empty}>{restCopy.visitedEmpty}</Text>}
+            </>
           )}
         </View>
 
-        {v.yearAgo && (
+        {REST_FEATURES.yearAgo && v.yearAgo && (
           <View style={styles.yearAgo}>
-            <View style={styles.yearAgoFace}>
-              <Ijang mood="base" size={44} />
-            </View>
+            <Ijang mood="base" size={44} />
             <View style={styles.body}>
               <Text style={styles.yearAgoDate}>
                 {restCopy.yearAgoTitle} · {dotted(v.yearAgo.date)}
@@ -176,42 +211,54 @@ const styles = StyleSheet.create({
   card: { backgroundColor: colors.cardSub, borderRadius: 24, paddingVertical: 14, paddingHorizontal: 16, gap: 12 },
   restHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   cardTitle: { fontFamily: fonts.bodyHeavy, fontSize: 14, color: colors.text },
-  restValue: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
+  restValue: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
+  restLabel: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.textSub },
   restNum: { fontFamily: fonts.numberBold, fontSize: 24, color: colors.leisure },
-  restLabel: { fontFamily: fonts.bodyHeavy, fontSize: 12, color: colors.textSub },
-  track: { height: 14, borderRadius: 7, backgroundColor: colors.track, overflow: 'hidden' },
-  fill: { height: '100%', borderRadius: 7, backgroundColor: colors.leisure },
-  stats: { flexDirection: 'row', gap: 8 },
-  stat: { flex: 1, backgroundColor: colors.night, borderRadius: 16, paddingVertical: 9, paddingHorizontal: 12, gap: 2 },
-  statLabel: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.textMuted },
-  statValue: { fontFamily: fonts.bodyHeavy, fontSize: 15, color: colors.text },
-  signal: { backgroundColor: '#262A63', borderRadius: 24, padding: 14, gap: 12, borderWidth: 2, borderColor: '#4A4F99' },
+  week: { flexDirection: 'row', justifyContent: 'space-between' },
+  day: { alignItems: 'center', gap: 4 },
+  dayCell: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.night, alignItems: 'center', justifyContent: 'center' },
+  dayRest: { backgroundColor: '#2E2A66' },
+  dayLabel: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.textMuted },
+  lastRest: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.textSub },
+  signal: { backgroundColor: '#262A63', borderRadius: 24, padding: 14, gap: 10, borderWidth: 2, borderColor: '#4A4F99' },
   signalHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  signalDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.leisure, shadowColor: colors.leisure, shadowOpacity: 0.5, shadowRadius: 4 },
   signalTitle: { fontFamily: fonts.bodyHeavy, fontSize: 14, color: '#E4D6FF' },
   signalSub: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.textMuted },
   signalCells: { flexDirection: 'row', gap: 6 },
-  signalCell: { flex: 1, backgroundColor: colors.cardSub, borderRadius: 18, paddingVertical: 10, paddingHorizontal: 6, alignItems: 'center', gap: 5 },
-  signalIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.track, alignItems: 'center', justifyContent: 'center' },
+  signalCell: { flex: 1, backgroundColor: colors.cardSub, borderRadius: 18, padding: 8, alignItems: 'center', gap: 4 },
   signalLabel: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.text },
-  signalValue: { fontFamily: fonts.bodyBold, fontSize: 12, lineHeight: 16, color: colors.textSub, textAlign: 'center' },
-  bubbleRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
-  bubble: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 18, borderBottomLeftRadius: 6, paddingVertical: 10, paddingHorizontal: 12, marginBottom: 8 },
-  bubbleText: { fontFamily: fonts.bodyHeavy, fontSize: 13, lineHeight: 20, color: colors.line },
+  signalValue: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.textSub, textAlign: 'center' },
+  signalLine: { fontFamily: fonts.bodyHeavy, fontSize: 13, lineHeight: 20, color: colors.text },
   section: { gap: 8 },
   sectionTitle: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.textSub, paddingHorizontal: 4 },
-  bundleHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  bundleActions: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  add: { height: 32, paddingHorizontal: 12, borderRadius: 16, backgroundColor: colors.pink, justifyContent: 'center', borderBottomWidth: 3, borderBottomColor: '#B32A6E' },
+  suggests: { gap: 8 },
+  suggest: { width: 148, height: 104, borderRadius: 22, padding: 12, justifyContent: 'space-between', backgroundColor: '#2A2F6E' },
+  suggestName: { fontFamily: fonts.bodyHeavy, fontSize: 16, color: colors.text },
+  chip: {
+    alignSelf: 'flex-start',
+    backgroundColor: colors.leisure,
+    color: colors.line,
+    borderRadius: 99,
+    paddingVertical: 3,
+    paddingHorizontal: 10,
+    overflow: 'hidden',
+    fontFamily: fonts.bodyHeavy,
+    fontSize: 12,
+  },
+  listHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  seg: { flex: 1, flexDirection: 'row', height: 40, borderRadius: 20, backgroundColor: colors.cardSub, padding: 4, gap: 4 },
+  segItem: { flex: 1, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  segOn: { backgroundColor: colors.leisure },
+  segText: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.textSub },
+  segTextOn: { color: colors.line },
+  add: { height: 34, paddingHorizontal: 12, borderRadius: 17, backgroundColor: colors.pink, justifyContent: 'center', borderBottomWidth: 3, borderBottomColor: '#B32A6E' },
   addText: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.line },
-  chips: { flexDirection: 'row', gap: 6 },
-  chip: { height: 34, paddingHorizontal: 14, borderRadius: 17, backgroundColor: colors.cardSub, justifyContent: 'center' },
-  chipOn: { backgroundColor: colors.leisure },
-  chipText: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.textSub },
-  chipTextOn: { color: colors.line },
+  filters: { flexDirection: 'row', gap: 6 },
+  filter: { height: 30, paddingHorizontal: 12, borderRadius: 15, backgroundColor: colors.night, borderWidth: 1.5, borderColor: '#333C7A', justifyContent: 'center' },
+  filterOn: { backgroundColor: colors.leisure, borderColor: colors.leisure },
+  filterText: { fontFamily: fonts.bodyHeavy, fontSize: 12, color: colors.textSub },
   empty: { fontFamily: fonts.bodyBold, fontSize: 13, lineHeight: 19, color: colors.textMuted, paddingHorizontal: 4 },
-  yearAgo: { backgroundColor: '#181F4C', borderRadius: 24, paddingVertical: 12, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', gap: 12 },
-  yearAgoFace: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.track, overflow: 'hidden', alignItems: 'center' },
+  yearAgo: { backgroundColor: '#181F4C', borderRadius: 24, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 12 },
   body: { flex: 1, gap: 3 },
   yearAgoDate: { fontFamily: fonts.number, fontSize: 12, color: colors.leisure },
   yearAgoText: { fontFamily: fonts.bodyBold, fontSize: 14, lineHeight: 21, color: colors.text },

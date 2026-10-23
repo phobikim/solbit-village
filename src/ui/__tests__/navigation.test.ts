@@ -9,7 +9,6 @@ describe('하단 바 탭 (마을 · 장부 · 이웃 · 쉼터 · 나)', () => {
     expect(tabOfPath('/me')).toBe('me');
   });
   it('하위 화면', () => {
-    expect(tabOfPath('/bundle')).toBe('rest');
     expect(tabOfPath('/storage')).toBe('me');
     expect(tabOfPath('/settings')).toBe('me');
   });
