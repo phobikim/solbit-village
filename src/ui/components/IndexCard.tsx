@@ -33,18 +33,54 @@ type Props = {
   /** 계산할 기록이 없으면 null */
   value: number | null;
   status: string;
+  /** 압축(64pt): 이름을 빼고 아이콘 + 숫자 + 짧은 상태만 */
+  compact?: boolean;
+  /** 카드 높이 (layout.ts) */
+  height?: number;
 };
 
 const SIZE = 44;
 const STROKE = 6;
 const R = (SIZE - STROKE) / 2;
 const CIRC = 2 * Math.PI * R;
+const SMALL = 30;
+const SSTROKE = 4;
+const SR = (SMALL - SSTROKE) / 2;
+const SCIRC = 2 * Math.PI * SR;
 
-export function IndexCard({ kind, value, status }: Props) {
+export function IndexCard({ kind, value, status, compact, height }: Props) {
   const col = value === null ? colors.textMuted : indexColor(kind, value);
   const v = value === null ? 0 : Math.min(100, Math.max(0, value));
+  if (compact) {
+    return (
+      <View style={[styles.card, styles.cardCompact, height !== undefined && { height }]} accessibilityLabel={`${LABEL[kind]} ${value ?? ''}, ${status}`}>
+        <View style={styles.compactRow}>
+          <View style={{ width: SMALL, height: SMALL, alignItems: 'center', justifyContent: 'center' }}>
+            <Svg width={SMALL} height={SMALL} style={StyleSheet.absoluteFill}>
+              <Circle cx={SMALL / 2} cy={SMALL / 2} r={SR} stroke={colors.track} strokeWidth={SSTROKE} fill="none" />
+              <Circle
+                cx={SMALL / 2}
+                cy={SMALL / 2}
+                r={SR}
+                stroke={col}
+                strokeWidth={SSTROKE}
+                fill="none"
+                strokeDasharray={`${(SCIRC * v) / 100} ${SCIRC}`}
+                transform={`rotate(-90 ${SMALL / 2} ${SMALL / 2})`}
+              />
+            </Svg>
+            <SvgXml xml={indexIconSvg(kind, col, colors.cardSub)} width={13} height={13} />
+          </View>
+          <Text style={[styles.value, styles.valueCompact, { color: col }]}>{value === null ? '-' : v}</Text>
+        </View>
+        <Text style={styles.statusCompact} numberOfLines={1}>
+          {status}
+        </Text>
+      </View>
+    );
+  }
   return (
-    <View style={styles.card} accessibilityLabel={`${LABEL[kind]} ${value ?? ''}, ${status}`}>
+    <View style={[styles.card, height !== undefined && { height, justifyContent: 'center' }]} accessibilityLabel={`${LABEL[kind]} ${value ?? ''}, ${status}`}>
       <View style={styles.gauge}>
         <Svg width={SIZE} height={SIZE} style={StyleSheet.absoluteFill}>
           <Circle cx={SIZE / 2} cy={SIZE / 2} r={R} stroke={colors.track} strokeWidth={STROKE} fill="none" />
@@ -88,4 +124,8 @@ const styles = StyleSheet.create({
   label: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.text },
   value: { fontFamily: fonts.numberBold, fontSize: 14 },
   status: { fontFamily: fonts.bodyHeavy, fontSize: 12, color: colors.textSub },
+  cardCompact: { paddingTop: 0, paddingBottom: 0, paddingHorizontal: 4, justifyContent: 'center', gap: 2 },
+  compactRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  valueCompact: { fontSize: 17 },
+  statusCompact: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.textSub, maxWidth: '100%' },
 });

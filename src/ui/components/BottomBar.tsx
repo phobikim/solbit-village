@@ -30,7 +30,7 @@ export function BottomBar() {
   last.current = current;
 
   return (
-    <View style={[styles.wrap, { marginBottom: 14 + insets.bottom }]} accessibilityRole="tablist">
+    <View style={[styles.wrap, { marginBottom: 6 + insets.bottom }]} accessibilityRole="tablist">
       {TABS.map((t) => {
         const on = t.key === current;
         return (

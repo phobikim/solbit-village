@@ -14,7 +14,8 @@ import { buildingSvg } from './skins';
 import { faceSvg, FACES, npcSvg, type NpcHair } from './neighbors';
 import { soliWithSkinSvg, type SoliMood } from './soli';
 import { wrap } from './svg';
-import { BOARD_RECT, VILLAGE_VIEWBOX, villageSceneSvg, villageSkyTop, type VillageSceneParams } from './village';
+import { sceneGeometry } from '../layout';
+import { BOARD_RECT, villageSceneSvg, villageSkyTop, type VillageSceneParams } from './village';
 
 export type { IjangMood, NpcHair, SoliMood, VillageSceneParams };
 
@@ -88,24 +89,26 @@ export const VillageScene = memo(function VillageScene({
     const { width, height } = e.nativeEvent.layout;
     setSize((s) => (s && s.w === width && s.h === height ? s : { w: width, h: height }));
   };
-  const fit = size && size.h / size.w > VILLAGE_VIEWBOX.height / VILLAGE_VIEWBOX.width ? 'meet' : 'slice';
-  const xml = useMemo(() => villageSceneSvg(scene, fit), [scene, fit]);
+  // 땅 쪽 층은 장면 너비 기준 비율로 아래에 붙고, 늘어나는 높이는 하늘만 흡수한다 (layout.ts)
+  const geo = useMemo(() => (size ? sceneGeometry(size.w, size.h) : null), [size]);
+  const xml = useMemo(() => (geo ? villageSceneSvg(scene, geo) : ''), [scene, geo]);
   return (
     <View style={[StyleSheet.absoluteFill, { backgroundColor: villageSkyTop(scene.timeOfDay) }]} onLayout={onLayout}>
-      {size && <SvgXml xml={xml} width={size.w} height={size.h} />}
-      {size && onBoardPress && (() => {
-        // xMidYMax: 가로를 꽉 채우고 아래에 붙인다 (meet · slice 모두 가로 기준 배율)
-        const k = size.w / VILLAGE_VIEWBOX.width;
-        const top = size.h - VILLAGE_VIEWBOX.height * k;
-        return (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="마을 게시판 (장부 대소사)"
-            onPress={onBoardPress}
-            style={{ position: 'absolute', left: BOARD_RECT.x * k, top: top + BOARD_RECT.y * k, width: BOARD_RECT.width * k, height: BOARD_RECT.height * k }}
-          />
-        );
-      })()}
+      {size && xml !== '' && <SvgXml xml={xml} width={size.w} height={size.h} />}
+      {size && geo && onBoardPress && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="마을 게시판 (장부 대소사)"
+          onPress={onBoardPress}
+          style={{
+            position: 'absolute',
+            left: (BOARD_RECT.x - geo.viewBox.x) * geo.k,
+            top: (BOARD_RECT.y - geo.viewBox.y) * geo.k,
+            width: BOARD_RECT.width * geo.k,
+            height: BOARD_RECT.height * geo.k,
+          }}
+        />
+      )}
     </View>
   );
 });

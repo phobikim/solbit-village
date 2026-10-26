@@ -1,25 +1,28 @@
 // 7a 마을 (메인). 기록·밭·경험치를 SQLite에서 읽어 마을을 그린다.
+// 메인은 스크롤이 없다. 고정 요소(헤더 · 방송 · 지수 · 기록 버튼)를 먼저 놓고 남는 높이는 전부 마을 장면이 가져간다.
+// 높이 규칙과 압축 단계는 src/ui/layout.ts (SPEC 11장).
 
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { VILLAGE_NAME, VILLAGE_TAGLINE } from '../../src/copy/labels.ko';
 import { today as getToday } from '../../src/domain/day';
 import { useFarm } from '../../src/state/farm';
 import { useLedger, useSkins } from '../../src/state/ledger';
-import { usePlaces } from '../../src/state/places';
-import { useRestLogs } from '../../src/state/restLogs';
 import { useNeighbors } from '../../src/state/neighbors';
 import { needsMorningNews } from '../../src/state/newsView';
+import { usePlaces } from '../../src/state/places';
 import { useRecords } from '../../src/state/records';
+import { useRestLogs } from '../../src/state/restLogs';
 import { useVillageView, villageRange } from '../../src/state/villageView';
 import { VillageScene } from '../../src/ui/characters';
 import { BroadcastLine } from '../../src/ui/components/BroadcastLine';
 import { IndexCard } from '../../src/ui/components/IndexCard';
 import { LevelBar } from '../../src/ui/components/LevelBar';
 import { PrimaryButton } from '../../src/ui/components/PrimaryButton';
+import { mainLayout, SCENE_MIN_HEIGHT } from '../../src/ui/layout';
 import { colors, fonts, radius } from '../../src/ui/theme';
 
 const timeLabel = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -39,6 +42,11 @@ export default function VillageScreen() {
   const [now, setNow] = useState(() => new Date());
   const v = useVillageView(today, now);
 
+  // 사용 가능 높이 = 창 높이 − 위 안전 영역 − (탭 바 + 아래 안전 영역)
+  const { height: windowHeight } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const L = mainLayout(windowHeight, insets.top, insets.bottom);
+
   useFocusEffect(
     useCallback(() => {
       setNow(new Date());
@@ -54,69 +62,70 @@ export default function VillageScreen() {
   );
 
   return (
-    <SafeAreaView edges={['top']} style={styles.root}>
-      <View style={styles.header}>
+    <View style={[styles.root, { paddingTop: insets.top }]} testID={`main-layout-step-${L.step}`}>
+      <View style={[styles.header, { height: L.header }]}>
         <View style={styles.titleRow}>
           <View style={styles.titleCol}>
             <Text style={styles.title}>{VILLAGE_NAME}</Text>
-            <Text style={styles.tagline}>{VILLAGE_TAGLINE}</Text>
+            {L.showTagline && <Text style={styles.tagline}>{VILLAGE_TAGLINE}</Text>}
           </View>
           <View style={styles.levelBadge}>
             <Text style={styles.levelText}>Lv.{v.level.level}</Text>
           </View>
         </View>
-        <LevelBar current={v.level.into} goal={v.level.needed} />
+        <LevelBar current={v.level.into} goal={v.level.needed} height={L.showTagline ? 22 : 20} />
       </View>
 
-      <BroadcastLine message={v.broadcast} time={timeLabel(now)} />
+      <View style={{ marginTop: L.gap, zIndex: 20 }}>
+        <BroadcastLine message={v.broadcast} time={timeLabel(now)} fixed={{ height: L.broadcast, lines: L.broadcastLines }} />
+      </View>
 
-      {/* 마을 무대: 탭하는 장치는 없다 (규칙 5). 수확은 자동이다. */}
-      <View style={styles.scene}>
+      {/* 마을 무대: 탭하는 장치는 없다 (규칙 5). 수확은 자동이다. 남는 높이는 전부 장면. */}
+      <View testID="main-scene" style={[styles.scene, { marginTop: L.gap, minHeight: L.step === 3 ? SCENE_MIN_HEIGHT : 0 }]}>
         <VillageScene {...v.scene} onBoardPress={openBoard} />
       </View>
 
-      <View style={styles.indices}>
+      {/* 지수 카드 영역은 항상 보인다 (최소 64) */}
+      <View style={[styles.indices, { marginTop: L.gap, height: L.indices }]}>
         {v.indices.map((it) => (
-          <IndexCard key={it.kind} {...it} />
+          <IndexCard key={it.kind} {...it} compact={L.indicesCompact} height={L.indices} />
         ))}
       </View>
 
       <PrimaryButton
         label={v.recordedToday ? '오늘 기록 고치기' : '오늘 기록하기'}
         onPress={() => router.push('/record')}
-        style={styles.cta}
+        style={[styles.cta, { marginTop: L.gap, height: L.cta }]}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.night, paddingBottom: 6 },
-  header: { paddingTop: 2, paddingHorizontal: 20, paddingBottom: 12, gap: 10 },
+  root: { flex: 1, backgroundColor: colors.night },
+  header: { paddingTop: 2, paddingHorizontal: 20, paddingBottom: 2, justifyContent: 'space-between' },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  titleCol: { gap: 2 },
-  title: { fontFamily: fonts.title, fontSize: 28, lineHeight: 34, color: colors.yellow },
-  tagline: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.pinkSoft },
+  titleCol: { gap: 0 },
+  title: { fontFamily: fonts.title, fontSize: 26, lineHeight: 30, color: colors.yellow },
+  tagline: { fontFamily: fonts.bodyHeavy, fontSize: 13, lineHeight: 14, color: colors.pinkSoft },
   levelBadge: {
     backgroundColor: colors.pink,
     borderRadius: 20,
-    paddingVertical: 7,
+    paddingVertical: 4,
     paddingHorizontal: 14,
     shadowColor: colors.pink,
     shadowOpacity: 0.35,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 6 },
   },
-  levelText: { fontFamily: fonts.title, fontSize: 20, color: colors.line },
+  levelText: { fontFamily: fonts.title, fontSize: 20, lineHeight: 26, color: colors.line },
   scene: {
     flex: 1,
-    minHeight: 200,
-    marginTop: 12,
     marginHorizontal: 12,
     borderRadius: radius.scene,
     overflow: 'hidden',
     backgroundColor: '#141A44',
   },
-  indices: { flexDirection: 'row', gap: 8, marginTop: 10, marginHorizontal: 12 },
-  cta: { marginTop: 12, marginHorizontal: 16 },
+  indices: { flexDirection: 'row', gap: 8, marginHorizontal: 12 },
+  cta: { marginHorizontal: 16 },
 });

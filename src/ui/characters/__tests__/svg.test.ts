@@ -6,6 +6,7 @@ import { ijangSvg } from '../ijang';
 import { FACES, faceSvg, npcSvg } from '../neighbors';
 import { buildingSvg } from '../skins';
 import { soliSkinBackSvg, soliSkinSvg, soliSvg } from '../soli';
+import { sceneGeometry } from '../../layout';
 import { villageSceneSvg, type VillageSceneParams } from '../village';
 
 const base: VillageSceneParams = {
@@ -78,8 +79,12 @@ describe('village scene', () => {
     expect(villageSceneSvg({ ...base, board: [{ type: 'travel', dday: 'D-DAY', name: 'x' }], boardToday: true })).toContain('오늘!');
   });
 
-  it('fit mode anchors to the ground', () => {
-    expect(villageSceneSvg(base, 'meet')).toContain('preserveAspectRatio="xMidYMax meet"');
+  it('칸에 맞춘 viewBox: 땅은 아래에 붙고 늘어난 높이는 하늘이 가져간다', () => {
+    const tall = villageSceneSvg(base, sceneGeometry(342, 500));
+    expect(tall).toContain('preserveAspectRatio="xMidYMax meet"');
+    const vb = /viewBox="([-\d. ]+)"/.exec(tall)![1].split(' ').map(Number);
+    expect(vb[1] + vb[3]).toBeCloseTo(340, 1); // 아래 끝은 그대로
+    expect(vb[3]).toBeGreaterThan(340); // 위로 더 보인다 (하늘)
   });
 });
 

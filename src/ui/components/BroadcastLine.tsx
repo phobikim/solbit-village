@@ -1,5 +1,6 @@
 // 이장 방송 라인. 모든 탭 헤더 바로 아래, 같은 자리·같은 모양 (SPEC 9장).
 
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
@@ -15,13 +16,47 @@ type Props = {
   time: string;
   /** 방송 끝에 붙는 버튼 (예: 수확할 작물이 있을 때만 [수확하기]) */
   action?: { label: string; onPress: () => void };
+  /** 메인 화면: 높이를 고정한다 (layout.ts). 넘치는 글은 말줄임, 탭하면 펼침 (장면 위에 겹쳐 뜬다) */
+  fixed?: { height: number; lines: 1 | 2 };
 };
 
 const megaphone = megaphoneSvg(colors.line);
 
-export function BroadcastLine({ message, time, action }: Props) {
+export function BroadcastLine({ message, time, action, fixed }: Props) {
   // 이장 소품 스킨을 쓰고 있으면 방송 아바타에도 보인다
   const prop = useSkins((s) => equippedSkin('ijang', s.equipped));
+  const [open, setOpen] = useState(false);
+  if (fixed) {
+    const one = fixed.lines === 1;
+    const avatar = one ? 30 : 40;
+    return (
+      <View style={[styles.fixedSlot, { height: fixed.height }, open && styles.fixedOpen]}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`마을 방송 ${time}. ${message}`}
+          accessibilityHint="누르면 전체를 펼치거나 접습니다"
+          onPress={() => setOpen((o) => !o)}
+          style={[styles.card, styles.fixedCard, open ? styles.fixedCardOpen : { height: fixed.height }, one && styles.fixedCardOne]}
+        >
+          <View style={{ width: avatar, height: avatar, borderRadius: avatar / 2, backgroundColor: colors.yellow, overflow: 'hidden', alignItems: 'center' }}>
+            <Ijang mood="base" prop={prop} size={avatar} style={{ marginTop: 1 }} />
+          </View>
+          <View style={styles.body}>
+            {!one && (
+              <View style={styles.meta}>
+                <Text style={styles.label}>마을 방송</Text>
+                <Text style={styles.time}>{time}</Text>
+              </View>
+            )}
+            <Text style={styles.fixedMessage} numberOfLines={open ? undefined : fixed.lines}>
+              {message}
+            </Text>
+          </View>
+          {one && <Text style={styles.time}>{time}</Text>}
+        </Pressable>
+      </View>
+    );
+  }
   return (
     // 버튼이 있으면 묶지 않아야 버튼에 따로 닿는다
     <View style={styles.card} accessible={!action} accessibilityLabel={action ? undefined : `마을 방송 ${time}. ${message}`}>
@@ -105,4 +140,11 @@ const styles = StyleSheet.create({
   },
   actionPressed: { transform: [{ translateY: 2 }], borderBottomWidth: 1 },
   actionText: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.line },
+  // 메인 고정 높이 변형
+  fixedSlot: { marginHorizontal: 12, zIndex: 1 },
+  fixedOpen: { zIndex: 20, elevation: 20 },
+  fixedCard: { marginHorizontal: 0, paddingVertical: 8, paddingHorizontal: 12, gap: 10, alignItems: 'center' },
+  fixedCardOne: { paddingVertical: 6 },
+  fixedCardOpen: { position: 'absolute', left: 0, right: 0, top: 0, minHeight: 44 },
+  fixedMessage: { fontFamily: fonts.bodyBold, fontSize: 14, lineHeight: 18, color: colors.text },
 });

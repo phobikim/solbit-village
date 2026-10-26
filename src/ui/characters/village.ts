@@ -13,7 +13,13 @@ import { buildingSvg } from './skins';
 import { soliWithSkinSvg, type SoliMood } from './soli';
 import { bud, cloud, flower, L, nest, o, place48, star } from './svg';
 
-export const VILLAGE_VIEWBOX = { width: 366, height: 340 } as const;
+import { DEFAULT_SCENE_GEOMETRY, SCENE_SKY_UNITS, SCENE_UNITS, type SceneGeometry } from '../layout';
+
+export const VILLAGE_VIEWBOX = SCENE_UNITS;
+
+/** 장면이 가로로 더 넓어질 때(짧은 칸) 땅이 이어지도록 가로 띠를 늘리는 범위 */
+const X0 = -600;
+const X1 = 970;
 
 /** 게시판(기둥 포함) 자리 — 누르면 장부 · 대소사로 간다 (디자인 TURN 12) */
 export const BOARD_RECT = { x: 102, y: 86, width: 112, height: 84 } as const;
@@ -217,10 +223,11 @@ export function villageSkyTop(t: TimeOfDay): string {
 }
 
 /**
- * fit: 칸이 그림보다 세로로 길면 'meet'(아래 정렬, 위는 하늘색 여백),
- * 가로로 길면 'slice'(아래 정렬, 하늘 위쪽이 잘림). 어느 쪽이든 땅·밭·게시판은 잘리지 않는다.
+ * geo: 장면 칸에 맞춘 기하 (layout.ts sceneGeometry). 땅 쪽 층은 칸 너비 기준 비율로 아래에 붙고,
+ * 늘어나는 높이는 하늘 층만 흡수한다. 하늘 그림(해 · 달 · 구름 · 별)은 보이는 하늘 한가운데로 옮긴다.
+ * 기본값은 원본 366 x 340.
  */
-export function villageSceneSvg(p: VillageSceneParams, fit: 'meet' | 'slice' = 'slice'): string {
+export function villageSceneSvg(p: VillageSceneParams, geo: SceneGeometry = DEFAULT_SCENE_GEOMETRY): string {
   const night = p.timeOfDay === 'night';
   const c = night ? NIGHT : DAY;
   const id = night ? 'vn' : 'vd';
@@ -231,15 +238,16 @@ export function villageSceneSvg(p: VillageSceneParams, fit: 'meet' | 'slice' = '
   let s =
     `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c.s1}"/><stop offset=".3" stop-color="${c.s2}"/></linearGradient>` +
     `<radialGradient id="${glowId}"><stop offset="0" stop-color="#FFE14D" stop-opacity=".55"/><stop offset="1" stop-color="#FFE14D" stop-opacity="0"/></radialGradient></defs>` +
-    `<rect width="366" height="340" fill="url(#${id})"/>`;
+    `<rect x="${X0}" y="${geo.viewBox.y - 2}" width="${X1 - X0}" height="${geo.viewBox.height + 2}" fill="url(#${id})"/>`;
 
-  // 1. 하늘
-  s += sky(p, c, glowId);
+  // 1. 하늘 — 보이는 하늘이 원래(85)보다 높으면 위로, 낮으면 아래로 그림을 옮겨 한가운데에 둔다
+  const skyShift = (SCENE_SKY_UNITS - geo.skyUnits) / 2;
+  s += `<g transform="translate(0 ${skyShift.toFixed(2)})">${sky(p, c, glowId)}</g>`;
 
   // 2. 뒤: 언덕 · 땅 · 오두막 · 게시판 · 냇가
-  s += `<path d="M-4 104 C70 92 150 98 220 100 C280 102 330 92 370 96 V344 H-4Z" fill="${c.hill}" ${o(3)}/>`;
+  s += `<path d="M${X0} 104 L-4 104 C70 92 150 98 220 100 C280 102 330 92 370 96 L${X1} 96 V344 H${X0}Z" fill="${c.hill}" ${o(3)}/>`;
   if (p.building) s += nest(buildingSvg(p.building), 306, 84, 54);
-  s += `<path d="M-4 160 C110 154 250 158 370 152 V344 H-4Z" fill="${c.ground}" ${o(3)}/>`;
+  s += `<path d="M${X0} 160 L-4 160 C110 154 250 158 370 152 L${X1} 152 V344 H${X0}Z" fill="${c.ground}" ${o(3)}/>`;
 
   // 오두막 (TODO: 마을 레벨에 따라 건물 수·디자인 변경)
   s += glow(56, 138, 40, 'opacity=".7"');
@@ -265,7 +273,7 @@ export function villageSceneSvg(p: VillageSceneParams, fit: 'meet' | 'slice' = '
   });
 
   // 3. 마당: 이웃(양옆) · 솔이(가운데)
-  s += `<path d="M-4 180 C100 172 260 176 370 178 V344 H-4Z" fill="${c.yard}" ${o(3)}/>`;
+  s += `<path d="M${X0} 180 L-4 180 C100 172 260 176 370 178 L${X1} 178 V344 H${X0}Z" fill="${c.yard}" ${o(3)}/>`;
   s += `<path d="M14 196 l3 -9 l3 7 l3 -10 l3 12z M346 200 l3 -9 l3 7 l3 -10 l3 12z" fill="#3E7A3A" ${o(1.6)}/>`;
   const [near, far] = p.visitors;
   if (near) {
@@ -277,7 +285,7 @@ export function villageSceneSvg(p: VillageSceneParams, fit: 'meet' | 'slice' = '
   s += `<ellipse cx="183" cy="258" rx="40" ry="6" fill="#000" opacity=".28"/>` + nest(soliWithSkinSvg(p.soliMood, p.soliSkin ?? null), 128, 146, 110);
 
   // 4. 앞: 밭 5칸
-  s += `<path d="M-4 262 C120 258 250 260 370 258 V344 H-4Z" fill="${c.front}" ${o(3)}/>`;
+  s += `<path d="M${X0} 262 L-4 262 C120 258 250 260 370 258 L${X1} 258 V344 H${X0}Z" fill="${c.front}" ${o(3)}/>`;
   const W = 65.2;
   const Y = 272;
   const H = 58;
@@ -295,5 +303,6 @@ export function villageSceneSvg(p: VillageSceneParams, fit: 'meet' | 'slice' = '
     }
   }
 
-  return `<svg viewBox="0 0 366 340" preserveAspectRatio="xMidYMax ${fit}" xmlns="http://www.w3.org/2000/svg">${s}</svg>`;
+  const vb = geo.viewBox;
+  return `<svg viewBox="${vb.x.toFixed(2)} ${vb.y.toFixed(2)} ${vb.width.toFixed(2)} ${vb.height.toFixed(2)}" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">${s}</svg>`;
 }

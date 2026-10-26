@@ -4,14 +4,14 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { colors, fonts } from '../theme';
 
-type Props = { current: number; goal: number };
+type Props = { current: number; goal: number; height?: number };
 
 const fmt = (n: number) => n.toLocaleString('en-US');
 
-export function LevelBar({ current, goal }: Props) {
+export function LevelBar({ current, goal, height = 26 }: Props) {
   const pct = goal > 0 ? Math.min(1, Math.max(0, current / goal)) : 0;
   return (
-    <View style={styles.track} accessibilityLabel={`마을 경험치 ${current} / ${goal}`}>
+    <View style={[styles.track, { height, borderRadius: height / 2 }]} accessibilityLabel={`마을 경험치 ${current} / ${goal}`}>
       <View style={[styles.fill, { width: `${pct * 100}%` }]} />
       <Text style={styles.text}>
         {fmt(current)} / {fmt(goal)}
