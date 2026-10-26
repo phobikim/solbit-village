@@ -14,8 +14,8 @@ import { buildingSvg } from './skins';
 import { faceSvg, FACES, npcSvg, type NpcHair } from './neighbors';
 import { soliWithSkinSvg, type SoliMood } from './soli';
 import { wrap } from './svg';
-import { sceneGeometry } from '../layout';
-import { BOARD_RECT, villageSceneSvg, villageSkyTop, type VillageSceneParams } from './village';
+import { SCENE_PCT } from '../layout';
+import { villageSceneSvg, villageSkyTop, type VillageSceneParams } from './village';
 
 export type { IjangMood, NpcHair, SoliMood, VillageSceneParams };
 
@@ -77,35 +77,31 @@ export function BannerIcon({ color, pole, size, style }: IconProps & { color: st
 }
 
 /**
- * 메인 마을 무대. 부모 크기를 채우고, 땅 쪽(아래)을 기준으로 맞춘다.
+ * 메인 마을 무대. 4:3 고정 — 너비 × 3/4 높이로 그린다 (잘림 · 좌우 여백 없음).
  * 누르는 곳은 게시판 하나 (장부로 가기). 기록을 입력하는 장치는 두지 않는다 (규칙 5).
  */
 export const VillageScene = memo(function VillageScene({
+  width,
+  height,
   onBoardPress,
   ...scene
-}: VillageSceneParams & { onBoardPress?: () => void }) {
-  const [size, setSize] = useState<{ w: number; h: number } | null>(null);
-  const onLayout = (e: LayoutChangeEvent) => {
-    const { width, height } = e.nativeEvent.layout;
-    setSize((s) => (s && s.w === width && s.h === height ? s : { w: width, h: height }));
-  };
-  // 땅 쪽 층은 장면 너비 기준 비율로 아래에 붙고, 늘어나는 높이는 하늘만 흡수한다 (layout.ts)
-  const geo = useMemo(() => (size ? sceneGeometry(size.w, size.h) : null), [size]);
-  const xml = useMemo(() => (geo ? villageSceneSvg(scene, geo) : ''), [scene, geo]);
+}: VillageSceneParams & { width: number; height: number; onBoardPress?: () => void }) {
+  const xml = useMemo(() => villageSceneSvg(scene), [scene]);
+  const hit = SCENE_PCT.boardHit;
   return (
-    <View style={[StyleSheet.absoluteFill, { backgroundColor: villageSkyTop(scene.timeOfDay) }]} onLayout={onLayout}>
-      {size && xml !== '' && <SvgXml xml={xml} width={size.w} height={size.h} />}
-      {size && geo && onBoardPress && (
+    <View style={{ width, height, backgroundColor: villageSkyTop(scene.timeOfDay) }}>
+      <SvgXml xml={xml} width={width} height={height} />
+      {onBoardPress && (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="마을 게시판 (장부 대소사)"
           onPress={onBoardPress}
           style={{
             position: 'absolute',
-            left: (BOARD_RECT.x - geo.viewBox.x) * geo.k,
-            top: (BOARD_RECT.y - geo.viewBox.y) * geo.k,
-            width: BOARD_RECT.width * geo.k,
-            height: BOARD_RECT.height * geo.k,
+            left: (width * hit.x0) / 100,
+            top: (height * hit.y0) / 100,
+            width: (width * (hit.x1 - hit.x0)) / 100,
+            height: (height * (hit.y1 - hit.y0)) / 100,
           }}
         />
       )}

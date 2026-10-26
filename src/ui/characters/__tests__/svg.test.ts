@@ -4,15 +4,14 @@ import { workColor } from '../../theme';
 import { cropIconSvg } from '../crops';
 import { ijangSvg } from '../ijang';
 import { FACES, faceSvg, npcSvg } from '../neighbors';
+import { fieldCellSvg } from '../fieldStrip';
 import { buildingSvg } from '../skins';
 import { soliSkinBackSvg, soliSkinSvg, soliSvg } from '../soli';
-import { sceneGeometry } from '../../layout';
 import { villageSceneSvg, type VillageSceneParams } from '../village';
 
 const base: VillageSceneParams = {
   timeOfDay: 'night',
   weather: 'cloud',
-  plots: [null, null, null, null, null],
   soliMood: 'normal',
   visitors: [],
   board: [],
@@ -59,7 +58,7 @@ describe('village scene', () => {
     }
   });
 
-  it('draws every crop at every stage', () => {
+  it('draws every crop at every stage (밭 띠 칸)', () => {
     const plots: PlotSlot[] = [
       { crop: 'sunflower', stage: 3 },
       { crop: 'strawberry', stage: 3 },
@@ -67,7 +66,18 @@ describe('village scene', () => {
       { crop: 'mushroom', stage: 3 },
       { crop: 'potato', stage: 1 },
     ];
-    expect(villageSceneSvg({ ...base, plots })).not.toMatch(bad);
+    for (const time of ['day', 'night'] as const) {
+      for (const slot of [...plots, null]) expect(fieldCellSvg(slot, time)).not.toMatch(bad);
+    }
+    // 칸마다 viewBox가 있고, 익은 작물(3일차)에는 빛이 있다
+    expect(fieldCellSvg(plots[0], 'day')).toContain('viewBox="0 0 60 52"');
+    expect(fieldCellSvg(plots[0], 'day')).toContain('opacity=".28"');
+    expect(fieldCellSvg(plots[4], 'day')).not.toContain('opacity=".28"');
+  });
+
+  it('장면에는 밭이 없다 (밭 띠로 뺐다)', () => {
+    const svg = villageSceneSvg(base);
+    expect(svg).not.toContain('rx="12" fill');
   });
 
   it('board: 빈 게시판 쪽지 / 쪽지 이름 이스케이프 · 길면 말줄임 / 오늘 도장', () => {
@@ -79,12 +89,21 @@ describe('village scene', () => {
     expect(villageSceneSvg({ ...base, board: [{ type: 'travel', dday: 'D-DAY', name: 'x' }], boardToday: true })).toContain('오늘!');
   });
 
-  it('칸에 맞춘 viewBox: 땅은 아래에 붙고 늘어난 높이는 하늘이 가져간다', () => {
-    const tall = villageSceneSvg(base, sceneGeometry(342, 500));
-    expect(tall).toContain('preserveAspectRatio="xMidYMax meet"');
-    const vb = /viewBox="([-\d. ]+)"/.exec(tall)![1].split(' ').map(Number);
-    expect(vb[1] + vb[3]).toBeCloseTo(340, 1); // 아래 끝은 그대로
-    expect(vb[3]).toBeGreaterThan(340); // 위로 더 보인다 (하늘)
+  it('4:3 고정 viewBox (400 x 300), 여백 없이 꽉 채운다', () => {
+    const svg = villageSceneSvg(base);
+    expect(svg).toContain('viewBox="0 0 400 300"');
+    expect(svg).not.toMatch(bad);
+  });
+
+  it('이웃 · 하트 · 건물 스킨 · 야근 등불이 있어도 깨지지 않는다', () => {
+    const svg = villageSceneSvg({
+      ...base,
+      visitors: [{ face: 1, heart: true }, { face: 5 }],
+      lanternOn: true,
+      bloom: 1,
+      building: 'roof',
+    });
+    expect(svg).not.toMatch(bad);
   });
 });
 

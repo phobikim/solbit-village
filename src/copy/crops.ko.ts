@@ -30,6 +30,10 @@ export const CROP_REASON: Record<CropKind, string> = {
 
 export const GROW_HINT = '사흘 뒤에 보슈.';
 
+/** 밭 띠 칸 상태 글자 (메인). 1일차 새싹 · 2일차 자라는 중 · 3일차는 다음 날 자동 수확 */
+export const PLOT_STAGE_LABEL = { 1: '새싹', 2: '자라는 중', 3: '내일 수확' } as const;
+export const PLOT_EMPTY_LABEL = '빈 밭';
+
 const METHOD_LABEL = { call: '통화', meet: '만남', message: '메시지' } as const;
 
 /** 씨앗 결과(9b) 위 작은 칩 — 그날 무슨 일이 있었는지 */

@@ -1,52 +1,87 @@
-// 메인 화면(7a) 레이아웃 — 화면 높이 비율 기준. 메인은 스크롤이 없다.
-// 고정 요소를 먼저 놓고 남는 높이는 전부 마을 장면이 가져간다. 장면이 사용 가능 높이의 40%보다 작으면 압축한다.
-// 이 파일은 RN을 import하지 않는다 (순수 계산 + 상수 → 단위 테스트).
+// 메인 화면(7a) 레이아웃 — 고정 규칙. 이 파일은 RN을 import하지 않는다 (순수 계산 + 상수 → 단위 테스트).
+//
+// 구성 순서: 헤더 → 방송 → 마을 장면 → 지수 → 밭 띠 → 오늘 기록하기 → 탭 바
+// 마을 장면은 4:3 고정 (너비 = 콘텐츠 영역 전체, 높이 = 너비 × 3/4). 장면 비율은 절대 바꾸지 않고,
+// 높이가 모자라면 나머지 요소를 압축한다. 그래도 안 들어가면 메인만 스크롤 (탭 바 고정).
 
 // ── 요소 높이 (pt) — 기본 / 압축 ─────────────────────────────────────────
 
 export const MAIN_LAYOUT = {
-  /** 헤더: 마을 이름 · Lv · 성장 바. 3단계부터 부제를 숨긴다 */
-  header: { full: 76, compact: 60 },
+  /** 헤더: 마을 이름 + Lv 한 줄 + 성장 바 (부제 없음) */
+  header: 64,
   /** 방송: 2줄 / 1줄 말줄임 (탭하면 펼침) */
   broadcast: { full: 68, compact: 44 },
-  /** 지수 카드: 기본(링 + 숫자 + 문구) / 문구 제거(링 + 숫자) / 한 줄 띠(아이콘 + 숫자, 링 없음). 지수 색은 늘 유지 */
+  /** 지수: 기본(링 + 숫자 + 문구) / 문구 제거(링 + 숫자) / 한 줄 띠(아이콘 + 숫자, 링 없음). 지수 색은 늘 유지 */
   indices: { full: 96, ring: 72, strip: 44 },
+  /** 밭 띠: 기본(그림 + 상태 글자) / 압축(글자 숨김) */
+  field: { full: 72, compact: 56 },
   /** 오늘 기록하기 */
   cta: { full: 56, compact: 52 },
-  /** 탭 바 (하단 안전 영역은 따로 더한다) */
+  /** 탭 바 (하단 안전 영역은 따로 더한다). 항상 고정 */
   tabBar: 76,
   /** 요소 사이 간격 */
   gap: { full: 10, compact: 8 },
-  /** 간격이 들어가는 곳: 헤더|방송 · 방송|장면 · 장면|지수 · 지수|기록 버튼 */
-  gapCount: 4,
+  /** 간격이 들어가는 곳: 헤더|방송 · 방송|장면 · 장면|지수 · 지수|밭 띠 · 밭 띠|기록 버튼 */
+  gapCount: 5,
+  /** 콘텐츠 영역 좌우 여백 */
+  sidePadding: 16,
 } as const;
 
-/** 마을 장면은 사용 가능 높이의 이 비율 이상이어야 한다. 부족하면 압축 */
-export const SCENE_MIN_RATIO = 0.4;
-/** 압축을 다 해도 장면은 이만큼은 남긴다 */
-export const SCENE_MIN_HEIGHT = 220;
+/** 웹에서 앱 틀의 최대 너비 (app/_layout.tsx frame.maxWidth) */
+export const APP_MAX_WIDTH = 430;
 
-// ── 장면 내부 ───────────────────────────────────────────────────────────
+// ── 마을 장면: 4:3 고정, 장면 크기 대비 % 좌표 ───────────────────────────
 
-/** 장면 그림 원본 좌표계 (village.ts의 viewBox 0 0 366 340) */
-export const SCENE_UNITS = { width: 366, height: 340 } as const;
-/** 땅 쪽 층(원경 · 중경 · 마당 · 전경)이 시작하는 y. 이 아래는 장면 너비 기준 비율로 크기가 정해진다 */
-export const SCENE_GROUND_TOP = 85;
-export const SCENE_GROUND_UNITS = SCENE_UNITS.height - SCENE_GROUND_TOP;
-/** 하늘 층 원래 높이 (원본 좌표). 해 · 구름 · 별 · 비 · 번개가 이 안에 그려진다 */
-export const SCENE_SKY_UNITS = SCENE_GROUND_TOP;
-/** 하늘은 줄어도 이만큼(pt)은 남긴다 */
-export const SCENE_SKY_MIN = 40;
+/** 높이 / 너비 */
+export const SCENE_RATIO = 3 / 4;
+/** 장면 그림 좌표계 (4:3). 아래 % 좌표를 이 좌표로 바꿔 그린다 */
+export const SCENE_VIEW = { width: 400, height: 300 } as const;
+
+/** 장면 안 배치 (장면 너비 · 높이 대비 %). x는 너비 기준, y는 높이 기준, bottom은 바닥선 y */
+export const SCENE_PCT = {
+  /** 하늘 (해 · 구름 · 별 · 비 · 번개) */
+  sky: { top: 0, bottom: 35 },
+  /**
+   * 원경 (언덕). 하루별 원경(출근 · 여행 · 쉬는 날)도 같은 영역을 쓴다.
+   * TODO: 하루별 원경 그림은 아직 코드에 없다 — 생기면 이 영역에 그린다.
+   */
+  far: { top: 28, bottom: 48 },
+  /** 땅 시작 y */
+  groundTop: 52,
+  house: { x0: 4, x1: 30, bottom: 60 },
+  board: { x0: 32, x1: 56, bottom: 60 },
+  creek: { x0: 60, x1: 96, y0: 52, y1: 62 },
+  /** 솔이: 가운데, 바닥 96%, 너비 30% */
+  soli: { cx: 50, bottom: 96, width: 30 },
+  /** 놀러 온 이웃: 가까운 이웃 18%, 먼 이웃 82%, 바닥 94%, 너비 16% */
+  neighbors: { cx: [18, 82] as const, bottom: 94, width: 16 },
+  /** 게시판을 누르는 영역 (게시판 간판 부분) */
+  boardHit: { x0: 32, x1: 56, y0: 38, y1: 60 },
+} as const;
+
+/** 장면 % → 그림 좌표 */
+export const sx = (pct: number) => (SCENE_VIEW.width * pct) / 100;
+export const sy = (pct: number) => (SCENE_VIEW.height * pct) / 100;
+
+/** 콘텐츠 영역 너비 = 보이는 너비(웹은 앱 틀 최대 너비로 제한) − 좌우 여백 */
+export function contentWidth(windowWidth: number): number {
+  return Math.max(0, Math.min(windowWidth, APP_MAX_WIDTH) - MAIN_LAYOUT.sidePadding * 2);
+}
+
+/** 장면 높이 = 너비 × 3/4 */
+export function sceneHeight(width: number): number {
+  return Math.round(width * SCENE_RATIO * 100) / 100;
+}
 
 // ── 메인 레이아웃 계산 ──────────────────────────────────────────────────
 
 /**
- * 압축 단계
- * 0 기본: 지수 96 (링 + 숫자 + 문구), 방송 2줄
- * 1 지수 문구 제거(72, 링 + 숫자) + 방송 1줄 말줄임
- * 2 지수를 한 줄 띠로(44, 아이콘 + 숫자)
- * 3 헤더 부제 숨김 + 간격 8 (기록 버튼 52)
- * 4 장면 최소 220 유지 + 장면 안에서 땅 층 축소 (장면은 위를 자르지 않는다)
+ * 압축 단계 (장면 비율은 절대 바꾸지 않는다)
+ * 0 기본: 지수 96, 방송 2줄, 밭 띠 72 (글자 있음)
+ * 1 지수 문구 제거 (96 → 72)
+ * 2 방송 1줄 + 지수 한 줄 띠(44) + 밭 띠 56 (글자 숨김)
+ * 3 간격 8, 기록 버튼 52
+ * 4 그래도 안 들어가면 메인 스크롤 허용 (탭 바는 고정). 크기는 3단계와 같다.
  */
 export type CompactStep = 0 | 1 | 2 | 3 | 4;
 export type IndexVariant = 'full' | 'ring' | 'strip';
@@ -56,123 +91,77 @@ export type MainLayout = {
   /** 사용 가능 높이: 보이는 높이 − 위 안전 영역 − (탭 바 + 아래 안전 영역) */
   available: number;
   header: number;
-  showTagline: boolean;
   broadcast: number;
   broadcastLines: 1 | 2;
+  /** 마을 장면: 너비 × 3/4 */
+  sceneWidth: number;
+  scene: number;
   indices: number;
   indexVariant: IndexVariant;
+  field: number;
+  /** 밭 띠 칸마다 상태 글자를 보이는가 */
+  fieldLabels: boolean;
   cta: number;
   gap: number;
-  /** 마을 장면 높이 (남는 높이 전부) */
-  scene: number;
-  /** 장면 / 사용 가능 높이 */
-  sceneRatio: number;
+  /** 요소 + 간격 + 장면을 다 더한 높이 */
+  content: number;
+  /** content > available이면 메인 스크롤 (4단계) */
+  scroll: boolean;
 };
 
 type Pick = {
-  header: number;
-  tagline: boolean;
   broadcast: number;
   lines: 1 | 2;
   indices: number;
   variant: IndexVariant;
+  field: number;
+  labels: boolean;
   cta: number;
   gap: number;
 };
 
-const total = (p: Pick) => p.header + p.broadcast + p.indices + p.cta + p.gap * MAIN_LAYOUT.gapCount;
-
-const L = MAIN_LAYOUT;
+const M = MAIN_LAYOUT;
 const STEPS: readonly Pick[] = [
-  { header: L.header.full, tagline: true, broadcast: L.broadcast.full, lines: 2, indices: L.indices.full, variant: 'full', cta: L.cta.full, gap: L.gap.full },
-  { header: L.header.full, tagline: true, broadcast: L.broadcast.compact, lines: 1, indices: L.indices.ring, variant: 'ring', cta: L.cta.full, gap: L.gap.full },
-  { header: L.header.full, tagline: true, broadcast: L.broadcast.compact, lines: 1, indices: L.indices.strip, variant: 'strip', cta: L.cta.full, gap: L.gap.full },
-  { header: L.header.compact, tagline: false, broadcast: L.broadcast.compact, lines: 1, indices: L.indices.strip, variant: 'strip', cta: L.cta.compact, gap: L.gap.compact },
+  { broadcast: M.broadcast.full, lines: 2, indices: M.indices.full, variant: 'full', field: M.field.full, labels: true, cta: M.cta.full, gap: M.gap.full },
+  { broadcast: M.broadcast.full, lines: 2, indices: M.indices.ring, variant: 'ring', field: M.field.full, labels: true, cta: M.cta.full, gap: M.gap.full },
+  { broadcast: M.broadcast.compact, lines: 1, indices: M.indices.strip, variant: 'strip', field: M.field.compact, labels: false, cta: M.cta.full, gap: M.gap.full },
+  { broadcast: M.broadcast.compact, lines: 1, indices: M.indices.strip, variant: 'strip', field: M.field.compact, labels: false, cta: M.cta.compact, gap: M.gap.compact },
 ];
 
+const fixedOf = (p: Pick) => M.header + p.broadcast + p.indices + p.field + p.cta + p.gap * M.gapCount;
+
 /**
- * 보이는 높이와 안전 영역으로 메인 레이아웃을 정한다.
- * 장면이 40% 미만이면 단계를 올린다 (위 CompactStep). 3단계까지 40%에 못 미치면 4단계:
- * 장면 최소 220을 지키고, 모자란 만큼은 장면 안에서 하늘 → 땅 층 순서로 줄인다 (sceneGeometry).
+ * 보이는 높이 · 안전 영역 · 콘텐츠 너비로 메인 레이아웃을 정한다.
+ * 장면(너비 × 3/4)을 먼저 놓고, 나머지 요소가 들어갈 때까지 단계를 올린다. 3단계로도 안 들어가면 4단계(스크롤).
  */
-export function mainLayout(visibleHeight: number, insetTop: number, insetBottom: number): MainLayout {
-  const available = Math.max(0, visibleHeight - insetTop - L.tabBar - insetBottom);
+export function mainLayout(visibleHeight: number, insetTop: number, insetBottom: number, width: number): MainLayout {
+  const available = Math.max(0, visibleHeight - insetTop - M.tabBar - insetBottom);
+  const scene = sceneHeight(width);
   let step: CompactStep = 4;
   let chosen = STEPS[STEPS.length - 1];
   for (let i = 0; i < STEPS.length; i++) {
-    if (available - total(STEPS[i]) >= available * SCENE_MIN_RATIO) {
+    if (fixedOf(STEPS[i]) + scene <= available) {
       step = i as CompactStep;
       chosen = STEPS[i];
       break;
     }
   }
-  const scene = Math.max(step === 4 ? SCENE_MIN_HEIGHT : 0, available - total(chosen));
+  const content = fixedOf(chosen) + scene;
   return {
     step,
     available,
-    header: chosen.header,
-    showTagline: chosen.tagline,
+    header: M.header,
     broadcast: chosen.broadcast,
     broadcastLines: chosen.lines,
+    sceneWidth: width,
+    scene,
     indices: chosen.indices,
     indexVariant: chosen.variant,
+    field: chosen.field,
+    fieldLabels: chosen.labels,
     cta: chosen.cta,
     gap: chosen.gap,
-    scene,
-    sceneRatio: available > 0 ? scene / available : 0,
+    content,
+    scroll: step === 4,
   };
-}
-
-// ── 장면 기하 ───────────────────────────────────────────────────────────
-
-export type SceneGeometry = {
-  /** 원본 1단위 = k pt */
-  k: number;
-  /** 화면에 보이는 원본 좌표 범위 (viewBox). 아래 끝은 늘 원본 아래 끝(340)이고 위는 절대 자르지 않는다 */
-  viewBox: { x: number; y: number; width: number; height: number };
-  /** 보이는 하늘 높이 (원본 단위) */
-  skyUnits: number;
-  /** 보이는 하늘 높이 (pt) */
-  skyPx: number;
-};
-
-/** 원본 그대로 (366 × 340) */
-export const DEFAULT_SCENE_GEOMETRY: SceneGeometry = {
-  k: 1,
-  viewBox: { x: 0, y: 0, width: SCENE_UNITS.width, height: SCENE_UNITS.height },
-  skyUnits: SCENE_SKY_UNITS,
-  skyPx: SCENE_SKY_UNITS,
-};
-
-/**
- * 장면 칸(너비 × 높이, pt)에 그림을 맞춘다. 칸이 어떤 크기여도 하늘(날씨) · 집 · 게시판 · 솔이 · 밭 5칸이 다 보인다.
- * - 땅 쪽 층은 장면 너비 기준 비율(k = 너비 / 366)로 크기가 정해지고 아래에 붙는다.
- * - 칸이 더 높으면 늘어난 만큼은 하늘이 가져간다.
- * - 칸이 낮으면 하늘이 먼저 줄고 (최소 40pt), 그래도 모자라면 땅 층 전체를 비율 그대로 줄인다.
- *   이때 남는 좌우는 그리지 않아 장면 배경색이 보인다 (viewBox가 366보다 넓어지고 그림은 가운데).
- */
-export function sceneGeometry(width: number, height: number): SceneGeometry {
-  const w = Math.max(1, width);
-  const h = Math.max(1, height);
-  const k = Math.max(0.05, Math.min(w / SCENE_UNITS.width, (h - SCENE_SKY_MIN) / SCENE_GROUND_UNITS));
-  const vbW = w / k;
-  const vbH = h / k;
-  const skyUnits = vbH - SCENE_GROUND_UNITS;
-  return {
-    k,
-    viewBox: { x: (SCENE_UNITS.width - vbW) / 2, y: SCENE_UNITS.height - vbH, width: vbW, height: vbH },
-    skyUnits,
-    skyPx: skyUnits * k,
-  };
-}
-
-/**
- * 하늘 그림(해 · 달 · 구름 · 별 · 비 · 번개, 원본 좌표 y 0 ~ 85)을 보이는 하늘 안에 넣는 변환.
- * 보이는 하늘이 원래보다 낮으면 그림을 줄이고(scale), 어느 쪽이든 보이는 하늘 가운데로 옮긴다.
- * 변환: translate(cx, centerY) scale(scale) translate(-cx, -SKY_CENTER)
- */
-export const SKY_CENTER = SCENE_SKY_UNITS / 2;
-export function skyFit(geo: SceneGeometry): { scale: number; centerY: number } {
-  const visible = geo.skyUnits;
-  return { scale: Math.min(1, Math.max(0.2, visible / SCENE_SKY_UNITS)), centerY: SCENE_GROUND_TOP - visible / 2 };
 }

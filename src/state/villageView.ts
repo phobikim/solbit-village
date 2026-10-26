@@ -26,7 +26,7 @@ import {
 import { logContacts } from '../domain/fire';
 import { bestFriendOf, mergeContacts, villageVisitors, visitedFromYesterday } from '../domain/neighbors';
 import { recordHeadline } from '../domain/records';
-import type { Condition, DayRecord, IndexKind } from '../domain/types';
+import type { Condition, DayRecord, IndexKind, PlotSlot, TimeOfDay } from '../domain/types';
 import { levelFromXp, type LevelProgress } from '../domain/village';
 import { WEATHER_WINDOW_DAYS, weatherNow } from '../domain/weather';
 import type { SoliMood, VillageSceneParams } from '../ui/characters';
@@ -57,6 +57,9 @@ export type VillageView = {
   broadcast: string;
   scene: VillageSceneParams;
   indices: IndexCardView[];
+  /** 밭 5칸 (장면 밖 밭 띠) */
+  plots: PlotSlot[];
+  timeOfDay: TimeOfDay;
   recordedToday: boolean;
 };
 
@@ -128,7 +131,6 @@ export function useVillageView(today: DayKey, now: Date): VillageView {
     const scene: VillageSceneParams = {
       timeOfDay: timeOfDayAt(now),
       weather: weather ?? 'cloud',
-      plots: fieldSlots(farm.active, today),
       soliMood: latest ? MOOD[latest.condition] : 'normal',
       visitors,
       soliSkin: equippedSkin('soli', equipped),
@@ -164,6 +166,8 @@ export function useVillageView(today: DayKey, now: Date): VillageView {
       broadcast: broadcastText(situation),
       scene,
       indices,
+      plots: fieldSlots(farm.active, today),
+      timeOfDay: timeOfDayAt(now),
       recordedToday: !!todayRec,
     };
   }, [byDate, neighbors, farm, today, now, events, places, restLogs, owned, equipped]);

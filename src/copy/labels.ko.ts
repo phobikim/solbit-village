@@ -79,7 +79,6 @@ export const INDEX_EMPTY = '기록 전';
 export const RELATION_NO_NEIGHBORS = '이웃 없음';
 
 export const VILLAGE_NAME = '솔빛 마을';
-export const VILLAGE_TAGLINE = '아직 망하진 않음';
 
 export const TREND_LABEL: Record<TrendBand, string> = {
   up: '계속 오름',
