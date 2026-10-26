@@ -1,13 +1,12 @@
 import { rec } from '../__fixtures__/records';
 import {
-  achievementsOf,
   boardEvents,
   eventDaysInMonth,
   eventsInAWeek,
   eventsToday,
   eventsTomorrow,
   nextOccurrence,
-  pastItems,
+  pastEvents,
   upcomingEvents,
   type VillageEvent,
 } from '../events';
@@ -49,22 +48,11 @@ describe('행사', () => {
     expect(eventsTomorrow([ev('x', '2026-10-21'), ev('y', '2026-10-22')], today).map((e) => e.id)).toEqual(['x']);
   });
 
-  it('지나간 일: 지난 행사 + 성취, 최근 순 (일상 기록·시스템 기록은 없음)', () => {
-    const achievements = achievementsOf([
-      rec('2026-10-20', { achievement: '배포 완료', memo: '일상 메모' }),
-      rec('2026-10-10', { memo: '메모만' }),
-      rec('2026-10-05', { achievement: '시험 접수' }),
-    ]);
-    expect(achievements).toEqual([
-      { date: '2026-10-20', text: '배포 완료' },
-      { date: '2026-10-05', text: '시험 접수' },
-    ]);
-    const items = pastItems(events, achievements, today);
-    expect(items.map((i) => (i.kind === 'event' ? `e:${i.event.id}` : `a:${i.text}`))).toEqual([
-      'a:배포 완료',
-      'a:시험 접수',
-      'e:past',
-    ]);
+  it('지나간 일: 날짜가 지난 행사만, 최근 순 (성취 · 일상 기록 · 시스템 기록은 없음)', () => {
+    const items = pastEvents(events, today);
+    expect(items.map((i) => i.id)).toEqual(['past']);
+    const more = [ev('old', '2026-09-01'), ev('mid', '2026-10-10'), ev('newer', '2026-10-19'), ev('later', '2026-10-25')];
+    expect(pastEvents(more, today).map((i) => i.id)).toEqual(['newer', 'mid', 'old']);
   });
 });
 
@@ -200,7 +188,7 @@ describe('매년 반복 (생일·기념일)', () => {
     const mom = ev('엄마 생신', '2025-10-21', 0, true);
     expect(upcomingEvents([mom], today)[0].date).toBe('2026-10-21');
     expect(eventsTomorrow([mom], today).length).toBe(1);
-    expect(pastItems([mom], [], today)).toEqual([]);
+    expect(pastEvents([mom], today)).toEqual([]);
   });
 });
 

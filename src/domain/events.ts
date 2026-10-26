@@ -1,9 +1,8 @@
-// 행사 D-day · 마을 게시판 · 지나간 일 (SPEC 8장). 이장네 장부에는 행사와 성취만 적는다.
+// 행사 D-day · 마을 게시판 · 지나간 일 (SPEC 8장). 이장네 장부에는 행사만 적는다.
 // 일상 기록과 시스템 기록(자동 수확, 레벨업)은 장부에 넣지 않는다.
 // 디자인 v5 TURN 11 [확정 2026-10-21]: 현수막 대신 마을 게시판에 가까운 행사 최대 3개를 쪽지로 붙인다.
 
 import { addDays, daysBetween, type DayKey } from './day';
-import type { DayRecord } from './types';
 
 /** 행사 분류 5종 (디자인 11a) */
 export type EventType = 'travel' | 'birth' | 'work' | 'meet' | 'etc';
@@ -97,30 +96,9 @@ export function eventsInAWeek(events: readonly VillageEvent[], today: DayKey): V
   return upcomingEvents(events, today).filter((e) => e.date === week);
 }
 
-export type PastItem =
-  | { kind: 'event'; date: DayKey; event: VillageEvent }
-  | { kind: 'achievement'; date: DayKey; text: string };
-
-export type Achievement = { date: DayKey; text: string };
-
-/** 기록 → 장부에 올라갈 성취 */
-export function achievementsOf(records: readonly DayRecord[]): Achievement[] {
-  return records.filter((r) => r.achievement).map((r) => ({ date: r.date, text: r.achievement as string }));
-}
-
-/**
- * 지나간 일: 날짜가 지난 행사(자동 이동, 매년 반복은 제외) + 기록 시트의 "오늘의 성취". 최근 순.
- */
-export function pastItems(
-  events: readonly VillageEvent[],
-  achievements: readonly Achievement[],
-  today: DayKey,
-): PastItem[] {
-  const items: PastItem[] = [
-    ...events
-      .filter((e) => !e.repeatYearly && daysBetween(today, e.date) < 0)
-      .map((e) => ({ kind: 'event' as const, date: e.date, event: e })),
-    ...achievements.map((a) => ({ kind: 'achievement' as const, date: a.date, text: a.text })),
-  ];
-  return items.sort((a, b) => b.date.localeCompare(a.date) || (a.kind === 'event' ? -1 : 1));
+/** 지나간 일: 날짜가 지난 행사 (자동 이동, 매년 반복은 제외). 최근 순. */
+export function pastEvents(events: readonly VillageEvent[], today: DayKey): VillageEvent[] {
+  return events
+    .filter((e) => !e.repeatYearly && daysBetween(today, e.date) < 0)
+    .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt);
 }

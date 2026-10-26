@@ -1,13 +1,13 @@
-// 12b 장부 · 대소사: 다가오는 행사 + 지나간 일(지난 행사 · 성취). 일상·시스템 기록은 넣지 않는다.
-// 머리에 정리 · + 등록 (디자인 v7). 정리 모드(13b)에서는 행사 줄 끝 휴지통. 성취는 기록 시트에서 고친다.
+// 12b 장부 · 대소사: 다가오는 행사 + 지나간 일(지난 행사, 아이콘 없이). 일상·시스템 기록은 넣지 않는다.
+// 머리에 정리 · + 등록 (디자인 v7). 정리 모드(13b)에서는 행사 줄 끝 휴지통.
 
 import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { ACHIEVEMENT_LABEL, EVENT_TYPE_COLOR, EVENT_TYPE_LABEL, LEDGER_EMPTY, WEEKDAYS } from '../../copy/labels.ko';
+import { EVENT_TYPE_COLOR, EVENT_TYPE_LABEL, LEDGER_EMPTY, WEEKDAYS } from '../../copy/labels.ko';
 import { dDayLabel, parseDayKey, weekdayOf, type DayKey } from '../../domain/day';
-import { BOARD_MAX, pastItems, upcomingEvents, type VillageEvent } from '../../domain/events';
+import { BOARD_MAX, pastEvents, upcomingEvents, type VillageEvent } from '../../domain/events';
 import { BannerIcon, EventIcon } from '../characters';
 import { colors, fonts } from '../theme';
 import { TidyButton } from './TidyButton';
@@ -31,7 +31,6 @@ export function openEventSheet(id?: string) {
 type Props = {
   today: DayKey;
   events: readonly VillageEvent[];
-  achievements: readonly { date: DayKey; text: string }[];
   /** 처음 불러오기 전에는 빈 문구를 띄우지 않는다 */
   loaded: boolean;
   tidy: boolean;
@@ -39,9 +38,9 @@ type Props = {
   onDelete: (e: VillageEvent) => void;
 };
 
-export function LedgerEvents({ today, events, achievements, loaded, tidy, onToggleTidy, onDelete }: Props) {
+export function LedgerEvents({ today, events, loaded, tidy, onToggleTidy, onDelete }: Props) {
   const upcoming = upcomingEvents(events, today);
-  const past = useMemo(() => pastItems(events, achievements, today), [events, achievements, today]);
+  const past = useMemo(() => pastEvents(events, today), [events, today]);
 
   return (
     <View style={styles.wrap}>
@@ -83,42 +82,21 @@ export function LedgerEvents({ today, events, achievements, loaded, tidy, onTogg
       ))}
 
       {past.length > 0 && <Text style={[styles.section, { marginTop: 8 }]}>지나간 일</Text>}
-      {past.map((p) =>
-        p.kind === 'event' ? (
-          <Pressable key={`e${p.event.id}`} disabled={tidy} onPress={() => openEventSheet(p.event.id)} style={[styles.card, styles.cardPast]}>
-            <View style={styles.icon}>
-              <EventIcon type={p.event.type} size={30} />
+      {/* 지나간 일: 아이콘 없이 이름 · 분류 · 날짜만 */}
+      {past.map((ev) => (
+        <Pressable key={ev.id} disabled={tidy} onPress={() => openEventSheet(ev.id)} style={[styles.card, styles.cardPast]}>
+          <View style={styles.body}>
+            <View style={styles.nameRow}>
+              <Text style={styles.name} numberOfLines={1}>
+                {ev.name}
+              </Text>
+              <Text style={[styles.badge, { color: EVENT_TYPE_COLOR[ev.type] }]}>{EVENT_TYPE_LABEL[ev.type]}</Text>
             </View>
-            <View style={styles.body}>
-              <View style={styles.nameRow}>
-                <Text style={styles.name} numberOfLines={1}>
-                  {p.event.name}
-                </Text>
-                <Text style={[styles.badge, { color: EVENT_TYPE_COLOR[p.event.type] }]}>
-                  {EVENT_TYPE_LABEL[p.event.type]}
-                </Text>
-              </View>
-            </View>
-            <Text style={styles.pastDate}>{md(p.date)}</Text>
-            {tidy && <TrashButton label={p.event.name} onPress={() => onDelete(p.event)} />}
-          </Pressable>
-        ) : (
-          <View key={`a${p.date}`} style={styles.card}>
-            <View style={styles.icon}>
-              <BannerIcon color={EVENT_TYPE_COLOR.achievement} size={28} />
-            </View>
-            <View style={styles.body}>
-              <View style={styles.nameRow}>
-                <Text style={styles.name} numberOfLines={2}>
-                  {p.text}
-                </Text>
-                <Text style={[styles.badge, { color: EVENT_TYPE_COLOR.achievement }]}>{ACHIEVEMENT_LABEL}</Text>
-              </View>
-            </View>
-            <Text style={styles.pastDate}>{md(p.date)}</Text>
           </View>
-        ),
-      )}
+          <Text style={styles.pastDate}>{md(ev.date)}</Text>
+          {tidy && <TrashButton label={ev.name} onPress={() => onDelete(ev)} />}
+        </Pressable>
+      ))}
     </View>
   );
 }

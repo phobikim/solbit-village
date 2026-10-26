@@ -97,14 +97,13 @@ export const FREQUENCY_LABEL = { often: '자주', sometimes: '가끔', rarely: '
 export const EVENT_TYPE_LABEL = { travel: '여행', birth: '생일·기념일', work: '업무', meet: '약속', etc: '기타' } as const;
 /** 달력 범례용 짧은 이름 (디자인 7b) */
 export const EVENT_TYPE_SHORT = { travel: '여행', birth: '생일', work: '업무', meet: '약속', etc: '기타' } as const;
-/** 분류 색 (아이콘 · 칩) — 성취는 장부 '지나간 일' 표시 */
+/** 분류 색 (아이콘 · 칩) */
 export const EVENT_TYPE_COLOR = {
   travel: '#C49BFF',
   birth: '#FF4FA0',
   work: '#FFC23C',
   meet: '#A8EB5A',
   etc: '#5FD8FF',
-  achievement: '#FFE14D',
 } as const;
 /** 게시판 쪽지 종이 색 */
 export const EVENT_PAPER_COLOR = { travel: '#EBDDFF', birth: '#FFD6E9', work: '#FFEDBF', meet: '#E5F8CC', etc: '#D3F4FF' } as const;
@@ -116,7 +115,6 @@ export const EVENT_TYPE_LINE = {
   meet: '늦지 마슈. 이장은 늦어유.',
   etc: '적어두면 이장이 기억혀유. 장부가유.',
 } as const;
-export const ACHIEVEMENT_LABEL = '성취';
 /** 기록 시트: 일한 날 / 쉬는 날 (디자인 14a · 14b) */
 export const DAY_TYPE_LABEL = { work: '일한 날', rest: '쉬는 날' } as const;
 export const recordCopy = {

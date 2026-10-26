@@ -70,6 +70,20 @@ describe('monthGrid', () => {
     expect(g.length % 7).toBe(0);
     expect(g.filter(Boolean)).toHaveLength(31);
   });
+
+  it('모든 날짜가 자기 요일 칸(열)에 있다 — 달력은 7칸씩 줄로 그린다', () => {
+    for (let year = 2024; year <= 2028; year++) {
+      for (let month = 1; month <= 12; month++) {
+        const g = monthGrid({ year, month });
+        expect(g.length % 7).toBe(0);
+        g.forEach((key, i) => {
+          if (key) expect(i % 7).toBe(weekdayOf(key));
+        });
+      }
+    }
+    // 2026.10.26은 월요일
+    expect(weekdayOf('2026-10-26')).toBe(1);
+  });
 });
 
 describe('dDayLabel', () => {

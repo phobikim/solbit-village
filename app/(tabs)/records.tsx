@@ -1,5 +1,5 @@
 // 12a · 12b 장부 (기록 탭 + 이장네 장부, 디자인 TURN 12). 월간 달력(날씨·행사) 아래
-// 그날그날(날짜별 기록 카드) / 대소사(행사 · 성취)를 고른다. 기록은 SQLite에서 읽는다.
+// 그날그날(날짜별 기록 카드) / 대소사(행사)를 고른다. 기록은 SQLite에서 읽는다.
 
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -52,7 +52,6 @@ export default function LedgerScreen() {
   const byDate = useRecords((s) => s.byDate);
   const loadMonth = useRecords((s) => s.loadMonth);
   const events = useLedger((s) => s.events);
-  const achievements = useLedger((s) => s.achievements);
   const loaded = useLedger((s) => s.loaded);
   const loadLedger = useLedger((s) => s.load);
   const removeEvent = useLedger((s) => s.remove);
@@ -136,7 +135,6 @@ export default function LedgerScreen() {
           <LedgerEvents
             today={today}
             events={events}
-            achievements={achievements}
             loaded={loaded}
             tidy={tidy && events.length > 0}
             onToggleTidy={() => setTidy(!(tidy && events.length > 0))}

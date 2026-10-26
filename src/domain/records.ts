@@ -13,7 +13,7 @@ export const RECORD_EDIT_WINDOW_DAYS = 7;
 /** 여가 기본 칩 */
 export const LEISURE_PRESETS = ['산책', '운동', '영화', '휴식'] as const;
 
-/** 성취·메모·여가 직접 입력 최대 길이 */
+/** 메모·여가 직접 입력 최대 길이 */
 export const TEXT_MAX_LENGTH = 60;
 export const LEISURE_MAX_LENGTH = 12;
 
@@ -42,7 +42,6 @@ export type RecordDraft = {
   dayType: DayType;
   condition: Condition | null;
   work: WorkLevel | null;
-  achievement: string;
   memo: string;
   leisure: string[];
   /** 쉼 칸의 장작 크기 (쉼 칸에 적었을 때만 쓴다) */
@@ -54,7 +53,6 @@ export const emptyDraft = (dayType: DayType = 'work'): RecordDraft => ({
   dayType,
   condition: null,
   work: null,
-  achievement: '',
   memo: '',
   leisure: [],
   restSize: DEFAULT_REST_SIZE,
@@ -66,7 +64,6 @@ export function draftFromRecord(r: DayRecord, restSize: RestSize = DEFAULT_REST_
     dayType: r.dayType,
     condition: r.condition,
     work: r.work,
-    achievement: r.achievement ?? '',
     memo: r.memo ?? '',
     leisure: [...r.leisure],
     restSize,
@@ -99,7 +96,6 @@ export function normalizeDraft(
     condition: d.condition,
     dayType: d.dayType,
     work: d.work,
-    achievement: clean(d.achievement, TEXT_MAX_LENGTH),
     memo: clean(d.memo, TEXT_MAX_LENGTH),
     leisure,
     contacts,
@@ -124,7 +120,7 @@ export function restLogOfRecord(r: DayRecord, size: RestSize, id: string, existi
   };
 }
 
-/** 기록 카드에 보일 한 줄: 메모 → 성취 → 여가 → 없음 */
+/** 기록 카드에 보일 한 줄: 메모 → 여가 → 없음 */
 export function recordHeadline(r: DayRecord): string | null {
-  return r.memo ?? r.achievement ?? (r.leisure.length ? r.leisure.join(' · ') : null);
+  return r.memo ?? (r.leisure.length ? r.leisure.join(' · ') : null);
 }

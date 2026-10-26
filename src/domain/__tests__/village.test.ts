@@ -10,8 +10,8 @@ describe('마을 경험치: 기록 +10, 영역 입력마다 +5', () => {
     const r = rec('d', { contacts: [{ neighborId: 'a', method: 'meet' }], leisure: ['산책'] });
     expect(xpForRecord(r)).toBe(30);
   });
-  it('성취·메모는 영역이 아니라 경험치를 더 주지 않는다', () => {
-    expect(xpForRecord(rec('d', { achievement: '배포', memo: '메모' }))).toBe(20);
+  it('메모는 영역이 아니라 경험치를 더 주지 않는다', () => {
+    expect(xpForRecord(rec('d', { memo: '메모' }))).toBe(20);
   });
   it('고쳐서 줄어도 이미 받은 경험치는 그대로 (차이만 더 준다)', () => {
     expect(xpDelta(20, 30)).toBe(10);

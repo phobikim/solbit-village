@@ -1,8 +1,8 @@
-// 이장네 장부(행사 · 성취) · 스킨 스토어
+// 이장네 장부(행사) · 스킨 스토어
 
 import { create } from 'zustand';
 
-import { deleteEvent, listAchievements, listEvents, saveEvent } from '../data/events';
+import { deleteEvent, listEvents, saveEvent } from '../data/events';
 import { exchangeSkin, loadSkins, setSkinEquipped } from '../data/skins';
 import type { DayKey } from '../domain/day';
 import type { VillageEvent } from '../domain/events';
@@ -10,7 +10,6 @@ import { useFarm } from './farm';
 
 type LedgerState = {
   events: VillageEvent[];
-  achievements: { date: DayKey; text: string }[];
   loaded: boolean;
   load: () => Promise<void>;
   save: (e: VillageEvent) => Promise<void>;
@@ -19,11 +18,9 @@ type LedgerState = {
 
 export const useLedger = create<LedgerState>((set, get) => ({
   events: [],
-  achievements: [],
   loaded: false,
   async load() {
-    const [events, achievements] = await Promise.all([listEvents(), listAchievements()]);
-    set({ events, achievements, loaded: true });
+    set({ events: await listEvents(), loaded: true });
   },
   async save(e) {
     await saveEvent(e);

@@ -11,7 +11,6 @@ type RecordRow = {
   condition: number;
   day_type: string;
   work: number | null;
-  achievement: string | null;
   memo: string | null;
   leisure: string;
   created_at: number;
@@ -35,7 +34,6 @@ function toRecord(row: RecordRow, contacts: Contact[]): DayRecord {
     condition: row.condition as Condition,
     dayType: (row.day_type === 'rest' ? 'rest' : 'work') as DayType,
     work: row.work === null ? null : (row.work as WorkLevel),
-    achievement: row.achievement,
     memo: row.memo,
     leisure: parseLeisure(row.leisure),
     contacts,
@@ -74,13 +72,12 @@ export async function getDayRecord(date: DayKey): Promise<DayRecord | null> {
 /** 기록 저장 (같은 날이면 내용만 갱신). 연락 목록은 통째로 바꾼다. 트랜잭션 안에서 부른다. */
 export async function saveDayRecordTx(db: SQLiteDatabase, r: DayRecord): Promise<void> {
   await db.runAsync(
-    `INSERT INTO day_record (date, condition, day_type, work, achievement, memo, leisure, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO day_record (date, condition, day_type, work, memo, leisure, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(date) DO UPDATE SET
        condition = excluded.condition,
        day_type = excluded.day_type,
        work = excluded.work,
-       achievement = excluded.achievement,
        memo = excluded.memo,
        leisure = excluded.leisure,
        updated_at = excluded.updated_at`,
@@ -88,7 +85,6 @@ export async function saveDayRecordTx(db: SQLiteDatabase, r: DayRecord): Promise
     r.condition,
     r.dayType,
     r.work,
-    r.achievement,
     r.memo,
     JSON.stringify(r.leisure),
     r.createdAt,

@@ -37,8 +37,6 @@ export type DayRecord = {
   dayType: DayType;
   /** 일 강도. 일한 날은 필수, 쉬는 날은 적을 때만 (없으면 null) */
   work: WorkLevel | null;
-  /** 오늘의 성취 (선택, 장부로 감) */
-  achievement: string | null;
   memo: string | null;
   /** 여가 칩 이름 (기본 칩 + 직접 입력) */
   leisure: string[];

@@ -13,7 +13,7 @@ type Props = {
   condition: Condition;
   /** 쉬는 날에 일 강도를 안 적었으면 null */
   work: WorkLevel | null;
-  /** 메모·성취·여가 한 줄. 없으면 "기록만 한 날" */
+  /** 메모·여가 한 줄. 없으면 "기록만 한 날" */
   headline: string | null;
   weather: Weather | null;
   /** 있으면 눌러서 고칠 수 있음 */

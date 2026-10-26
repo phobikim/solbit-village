@@ -47,7 +47,7 @@ export type BroadcastContext = {
   leisureIndex: number | null;
   /** 최근 7일 기록 수 (여가 부족은 기록이 어느 정도 있을 때만) */
   recentRecordCount: number;
-  /** 오늘 기록이 있고, 성취·연락·여가·메모가 하나도 없음 */
+  /** 오늘 기록이 있고, 연락·여가·메모가 하나도 없음 */
   todayRecordOnly: boolean;
   bestFriendName: string | null;
   /** 오늘 정산한 자동 수확 작물 (없으면 빈 배열) */

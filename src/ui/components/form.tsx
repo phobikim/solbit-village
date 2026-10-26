@@ -60,6 +60,8 @@ export function DatePicker({
 }) {
   const [month, setMonth] = useState(() => yearMonthOf(value));
   const cells = monthGrid(month);
+  // 줄 단위로 그린다 (칸 너비를 %로 주면 7칸 합이 100%를 넘어 요일이 밀릴 수 있다)
+  const weeks = Array.from({ length: cells.length / 7 }, (_, w) => cells.slice(w * 7, w * 7 + 7));
   return (
     <View style={styles.cal}>
       <View style={styles.calHead}>
@@ -77,8 +79,10 @@ export function DatePicker({
         ))}
       </View>
       <View style={styles.calGrid}>
-        {cells.map((key, i) => {
-          if (!key) return <View key={`e${i}`} style={styles.calCell} />;
+        {weeks.map((week, w) => (
+          <View key={w} style={styles.calWeek}>
+        {week.map((key, i) => {
+          if (!key) return <View key={`e${w}-${i}`} style={styles.calCell} />;
           const disabled = (!!min && key < min) || (!!max && key > max);
           const on = key === value;
           return (
@@ -96,6 +100,8 @@ export function DatePicker({
             </Pressable>
           );
         })}
+          </View>
+        ))}
       </View>
     </View>
   );
@@ -148,8 +154,9 @@ const styles = StyleSheet.create({
   calMonth: { fontFamily: fonts.number, fontSize: 15, color: colors.text },
   calRow: { flexDirection: 'row' },
   calDow: { flex: 1, textAlign: 'center', fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.textMuted },
-  calGrid: { flexDirection: 'row', flexWrap: 'wrap' },
-  calCell: { width: `${100 / 7}%`, height: 34, alignItems: 'center', justifyContent: 'center', borderRadius: 12 },
+  calGrid: {},
+  calWeek: { flexDirection: 'row' },
+  calCell: { flex: 1, height: 34, alignItems: 'center', justifyContent: 'center', borderRadius: 12 },
   calDay: { fontFamily: fonts.number, fontSize: 13, color: colors.text },
   sub: { flex: 1, backgroundColor: colors.night },
   subHead: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingTop: 2, paddingBottom: 12 },

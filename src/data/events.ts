@@ -43,14 +43,6 @@ export function deleteEvent(id: string): Promise<void> {
   });
 }
 
-/** 성취가 적힌 기록 (지나간 일) */
-export async function listAchievements(): Promise<{ date: DayKey; text: string }[]> {
-  const db = await getDb();
-  return db.getAllAsync<{ date: string; text: string }>(
-    'SELECT date, achievement AS text FROM day_record WHERE achievement IS NOT NULL ORDER BY date DESC',
-  );
-}
-
 export function newId(prefix: string, now = Date.now()): string {
   return `${prefix}_${now.toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }

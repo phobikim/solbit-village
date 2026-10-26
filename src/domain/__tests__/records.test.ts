@@ -51,7 +51,6 @@ describe('기록 입력값', () => {
         dayType: 'work',
         condition: 3,
         work: 2,
-        achievement: '  ',
         memo: ' 산책함 ',
         leisure: ['산책', ' 산책 ', '', '독서'],
         restSize: 'firewood',
@@ -64,7 +63,7 @@ describe('기록 입력값', () => {
       200,
       { createdAt: 100 } as never,
     );
-    expect(r.achievement).toBeNull();
+    expect(r).not.toHaveProperty('achievement'); // 오늘의 성취는 없어졌다
     expect(r.memo).toBe('산책함');
     expect(r.leisure).toEqual(['산책', '독서']);
     expect(r.contacts).toEqual([
@@ -75,12 +74,11 @@ describe('기록 입력값', () => {
     expect(r.updatedAt).toBe(200);
   });
 
-  it('카드 한 줄: 메모 → 성취 → 여가 → 없음', () => {
+  it('카드 한 줄: 메모 → 여가 → 없음', () => {
     const base = normalizeDraft('2026-10-20', { ...emptyDraft(), condition: 2, work: 1 }, 1);
     expect(recordHeadline(base)).toBeNull();
     expect(recordHeadline({ ...base, leisure: ['산책', '영화'] })).toBe('산책 · 영화');
-    expect(recordHeadline({ ...base, achievement: '배포', leisure: ['산책'] })).toBe('배포');
-    expect(recordHeadline({ ...base, memo: '메모', achievement: '배포' })).toBe('메모');
+    expect(recordHeadline({ ...base, memo: '메모', leisure: ['산책'] })).toBe('메모');
   });
 });
 

@@ -1,7 +1,7 @@
 // 9a · 14a · 14b 오늘 기록 시트 (모달). 기록 입력은 이 시트 한곳에서만 한다 (CLAUDE.md 규칙 5).
 // ?date=YYYY-MM-DD 로 지난 기록(최근 7일)을 고칠 수 있다.
 // 맨 위에서 일한 날 / 쉬는 날을 고른다 (새 기록은 토 · 일이면 쉬는 날). 컨디션 · 한 줄 메모는 공통,
-// 일 강도 · 성취 · 누구와 · 쉼은 + 로 펼친다. 일한 날은 일 강도 · 성취, 쉬는 날은 쉼이 처음부터 펼쳐져 있다.
+// 일 강도 · 누구와 · 쉼은 + 로 펼친다. 일한 날은 일 강도, 쉬는 날은 쉼이 처음부터 펼쳐져 있다.
 
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState, type ReactNode } from 'react';
@@ -55,16 +55,16 @@ import { colors, fonts } from '../src/ui/theme';
 type Mode = 'loading' | 'create' | 'edit' | 'tooOld' | 'noBackfill';
 
 /** + 로 펼치는 칸 */
-type Extra = 'work' | 'achievement' | 'contacts' | 'leisure';
-const EXTRAS: readonly Extra[] = ['work', 'achievement', 'contacts', 'leisure'];
+type Extra = 'work' | 'contacts' | 'leisure';
+const EXTRAS: readonly Extra[] = ['work', 'contacts', 'leisure'];
 /** 일한 날 / 쉬는 날에 처음부터 펼쳐 두는 칸 (디자인 14a · 14b) */
-const OPEN_BY_DAY: Record<DayType, readonly Extra[]> = { work: ['work', 'achievement'], rest: ['leisure'] };
-const EXTRA_COLOR: Record<Extra, string> = { work: '#FF9A3C', achievement: colors.yellow, contacts: colors.relation, leisure: colors.leisure };
+const OPEN_BY_DAY: Record<DayType, readonly Extra[]> = { work: ['work'], rest: ['leisure'] };
+const EXTRA_COLOR: Record<Extra, string> = { work: '#FF9A3C', contacts: colors.relation, leisure: colors.leisure };
 
 /** 값이 들어 있는 칸은 늘 펼친다 */
 function filled(d: RecordDraft): Extra[] {
   return EXTRAS.filter((k) =>
-    k === 'work' ? d.work !== null : k === 'achievement' ? d.achievement.trim() !== '' : k === 'contacts' ? d.contacts.length > 0 : d.leisure.length > 0,
+    k === 'work' ? d.work !== null : k === 'contacts' ? d.contacts.length > 0 : d.leisure.length > 0,
   );
 }
 const openFor = (d: RecordDraft): Set<Extra> => new Set([...OPEN_BY_DAY[d.dayType], ...filled(d)]);
@@ -125,7 +125,7 @@ export default function RecordSheet() {
   const collapse = (k: Extra) => {
     setOpen((o) => new Set([...o].filter((x) => x !== k)));
     setDraft((d) =>
-      k === 'work' ? { ...d, work: null } : k === 'achievement' ? { ...d, achievement: '' } : k === 'contacts' ? { ...d, contacts: [] } : { ...d, leisure: [] },
+      k === 'work' ? { ...d, work: null } : k === 'contacts' ? { ...d, contacts: [] } : { ...d, leisure: [] },
     );
   };
   const expand = (k: Extra) => setOpen((o) => new Set([...o, k]));
@@ -197,22 +197,10 @@ export default function RecordSheet() {
       {body}
     </View>
   );
-  const EXTRA_TITLE: Record<Extra, string> = { work: '일 강도', achievement: '오늘의 성취', contacts: '누구와', leisure: '쉼' };
-  const EXTRA_ADD: Record<Extra, string> = { work: '일 강도', achievement: '성취', contacts: '누구와', leisure: '쉼' };
+  const EXTRA_TITLE: Record<Extra, string> = { work: '일 강도', contacts: '누구와', leisure: '쉼' };
+  const EXTRA_ADD: Record<Extra, string> = { work: '일 강도', contacts: '누구와', leisure: '쉼' };
   const extraBody: Record<Extra, () => ReactNode> = {
     work: () => <WorkPicker value={draft.work} onChange={(v) => update('work', v)} />,
-    achievement: () => (
-      <>
-        <Field
-          value={draft.achievement}
-          onChangeText={(t) => update('achievement', t)}
-          placeholder="오늘 해낸 일 한 줄"
-          maxLength={TEXT_MAX_LENGTH}
-          returnKeyType="done"
-        />
-        <Text style={styles.hintText}>적으면 이장네 장부에 올라갑니다</Text>
-      </>
-    ),
     contacts: () =>
       neighbors.length > 0 ? (
         <NeighborPicker neighbors={neighbors} value={draft.contacts} onChange={(v) => update('contacts', v)} />
@@ -242,7 +230,7 @@ export default function RecordSheet() {
     ),
   };
   // 펼친 칸은 그날 종류의 기본 칸부터
-  const order: readonly Extra[] = draft.dayType === 'work' ? ['work', 'achievement', 'contacts', 'leisure'] : ['leisure', 'contacts', 'achievement', 'work'];
+  const order: readonly Extra[] = draft.dayType === 'work' ? ['work', 'contacts', 'leisure'] : ['leisure', 'contacts', 'work'];
   const opened = order.filter((k) => open.has(k));
   const closed = order.filter((k) => !open.has(k));
 

@@ -2,9 +2,9 @@
 
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { EVENT_TYPE_LABEL, EVENT_TYPE_SHORT, WEATHER_NAME, WEEKDAYS } from '../../copy/labels.ko';
+import { EVENT_TYPE_LABEL, WEATHER_NAME, WEEKDAYS } from '../../copy/labels.ko';
 import { daysBetween, monthGrid, parseDayKey, type DayKey, type YearMonth } from '../../domain/day';
-import { EVENT_TYPES, type EventType } from '../../domain/events';
+import type { EventType } from '../../domain/events';
 import type { Weather } from '../../domain/types';
 import { EventIcon, WeatherIcon } from '../characters';
 import { colors, fonts } from '../theme';
@@ -20,10 +20,10 @@ type Props = {
   onDayPress?: (day: DayKey) => void;
 };
 
-const LEGEND: Weather[] = ['sun', 'cloud', 'over', 'rain', 'storm'];
-
 export function MonthCalendar({ month, today, weatherByDay, eventDays, isPressable, onDayPress }: Props) {
   const cells = monthGrid(month);
+  // 한 줄 7칸 (일 ~ 토). 칸 너비를 %로 주면 7칸 합이 100%를 넘어 마지막 칸이 다음 줄로 밀릴 수 있어 줄 단위로 그린다.
+  const weeks = Array.from({ length: cells.length / 7 }, (_, w) => cells.slice(w * 7, w * 7 + 7));
   return (
     <View style={styles.card}>
       <View style={styles.row}>
@@ -34,8 +34,11 @@ export function MonthCalendar({ month, today, weatherByDay, eventDays, isPressab
         ))}
       </View>
       <View style={styles.grid}>
-        {cells.map((key, i) => {
-          if (!key) return <View key={`e${i}`} style={styles.cell} />;
+        {weeks.map((week, w) => (
+          <View key={w} style={styles.week}>
+        {week.map((key, col) => {
+          const i = col;
+          if (!key) return <View key={`e${w}-${col}`} style={styles.cell} />;
           const { day } = parseDayKey(key);
           const future = daysBetween(today, key) > 0;
           const isToday = key === today;
@@ -71,20 +74,6 @@ export function MonthCalendar({ month, today, weatherByDay, eventDays, isPressab
             </Pressable>
           );
         })}
-      </View>
-      <View style={styles.legend}>
-        {LEGEND.map((w) => (
-          <View key={w} style={styles.legendItem}>
-            <WeatherIcon weather={w} size={18} />
-            <Text style={styles.legendText}>{WEATHER_NAME[w]}</Text>
-          </View>
-        ))}
-      </View>
-      <View style={styles.legend}>
-        {EVENT_TYPES.map((t) => (
-          <View key={t} style={styles.legendItem}>
-            <EventIcon type={t} size={15} small />
-            <Text style={styles.legendText}>{EVENT_TYPE_SHORT[t]}</Text>
           </View>
         ))}
       </View>
@@ -109,9 +98,10 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   sunday: { color: colors.pinkSoft },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 3 },
+  grid: { gap: 3 },
+  week: { flexDirection: 'row' },
   cell: {
-    width: `${100 / 7}%`,
+    flex: 1,
     height: 44,
     borderRadius: 14,
     alignItems: 'center',
@@ -126,7 +116,4 @@ const styles = StyleSheet.create({
   dayNum: { fontFamily: fonts.number, fontSize: 11, lineHeight: 12, color: colors.text },
   dayFuture: { color: colors.disabled },
   icon: { width: 22, height: 22 },
-  legend: { flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', gap: 8, paddingTop: 2 },
-  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  legendText: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.textSub },
 });
