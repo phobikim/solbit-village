@@ -4,7 +4,7 @@
 
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { VILLAGE_NAME, VILLAGE_TAGLINE } from '../../src/copy/labels.ko';
@@ -23,6 +23,7 @@ import { IndexCard } from '../../src/ui/components/IndexCard';
 import { LevelBar } from '../../src/ui/components/LevelBar';
 import { PrimaryButton } from '../../src/ui/components/PrimaryButton';
 import { mainLayout, SCENE_MIN_HEIGHT } from '../../src/ui/layout';
+import { useVisibleHeight } from '../../src/ui/useVisibleHeight';
 import { colors, fonts, radius } from '../../src/ui/theme';
 
 const timeLabel = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -42,10 +43,10 @@ export default function VillageScreen() {
   const [now, setNow] = useState(() => new Date());
   const v = useVillageView(today, now);
 
-  // 사용 가능 높이 = 창 높이 − 위 안전 영역 − (탭 바 + 아래 안전 영역)
-  const { height: windowHeight } = useWindowDimensions();
+  // 사용 가능 높이 = 보이는 높이(웹은 window.innerHeight) − 위 안전 영역 − (탭 바 + 아래 안전 영역)
+  const visibleHeight = useVisibleHeight();
   const insets = useSafeAreaInsets();
-  const L = mainLayout(windowHeight, insets.top, insets.bottom);
+  const L = mainLayout(visibleHeight, insets.top, insets.bottom);
 
   useFocusEffect(
     useCallback(() => {
@@ -81,16 +82,21 @@ export default function VillageScreen() {
       </View>
 
       {/* 마을 무대: 탭하는 장치는 없다 (규칙 5). 수확은 자동이다. 남는 높이는 전부 장면. */}
-      <View testID="main-scene" style={[styles.scene, { marginTop: L.gap, minHeight: L.step === 3 ? SCENE_MIN_HEIGHT : 0 }]}>
+      <View testID="main-scene" style={[styles.scene, { marginTop: L.gap, minHeight: L.step === 4 ? SCENE_MIN_HEIGHT : 0 }]}>
         <VillageScene {...v.scene} onBoardPress={openBoard} />
       </View>
 
-      {/* 지수 카드 영역은 항상 보인다 (최소 64) */}
-      <View style={[styles.indices, { marginTop: L.gap, height: L.indices }]}>
+      {/* 지수 영역은 항상 보인다. 누르면 나 탭의 4주 추세로 */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="지수 추세 보기 (나 탭)"
+        onPress={() => router.navigate('/me')}
+        style={[styles.indices, { marginTop: L.gap, height: L.indices }]}
+      >
         {v.indices.map((it) => (
-          <IndexCard key={it.kind} {...it} compact={L.indicesCompact} height={L.indices} />
+          <IndexCard key={it.kind} {...it} variant={L.indexVariant} height={L.indices} />
         ))}
-      </View>
+      </Pressable>
 
       <PrimaryButton
         label={v.recordedToday ? '오늘 기록 고치기' : '오늘 기록하기'}

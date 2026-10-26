@@ -9,6 +9,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { initDb } from '../src/data/db';
 import { setupNotificationHandler } from '../src/notifications';
 import { BottomBar } from '../src/ui/components/BottomBar';
+import { useVisibleHeight } from '../src/ui/useVisibleHeight';
 import { colors, fontFiles } from '../src/ui/theme';
 import { injectWebStyles } from '../src/ui/webStyles';
 
@@ -18,6 +19,8 @@ setupNotificationHandler();
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts(fontFiles);
+  // 웹: 모바일 브라우저의 주소창 · 툴바를 뺀 보이는 높이에 앱을 맞춘다 (100%는 보이는 영역보다 클 수 있다)
+  const visibleHeight = useVisibleHeight();
 
   useEffect(() => {
     initDb()
@@ -34,7 +37,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />
-      <View style={styles.outer}>
+      <View style={[styles.outer, Platform.OS === 'web' && visibleHeight > 0 ? { flexGrow: 0, flexShrink: 0, flexBasis: 'auto', height: visibleHeight } : null]}>
         <View style={styles.frame}>
           <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.night } }}>
             <Stack.Screen name="(tabs)" />

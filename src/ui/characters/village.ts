@@ -13,13 +13,13 @@ import { buildingSvg } from './skins';
 import { soliWithSkinSvg, type SoliMood } from './soli';
 import { bud, cloud, flower, L, nest, o, place48, star } from './svg';
 
-import { DEFAULT_SCENE_GEOMETRY, SCENE_SKY_UNITS, SCENE_UNITS, type SceneGeometry } from '../layout';
+import { DEFAULT_SCENE_GEOMETRY, SCENE_UNITS, SKY_CENTER, skyFit, type SceneGeometry } from '../layout';
 
 export const VILLAGE_VIEWBOX = SCENE_UNITS;
 
-/** 장면이 가로로 더 넓어질 때(짧은 칸) 땅이 이어지도록 가로 띠를 늘리는 범위 */
-const X0 = -600;
-const X1 = 970;
+/** 그림 가로 범위. 칸이 낮아 그림을 줄일 때 남는 좌우는 그리지 않아 장면 배경색이 보인다 */
+const X0 = -4;
+const X1 = 370;
 
 /** 게시판(기둥 포함) 자리 — 누르면 장부 · 대소사로 간다 (디자인 TURN 12) */
 export const BOARD_RECT = { x: 102, y: 86, width: 112, height: 84 } as const;
@@ -240,9 +240,9 @@ export function villageSceneSvg(p: VillageSceneParams, geo: SceneGeometry = DEFA
     `<radialGradient id="${glowId}"><stop offset="0" stop-color="#FFE14D" stop-opacity=".55"/><stop offset="1" stop-color="#FFE14D" stop-opacity="0"/></radialGradient></defs>` +
     `<rect x="${X0}" y="${geo.viewBox.y - 2}" width="${X1 - X0}" height="${geo.viewBox.height + 2}" fill="url(#${id})"/>`;
 
-  // 1. 하늘 — 보이는 하늘이 원래(85)보다 높으면 위로, 낮으면 아래로 그림을 옮겨 한가운데에 둔다
-  const skyShift = (SCENE_SKY_UNITS - geo.skyUnits) / 2;
-  s += `<g transform="translate(0 ${skyShift.toFixed(2)})">${sky(p, c, glowId)}</g>`;
+  // 1. 하늘 — 보이는 하늘 한가운데에 두고, 보이는 하늘이 원래(85)보다 낮으면 그림을 줄여 날씨가 잘리지 않게 한다
+  const fit = skyFit(geo);
+  s += `<g transform="translate(183 ${fit.centerY.toFixed(2)}) scale(${fit.scale.toFixed(3)}) translate(-183 -${SKY_CENTER})">${sky(p, c, glowId)}</g>`;
 
   // 2. 뒤: 언덕 · 땅 · 오두막 · 게시판 · 냇가
   s += `<path d="M${X0} 104 L-4 104 C70 92 150 98 220 100 C280 102 330 92 370 96 L${X1} 96 V344 H${X0}Z" fill="${c.hill}" ${o(3)}/>`;

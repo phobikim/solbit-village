@@ -1,4 +1,7 @@
-// 지수 카드: 원형 게이지 + 이름 + 숫자(0~100) + 상태 문구 (SPEC 3장).
+// 지수 카드 (SPEC 3장). 높이에 따라 세 가지 모양 (SPEC 11장 압축 단계):
+// full  96pt  링 + 이름 + 숫자 + 상태 문구
+// ring  72pt  링 + 이름 + 숫자 (문구 제거)
+// strip 44pt  한 줄 띠: 아이콘 + 숫자 (링 없음). 지수 색은 어느 모양이든 유지한다.
 
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
@@ -6,6 +9,7 @@ import { SvgXml } from 'react-native-svg';
 
 import type { IndexKind } from '../../domain/types';
 import { indexIconSvg } from '../characters/icons';
+import type { IndexVariant } from '../layout';
 import { colors, fonts, radius, workColor } from '../theme';
 
 const LABEL: Record<IndexKind, string> = {
@@ -33,77 +37,67 @@ type Props = {
   /** 계산할 기록이 없으면 null */
   value: number | null;
   status: string;
-  /** 압축(64pt): 이름을 빼고 아이콘 + 숫자 + 짧은 상태만 */
-  compact?: boolean;
+  variant?: IndexVariant;
   /** 카드 높이 (layout.ts) */
   height?: number;
 };
 
-const SIZE = 44;
-const STROKE = 6;
-const R = (SIZE - STROKE) / 2;
-const CIRC = 2 * Math.PI * R;
-const SMALL = 30;
-const SSTROKE = 4;
-const SR = (SMALL - SSTROKE) / 2;
-const SCIRC = 2 * Math.PI * SR;
+/** 링 하나: 크기 · 두께 · 안쪽 아이콘 크기 */
+const RING = {
+  full: { size: 44, stroke: 6, icon: 18 },
+  ring: { size: 36, stroke: 5, icon: 15 },
+} as const;
 
-export function IndexCard({ kind, value, status, compact, height }: Props) {
+function Ring({ kind, col, v, spec }: { kind: IndexKind; col: string; v: number; spec: { size: number; stroke: number; icon: number } }) {
+  const r = (spec.size - spec.stroke) / 2;
+  const circ = 2 * Math.PI * r;
+  return (
+    <View style={{ width: spec.size, height: spec.size, alignItems: 'center', justifyContent: 'center' }}>
+      <Svg width={spec.size} height={spec.size} style={StyleSheet.absoluteFill}>
+        <Circle cx={spec.size / 2} cy={spec.size / 2} r={r} stroke={colors.track} strokeWidth={spec.stroke} fill="none" />
+        <Circle
+          cx={spec.size / 2}
+          cy={spec.size / 2}
+          r={r}
+          stroke={col}
+          strokeWidth={spec.stroke}
+          fill="none"
+          strokeDasharray={`${(circ * v) / 100} ${circ}`}
+          transform={`rotate(-90 ${spec.size / 2} ${spec.size / 2})`}
+        />
+      </Svg>
+      <SvgXml xml={indexIconSvg(kind, col, colors.cardSub)} width={spec.icon} height={spec.icon} />
+    </View>
+  );
+}
+
+export function IndexCard({ kind, value, status, variant = 'full', height }: Props) {
   const col = value === null ? colors.textMuted : indexColor(kind, value);
   const v = value === null ? 0 : Math.min(100, Math.max(0, value));
-  if (compact) {
+  const shown = value === null ? '-' : v;
+  const a11y = `${LABEL[kind]} ${value ?? ''}, ${status}`;
+
+  if (variant === 'strip') {
     return (
-      <View style={[styles.card, styles.cardCompact, height !== undefined && { height }]} accessibilityLabel={`${LABEL[kind]} ${value ?? ''}, ${status}`}>
-        <View style={styles.compactRow}>
-          <View style={{ width: SMALL, height: SMALL, alignItems: 'center', justifyContent: 'center' }}>
-            <Svg width={SMALL} height={SMALL} style={StyleSheet.absoluteFill}>
-              <Circle cx={SMALL / 2} cy={SMALL / 2} r={SR} stroke={colors.track} strokeWidth={SSTROKE} fill="none" />
-              <Circle
-                cx={SMALL / 2}
-                cy={SMALL / 2}
-                r={SR}
-                stroke={col}
-                strokeWidth={SSTROKE}
-                fill="none"
-                strokeDasharray={`${(SCIRC * v) / 100} ${SCIRC}`}
-                transform={`rotate(-90 ${SMALL / 2} ${SMALL / 2})`}
-              />
-            </Svg>
-            <SvgXml xml={indexIconSvg(kind, col, colors.cardSub)} width={13} height={13} />
-          </View>
-          <Text style={[styles.value, styles.valueCompact, { color: col }]}>{value === null ? '-' : v}</Text>
-        </View>
-        <Text style={styles.statusCompact} numberOfLines={1}>
-          {status}
-        </Text>
+      <View style={[styles.card, styles.strip, height !== undefined && { height }]} accessibilityLabel={a11y}>
+        <SvgXml xml={indexIconSvg(kind, col, colors.cardSub)} width={20} height={20} />
+        <Text style={[styles.stripValue, { color: col }]}>{shown}</Text>
       </View>
     );
   }
+
   return (
-    <View style={[styles.card, height !== undefined && { height, justifyContent: 'center' }]} accessibilityLabel={`${LABEL[kind]} ${value ?? ''}, ${status}`}>
-      <View style={styles.gauge}>
-        <Svg width={SIZE} height={SIZE} style={StyleSheet.absoluteFill}>
-          <Circle cx={SIZE / 2} cy={SIZE / 2} r={R} stroke={colors.track} strokeWidth={STROKE} fill="none" />
-          <Circle
-            cx={SIZE / 2}
-            cy={SIZE / 2}
-            r={R}
-            stroke={col}
-            strokeWidth={STROKE}
-            fill="none"
-            strokeDasharray={`${(CIRC * v) / 100} ${CIRC}`}
-            transform={`rotate(-90 ${SIZE / 2} ${SIZE / 2})`}
-          />
-        </Svg>
-        <SvgXml xml={indexIconSvg(kind, col, colors.cardSub)} width={18} height={18} />
-      </View>
+    <View style={[styles.card, styles.stack, height !== undefined && { height }]} accessibilityLabel={a11y}>
+      <Ring kind={kind} col={col} v={v} spec={RING[variant]} />
       <View style={styles.row}>
         <Text style={styles.label}>{LABEL[kind]}</Text>
-        <Text style={[styles.value, { color: col }]}>{value === null ? '-' : v}</Text>
+        <Text style={[styles.value, { color: col }]}>{shown}</Text>
       </View>
-      <Text style={styles.status} numberOfLines={1}>
-        {status}
-      </Text>
+      {variant === 'full' && (
+        <Text style={styles.status} numberOfLines={1}>
+          {status}
+        </Text>
+      )}
     </View>
   );
 }
@@ -113,19 +107,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.cardSub,
     borderRadius: radius.index,
-    paddingTop: 9,
-    paddingBottom: 8,
     paddingHorizontal: 2,
     alignItems: 'center',
-    gap: 4,
+    justifyContent: 'center',
   },
-  gauge: { width: SIZE, height: SIZE, alignItems: 'center', justifyContent: 'center' },
+  stack: { gap: 4 },
+  strip: { flexDirection: 'row', gap: 6 },
+  stripValue: { fontFamily: fonts.numberBold, fontSize: 20, lineHeight: 24 },
   row: { flexDirection: 'row', alignItems: 'baseline', gap: 3 },
   label: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.text },
   value: { fontFamily: fonts.numberBold, fontSize: 14 },
   status: { fontFamily: fonts.bodyHeavy, fontSize: 12, color: colors.textSub },
-  cardCompact: { paddingTop: 0, paddingBottom: 0, paddingHorizontal: 4, justifyContent: 'center', gap: 2 },
-  compactRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  valueCompact: { fontSize: 17 },
-  statusCompact: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.textSub, maxWidth: '100%' },
 });
