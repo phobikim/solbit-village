@@ -1,4 +1,4 @@
-// 하단 바 (design/ v5 TURN 7 개정): 떠 있는 알약 모양, 활성 탭은 노란 알약(아이콘 + 글자 가로).
+// 하단 바 (design/ v5 TURN 7 개정): 떠 있는 알약 모양, 활성 탭은 노란 알약. 모든 탭은 아이콘 위 · 글자 아래 세로 정렬이고, 선택해도 가로로 바뀌지 않는다 (2026-10-26).
 // 탭 화면뿐 아니라 하위 화면(장부 · 수확 창고 · 설정 …)에도 항상 떠 있다. 입력 시트 · 결과 카드는 위를 덮는다.
 
 import { router, usePathname } from 'expo-router';
@@ -42,11 +42,7 @@ export function BottomBar() {
             onPress={() => router.navigate(t.href)}
             style={({ pressed }) => [styles.tab, on && styles.tabOn, pressed && !on && styles.pressed]}
           >
-            <SvgXml
-              xml={tabIconSvg(t.key, on ? colors.line : colors.textMuted, on ? 2.8 : 2.4)}
-              width={on ? 18 : 22}
-              height={on ? 18 : 22}
-            />
+            <SvgXml xml={tabIconSvg(t.key, on ? colors.line : colors.textMuted, on ? 2.8 : 2.4)} width={22} height={22} />
             <Text style={[styles.label, on && styles.labelOn]}>{t.label}</Text>
           </Pressable>
         );
@@ -75,8 +71,6 @@ const styles = StyleSheet.create({
   },
   tab: { flex: 1, height: 52, alignItems: 'center', justifyContent: 'center', gap: 3, borderRadius: 26 },
   tabOn: {
-    flexDirection: 'row',
-    gap: 3,
     marginHorizontal: 2,
     backgroundColor: colors.yellow,
     borderBottomWidth: 3,
@@ -84,5 +78,5 @@ const styles = StyleSheet.create({
   },
   pressed: { opacity: 0.7 },
   label: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.textMuted },
-  labelOn: { fontSize: 12, color: colors.line },
+  labelOn: { color: colors.line },
 });
