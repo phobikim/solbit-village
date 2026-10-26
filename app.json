@@ -47,6 +47,27 @@
       "expo-sqlite",
       "expo-notifications",
       "expo-sharing"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "headers": {
+          "Cross-Origin-Embedder-Policy": "credentialless",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        },
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "ebc72503-d612-4e18-889f-a6aa302288d6"
+      }
+    },
+    "owner": "phobi",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/ebc72503-d612-4e18-889f-a6aa302288d6"
+    }
   }
 }
