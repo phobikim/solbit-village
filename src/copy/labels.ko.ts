@@ -121,6 +121,11 @@ export const recordCopy = {
   weekendRest: (dow: string) => `${dow}요일이라 쉬는 날로 골라놨슈. 연차도 여기유.`,
   memoPlaceholder: '오늘 어땠슈? 한 줄이면 돼유',
   more: '더 적고 싶으면',
+  workHint: '일했다면 적어두세유. 안 적으면 일 0으로 쳐유.',
+  contactsHint: '얘기 나눈 이웃을 눌러유.',
+  leisureHint: '뭐 했는지 눌러유.',
+  sizeAsk: '얼마나 쉬었슈?',
+  sizeIdle: '쉰 걸 고르면 얼마나 쉬었는지도 정해유.',
   needWork: '컨디션과 일 강도만 고르면 됩니다.',
   needRest: '컨디션만 고르면 됩니다.',
 };

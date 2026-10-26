@@ -1,7 +1,7 @@
 // 9a · 14a · 14b 오늘 기록 시트 (모달). 기록 입력은 이 시트 한곳에서만 한다 (CLAUDE.md 규칙 5).
 // ?date=YYYY-MM-DD 로 지난 기록(최근 7일)을 고칠 수 있다.
-// 맨 위에서 일한 날 / 쉬는 날을 고른다 (새 기록은 토 · 일이면 쉬는 날). 컨디션 · 한 줄 메모는 공통,
-// 일 강도 · 누구와 · 쉼은 + 로 펼친다. 일한 날은 일 강도, 쉬는 날은 쉼이 처음부터 펼쳐져 있다.
+// 맨 위에서 일한 날 / 쉬는 날을 고른다 (새 기록은 토 · 일이면 쉬는 날). 필수(컨디션 · 일한 날의 일 강도)와 한 줄 메모는
+// 위에, 선택(누구와 · 쉼, 쉬는 날은 일 강도도)은 "더 적고 싶으면" 아래에 늘 펼쳐 둔다 (접고 펴는 + · × 없음).
 
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState, type ReactNode } from 'react';
@@ -54,20 +54,9 @@ import { colors, fonts } from '../src/ui/theme';
 
 type Mode = 'loading' | 'create' | 'edit' | 'tooOld' | 'noBackfill';
 
-/** + 로 펼치는 칸 */
+/** 선택 칸 (늘 펼쳐 둔다) */
 type Extra = 'work' | 'contacts' | 'leisure';
-const EXTRAS: readonly Extra[] = ['work', 'contacts', 'leisure'];
-/** 일한 날 / 쉬는 날에 처음부터 펼쳐 두는 칸 (디자인 14a · 14b) */
-const OPEN_BY_DAY: Record<DayType, readonly Extra[]> = { work: ['work'], rest: ['leisure'] };
 const EXTRA_COLOR: Record<Extra, string> = { work: '#FF9A3C', contacts: colors.relation, leisure: colors.leisure };
-
-/** 값이 들어 있는 칸은 늘 펼친다 */
-function filled(d: RecordDraft): Extra[] {
-  return EXTRAS.filter((k) =>
-    k === 'work' ? d.work !== null : k === 'contacts' ? d.contacts.length > 0 : d.leisure.length > 0,
-  );
-}
-const openFor = (d: RecordDraft): Set<Extra> => new Set([...OPEN_BY_DAY[d.dayType], ...filled(d)]);
 
 const isDayKey = (s: unknown): s is DayKey => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s);
 
@@ -85,7 +74,6 @@ export default function RecordSheet() {
   const [mode, setMode] = useState<Mode>('loading');
   const [existing, setExisting] = useState<DayRecord | null>(null);
   const [draft, setDraft] = useState<RecordDraft>(() => emptyDraft(defaultDayType(date)));
-  const [open, setOpen] = useState<Set<Extra>>(() => new Set(OPEN_BY_DAY[defaultDayType(date)]));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -101,7 +89,6 @@ export default function RecordSheet() {
           setMode(canEditRecord(date, today) ? 'edit' : 'tooOld');
           const d = draftFromRecord(r, log?.size);
           setDraft(d);
-          setOpen(openFor(d));
         } else {
           setMode(canCreateRecord(date, today) ? 'create' : 'noBackfill');
         }
@@ -116,19 +103,7 @@ export default function RecordSheet() {
   }, [date, today, loadDay, loadNeighbors, loadRestLogs]);
 
   const update = <K extends keyof RecordDraft>(k: K, v: RecordDraft[K]) => setDraft((d) => ({ ...d, [k]: v }));
-  const setDayType = (t: DayType) => {
-    const next = { ...draft, dayType: t };
-    setDraft(next);
-    setOpen(openFor(next));
-  };
-  /** 칸 접기: 접으면 그 칸 값도 비운다 (보이는 것만 저장) */
-  const collapse = (k: Extra) => {
-    setOpen((o) => new Set([...o].filter((x) => x !== k)));
-    setDraft((d) =>
-      k === 'work' ? { ...d, work: null } : k === 'contacts' ? { ...d, contacts: [] } : { ...d, leisure: [] },
-    );
-  };
-  const expand = (k: Extra) => setOpen((o) => new Set([...o, k]));
+  const setDayType = (t: DayType) => update('dayType', t);
   const close = () => (router.canGoBack() ? router.back() : router.replace('/'));
 
   const onSave = async () => {
@@ -179,28 +154,25 @@ export default function RecordSheet() {
               : ijangLines.sheetBackfill;
   // 새 기록이 주말이라 쉬는 날로 골라 둔 경우
   const weekendHint = mode === 'create' && draft.dayType === 'rest' && defaultDayType(date) === 'rest';
-  /** 일한 날의 일 강도는 필수라 접지 않는다 */
-  const closable = (k: Extra) => !(k === 'work' && draft.dayType === 'work');
-  const extraBox = (k: Extra, title: string, body: ReactNode) => (
+  const extraBox = (k: Extra, title: string, hint: string, body: ReactNode) => (
     <View key={k} style={styles.extra}>
-      <View style={styles.extraHead}>
-        <View style={styles.extraTitle}>
-          <View style={[styles.extraDot, { backgroundColor: EXTRA_COLOR[k] }]} />
-          <Text style={styles.extraTitleText}>{title}</Text>
-        </View>
-        {closable(k) && (
-          <Pressable accessibilityRole="button" accessibilityLabel={`${title} 접기`} onPress={() => collapse(k)} style={styles.extraClose}>
-            <Text style={styles.extraCloseText}>×</Text>
-          </Pressable>
-        )}
+      <View style={styles.extraTitle}>
+        <View style={[styles.extraDot, { backgroundColor: EXTRA_COLOR[k] }]} />
+        <Text style={styles.extraTitleText}>{title}</Text>
+        <Text style={styles.extraHint}>{hint}</Text>
       </View>
       {body}
     </View>
   );
-  const EXTRA_TITLE: Record<Extra, string> = { work: '일 강도', contacts: '누구와', leisure: '쉼' };
-  const EXTRA_ADD: Record<Extra, string> = { work: '일 강도', contacts: '누구와', leisure: '쉼' };
-  const extraBody: Record<Extra, () => ReactNode> = {
-    work: () => <WorkPicker value={draft.work} onChange={(v) => update('work', v)} />,
+  const isRestDay = draft.dayType === 'rest';
+  /** 일 강도: 일한 날은 필수라 위쪽에, 쉬는 날은 선택이라 아래쪽에 두고 다시 누르면 뺀다 */
+  const workPicker = (
+    <WorkPicker
+      value={draft.work}
+      onChange={(v) => update('work', isRestDay && draft.work === v ? null : v)}
+    />
+  );
+  const extraBody: Record<Exclude<Extra, 'work'>, () => ReactNode> = {
     contacts: () =>
       neighbors.length > 0 ? (
         <NeighborPicker neighbors={neighbors} value={draft.contacts} onChange={(v) => update('contacts', v)} />
@@ -217,22 +189,31 @@ export default function RecordSheet() {
           )}
         </View>
       ),
-    leisure: () => (
-      <>
-        <LeisurePicker value={draft.leisure} onChange={(v) => update('leisure', v)} />
-        {draft.leisure.length > 0 && (
-          <>
-            <Text style={styles.hintText}>얼마나 쉬었슈?</Text>
+    leisure: () => {
+      const picked = draft.leisure.length > 0;
+      return (
+        <>
+          <LeisurePicker value={draft.leisure} onChange={(v) => update('leisure', v)} />
+          <Text style={styles.hintText}>{picked ? recordCopy.sizeAsk : recordCopy.sizeIdle}</Text>
+          <View style={!picked && styles.dim} pointerEvents={picked ? 'auto' : 'none'}>
             <SizePicker value={draft.restSize} onChange={(v) => update('restSize', v)} />
-          </>
-        )}
-      </>
-    ),
+          </View>
+        </>
+      );
+    },
   };
-  // 펼친 칸은 그날 종류의 기본 칸부터
-  const order: readonly Extra[] = draft.dayType === 'work' ? ['work', 'contacts', 'leisure'] : ['leisure', 'contacts', 'work'];
-  const opened = order.filter((k) => open.has(k));
-  const closed = order.filter((k) => !open.has(k));
+  // 선택 칸: 일한 날은 누구와 → 쉼, 쉬는 날은 쉼 → 누구와 → 일 강도
+  const optionalBoxes: ReactNode[] =
+    draft.dayType === 'work'
+      ? [
+          extraBox('contacts', '누구와', recordCopy.contactsHint, extraBody.contacts()),
+          extraBox('leisure', '쉼', recordCopy.leisureHint, extraBody.leisure()),
+        ]
+      : [
+          extraBox('leisure', '쉼', recordCopy.leisureHint, extraBody.leisure()),
+          extraBox('contacts', '누구와', recordCopy.contactsHint, extraBody.contacts()),
+          extraBox('work', '일 강도', recordCopy.workHint, workPicker),
+        ];
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
@@ -271,6 +252,13 @@ export default function RecordSheet() {
                 <ConditionPicker value={draft.condition} onChange={(v) => update('condition', v)} />
               </View>
 
+              {!isRestDay && (
+                <View style={styles.section}>
+                  <FieldLabel>일 강도</FieldLabel>
+                  {workPicker}
+                </View>
+              )}
+
               <View style={styles.section}>
                 <FieldLabel>한 줄 메모</FieldLabel>
                 <Field
@@ -286,17 +274,7 @@ export default function RecordSheet() {
                 <Text style={styles.extrasLabel}>
                   {recordCopy.more} <Text style={styles.extrasOptional}>(선택)</Text>
                 </Text>
-                {opened.map((k) => extraBox(k, EXTRA_TITLE[k], extraBody[k]()))}
-                {closed.length > 0 && (
-                  <View style={styles.adds}>
-                    {closed.map((k) => (
-                      <Pressable key={k} accessibilityRole="button" onPress={() => expand(k)} style={styles.add}>
-                        <Text style={[styles.addPlus, { color: EXTRA_COLOR[k] }]}>+</Text>
-                        <Text style={styles.addText}>{EXTRA_ADD[k]}</Text>
-                      </Pressable>
-                    ))}
-                  </View>
-                )}
+                {optionalBoxes}
               </View>
             </>
           )}
@@ -345,28 +323,11 @@ const styles = StyleSheet.create({
   extrasLabel: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.textMuted, paddingLeft: 4 },
   extrasOptional: { color: '#7D84B8' },
   extra: { backgroundColor: colors.night, borderRadius: 22, padding: 12, gap: 10 },
-  extraHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingLeft: 4 },
-  extraTitle: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  extraTitle: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingLeft: 4 },
   extraDot: { width: 8, height: 8, borderRadius: 4 },
   extraTitleText: { fontFamily: fonts.bodyHeavy, fontSize: 14, color: colors.text },
-  extraClose: { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.card, alignItems: 'center', justifyContent: 'center' },
-  extraCloseText: { fontFamily: fonts.bodyHeavy, fontSize: 16, lineHeight: 18, color: colors.textSub },
-  adds: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  add: {
-    flexGrow: 1,
-    flexBasis: '30%',
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 2,
-    borderStyle: 'dashed',
-    borderColor: '#333C7A',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-  },
-  addPlus: { fontFamily: fonts.numberBold, fontSize: 18 },
-  addText: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.textSub },
+  extraHint: { flexShrink: 1, fontFamily: fonts.bodyBold, fontSize: 12, color: colors.textMuted },
+  dim: { opacity: 0.4 },
   empty: { backgroundColor: colors.night, borderRadius: 20, padding: 12, gap: 8 },
   emptyText: { fontFamily: fonts.bodyBold, fontSize: 13, lineHeight: 19, color: colors.textSub },
   devButton: {

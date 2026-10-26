@@ -120,6 +120,9 @@ export function NeighborPicker({ neighbors, value, onChange }: Props) {
         if (!n) return null;
         return (
           <View key={c.neighborId} style={styles.methodRow}>
+            <Avatar size={28} background={NEIGHBOR_COLORS[n.color] ?? colors.night}>
+              <Face face={n.face} size={25} />
+            </Avatar>
             <Text style={styles.methodWho} numberOfLines={1}>
               {n.name} 씨와
             </Text>

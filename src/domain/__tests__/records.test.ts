@@ -3,6 +3,7 @@ import { frequentNeighbors } from '../neighbors';
 import {
   canCreateRecord,
   canEditRecord,
+  defaultDayType,
   emptyDraft,
   isDraftComplete,
   normalizeDraft,
@@ -110,5 +111,21 @@ describe('자주 연락하는 이웃', () => {
       { id: 'e', name: 'e', createdAt: 4, contactCount: 0, lastContact: null },
     ];
     expect(frequentNeighbors(list, 4).map((n) => n.id)).toEqual(['b', 'c', 'a', 'd']);
+  });
+});
+
+describe('일한 날 / 쉬는 날 기본값', () => {
+  it('평일은 일한 날', () => {
+    for (const d of ['2026-10-26', '2026-10-27', '2026-10-28', '2026-10-29', '2026-10-30']) {
+      expect(defaultDayType(d)).toBe('work');
+    }
+  });
+  it('토 · 일은 쉬는 날', () => {
+    expect(defaultDayType('2026-10-24')).toBe('rest');
+    expect(defaultDayType('2026-10-25')).toBe('rest');
+  });
+  it('새 기록 초안이 그 기본값으로 시작한다', () => {
+    expect(emptyDraft(defaultDayType('2026-10-24')).dayType).toBe('rest');
+    expect(emptyDraft(defaultDayType('2026-10-26')).dayType).toBe('work');
   });
 });
