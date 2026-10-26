@@ -6,31 +6,43 @@ import { L } from './svg';
 const WOOD = '#B9783C';
 const WOOD_DARK = '#8A5528';
 
-const logs = (cx: number, y: number, w: number) =>
-  `<g stroke="${L}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round">` +
-  `<rect x="${cx - w}" y="${y}" width="${w * 2}" height="9" rx="4.5" fill="${WOOD}" transform="rotate(-8 ${cx} ${y + 4})"/>` +
-  `<rect x="${cx - w}" y="${y}" width="${w * 2}" height="9" rx="4.5" fill="${WOOD_DARK}" transform="rotate(8 ${cx} ${y + 4})"/></g>`;
+/** 엇갈린 통나무 두 개 (viewBox 200 x 140 안, 가운데 아래) */
+const crossLogs = () =>
+  `<g stroke-linejoin="round" stroke-linecap="round">` +
+  `<rect x="30" y="106" width="140" height="24" rx="12" fill="#6F4328" stroke="#4A2C18" stroke-width="2.4" transform="rotate(7 100 118)"/>` +
+  `<rect x="30" y="94" width="140" height="24" rx="12" fill="#8B5A38" stroke="#5A3822" stroke-width="2.4" transform="rotate(-7 100 106)"/>` +
+  `<path d="M44 100 H150" stroke="#A9714A" stroke-width="3" opacity=".7" transform="rotate(-7 100 106)"/>` +
+  `</g>`;
 
-/** 불 크기: 활활 > 타오름 > 사그라듦 > 꺼져감 (viewBox 100x100) */
+/** 불꽃 크기: 활활 > 타오름 > 사그라듦 > 꺼져감 */
 const FLAME: Record<FireBand | 'none', { h: number; col: string; core: string }> = {
-  blaze: { h: 70, col: '#FF8A3C', core: '#FFE14D' },
-  burning: { h: 54, col: '#FF9A3C', core: '#FFE14D' },
-  dying: { h: 34, col: '#FF7A4A', core: '#FFC23C' },
+  blaze: { h: 78, col: '#FF8A3C', core: '#FFE14D' },
+  burning: { h: 62, col: '#FF9A3C', core: '#FFE14D' },
+  dying: { h: 44, col: '#E8863C', core: '#B8A04A' },
   out: { h: 16, col: '#B8604A', core: '#FF9A3C' },
   none: { h: 0, col: '#8F96CC', core: '#C9CEF5' },
 };
 
+const FIRE_BASE = 98;
+/** 모닥불 그림 높이(너비 200 기준): 불이 작을수록 위 빈 곳을 줄인다 */
+export function fireHeight(band: FireBand | null): number {
+  const f = FLAME[band ?? 'none'];
+  return 140 - Math.max(0, FIRE_BASE - f.h - 14);
+}
+
+/** 모닥불 (너비 200, 높이 fireHeight). 위에 불꽃, 아래에 엇갈린 통나무 */
 export function fireSvg(band: FireBand | null): string {
   const f = FLAME[band ?? 'none'];
-  const base = 84;
+  const base = FIRE_BASE;
   const top = base - f.h;
-  const w = 14 + f.h * 0.22;
+  const minY = Math.max(0, FIRE_BASE - f.h - 14);
+  const w = 12 + f.h * 0.28;
   const flame =
     f.h > 0
-      ? `<path d="M50 ${top} C${50 + w} ${top + f.h * 0.45} ${50 + w} ${base - 4} 50 ${base - 4} C${50 - w} ${base - 4} ${50 - w} ${top + f.h * 0.45} 50 ${top}Z" fill="${f.col}" stroke="${L}" stroke-width="2.6" stroke-linejoin="round"/>` +
-        `<path d="M50 ${top + f.h * 0.38} C${50 + w * 0.5} ${top + f.h * 0.62} ${50 + w * 0.5} ${base - 6} 50 ${base - 6} C${50 - w * 0.5} ${base - 6} ${50 - w * 0.5} ${top + f.h * 0.62} 50 ${top + f.h * 0.38}Z" fill="${f.core}"/>`
-      : `<path d="M44 84 q2-8 6-8 t6 8" fill="none" stroke="#8F96CC" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="1 5"/>`;
-  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${flame}${logs(50, 82, 30)}</svg>`;
+      ? `<path d="M100 ${top} C${100 + w} ${top + f.h * 0.45} ${100 + w} ${base} 100 ${base} C${100 - w} ${base} ${100 - w} ${top + f.h * 0.45} 100 ${top}Z" fill="${f.col}"/>` +
+        `<path d="M100 ${top + f.h * 0.4} C${100 + w * 0.55} ${top + f.h * 0.65} ${100 + w * 0.55} ${base - 3} 100 ${base - 3} C${100 - w * 0.55} ${base - 3} ${100 - w * 0.55} ${top + f.h * 0.65} 100 ${top + f.h * 0.4}Z" fill="${f.core}"/>`
+      : `<path d="M92 92 q4-10 8-10 t8 10" fill="none" stroke="#8F96CC" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 7"/>`;
+  return `<svg viewBox="0 ${minY} 200 ${140 - minY}" xmlns="http://www.w3.org/2000/svg">${flame}${crossLogs()}</svg>`;
 }
 
 /** 장작 크기 그림 (viewBox 48x32): 잔가지 / 장작 / 통나무 */
@@ -44,11 +56,6 @@ export function sizeSvg(size: RestSize, on: boolean): string {
         ? `<g stroke="${L}" stroke-width="2.4" stroke-linejoin="round"><rect x="6" y="17" width="36" height="10" rx="5" fill="${dark}"/><rect x="9" y="6" width="30" height="10" rx="5" fill="${col}"/></g>`
         : `<g stroke="${L}" stroke-width="2.4" stroke-linejoin="round"><rect x="4" y="9" width="40" height="18" rx="9" fill="${col}"/><ellipse cx="36" cy="18" rx="5" ry="8" fill="${dark}"/><path d="M36 14.5a2 3.6 0 0 1 0 7" fill="none" stroke="${L}" stroke-width="1.6"/></g>`;
   return `<svg viewBox="0 0 48 32" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
-}
-
-/** 이번 주 7칸의 작은 장작 (viewBox 24x24) */
-export function logCellSvg(col = '#FFB04A'): string {
-  return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g stroke="${L}" stroke-width="1.6" stroke-linejoin="round"><rect x="3" y="13" width="18" height="6" rx="3" fill="${WOOD_DARK}"/><path d="M12 4 C16 8 16 11 12 13 C8 11 8 8 12 4Z" fill="${col}"/></g></svg>`;
 }
 
 /** 깃발 (viewBox 40x48) */

@@ -1,26 +1,28 @@
-// 15c 보따리 지도. 실제 지도가 아니다 — 솔빛 마을을 한가운데 두고 장소를 겹치지 않게 자동 배치한다 (지도 API · 위치 권한 없음).
-// 발자국 = 다녀온 곳, 깃발 = 가고 싶은 곳. 다녀온 경로는 점선. 깃발 카드: [날짜 잡기] / [다녀왔슈].
+// 15d 보따리 지도 — 밤바다 위 솔빛 섬. 실제 지도가 아니다: 솔빛 마을을 가운데 섬으로 두고 장소를 겹치지 않게 자동 배치한다 (지도 API · 위치 권한 없음).
+// 발자국 = 다녀온 곳(초록 길), 깃발 = 가고 싶은 곳(흐린 점선). 이장이 미는 곳(오래 담아둔 깃발)은 노란 깃발.
+// 위 칩으로 전체 / 발자국 / 깃발만 골라 본다. 깃발 카드: [날짜 잡기] / [다녀왔슈].
 
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
-import Svg, { Polyline } from 'react-native-svg';
 import { SvgXml } from 'react-native-svg';
 
 import { withPrefix } from '../src/copy/broadcasts.ko';
-import { LEISURE_STATUS, WEEKDAYS } from '../src/copy/labels.ko';
+import { WEEKDAYS } from '../src/copy/labels.ko';
 import { flagAgeLabel, flagOldLine, MAP_BROADCAST, mapCopy, restCopy, tripLength, visitCountLabel } from '../src/copy/rest.ko';
 import { newId } from '../src/data/events';
 import { dDayLabel, parseDayKey, today as getToday, weekdayOf, type DayKey } from '../src/domain/day';
-import { fireBand, fireIndex } from '../src/domain/fire';
-import { footprintPath, layoutPins, mapScale, PIN_SIZE } from '../src/domain/placeMap';
+import { fireIndex } from '../src/domain/fire';
+import { footprintPath, layoutPins, mapScale } from '../src/domain/placeMap';
 import { FLAG_OLD_DAYS, keptDays, scheduledDate, tripDays, wishAgain, type Place } from '../src/domain/rest';
 import { useLedger } from '../src/state/ledger';
 import { usePlaces } from '../src/state/places';
 import { useRecords } from '../src/state/records';
 import { useRestLogs } from '../src/state/restLogs';
 import { restRange } from '../src/state/restView';
-import { flagSvg, footprintSvg, villagePinSvg } from '../src/ui/characters/restIcons';
+import { Ijang } from '../src/ui/characters';
+import { placeMapSvg, type MapArtPin, type MapFilter } from '../src/ui/characters/placeMapArt';
+import { flagSvg, footprintSvg } from '../src/ui/characters/restIcons';
 import { SubScreen } from '../src/ui/components/form';
 import { colors, fonts } from '../src/ui/theme';
 
@@ -35,7 +37,9 @@ const ymd = (d: DayKey) => {
   return `${year}.${pad(month)}.${pad(day)}`;
 };
 
-const MAP_HEIGHT = 380;
+/** 지도 칸 높이 / 너비 (디자인 15d: 약 355 x 400) */
+const MAP_RATIO = 1.13;
+const HIT = 44;
 
 export default function PlaceMapScreen() {
   const today = getToday();
@@ -50,6 +54,7 @@ export default function PlaceMapScreen() {
   const loadLogs = useRestLogs((s) => s.load);
   const [width, setWidth] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
+  const [filter, setFilter] = useState<MapFilter>('all');
   const [notice, setNotice] = useState<string | null>(null);
 
   useFocusEffect(
@@ -60,26 +65,32 @@ export default function PlaceMapScreen() {
     }, [today, loadRange, loadPlaces, loadLedger, loadLogs]),
   );
 
-  const pins = useMemo(() => layoutPins(places), [places]);
-  const path = useMemo(() => footprintPath(pins), [pins]);
   const feet = places.filter((p) => p.visited).length;
   const flags = places.length - feet;
-  const rest = useMemo(
-    () => fireIndex({ logs, trips: tripDays(places) }, today, (d) => !!byDate[d]),
-    [logs, places, byDate, today],
-  );
+  const rest = useMemo(() => fireIndex({ logs, trips: tripDays(places) }, today, (d) => !!byDate[d]), [logs, places, byDate, today]);
 
-  // 처음엔 가장 오래된 깃발 (오래됐을 때만) 을 짚어 둔다
-  const defaultPick = useMemo(() => {
-    const oldest = places.filter((p) => !p.visited).sort((a, b) => a.createdAt - b.createdAt)[0];
-    return oldest && keptDays(oldest, today) >= FLAG_OLD_DAYS ? oldest.id : null;
+  // 이장이 미는 곳: 오래 담아둔(60일 이상) 가장 오래된 깃발 — 날짜가 잡히지 않은 것만
+  const pushed = useMemo(() => {
+    const oldest = places.filter((p) => !p.visited && !p.eventId).sort((a, b) => a.createdAt - b.createdAt)[0];
+    return oldest && keptDays(oldest, today) >= FLAG_OLD_DAYS ? oldest : null;
   }, [places, today]);
-  const selected = places.find((p) => p.id === (picked ?? defaultPick)) ?? null;
+  const selected = places.find((p) => p.id === (picked ?? pushed?.id)) ?? null;
 
-  const halfW = width / 2;
-  const halfH = MAP_HEIGHT / 2;
-  const scale = width ? mapScale(pins, halfW, halfH) : 1;
-  const at = (x: number, y: number) => ({ left: halfW + x * scale - PIN_SIZE / 2, top: halfH + y * scale - PIN_SIZE / 2 });
+  const height = Math.round(width * MAP_RATIO);
+  const art = useMemo(() => {
+    if (!width) return null;
+    const pins = layoutPins(places);
+    const scale = mapScale(pins, width / 2 - 20, height / 2 - 46);
+    const at = (x: number, y: number) => ({ x: width / 2 + x * scale, y: height / 2 + y * scale });
+    const mapped: MapArtPin[] = pins.map(({ place: p, x, y }) => ({ id: p.id, name: p.name, visited: p.visited, pushed: p.id === pushed?.id, ...at(x, y) }));
+    const trail = footprintPath(pins).map((t) => at(t.x, t.y));
+    return { mapped, trail, center: at(0, 0) };
+  }, [places, width, height, pushed?.id]);
+
+  const xml = useMemo(
+    () => (art ? placeMapSvg({ w: width, h: height, center: art.center, pins: art.mapped, trail: art.trail, filter, selectedId: selected?.id ?? null }) : ''),
+    [art, width, height, filter, selected?.id],
+  );
 
   const onWishAgain = async (p: Place) => {
     const copy = wishAgain(p, places, newId('pl'), today, Date.now());
@@ -87,67 +98,53 @@ export default function PlaceMapScreen() {
     setNotice(copy ? restCopy.wishAgainDone : restCopy.wishAgainExists);
   };
 
+  const chips: { key: MapFilter; label: string; dot?: string }[] = [
+    { key: 'all', label: '전체' },
+    { key: 'foot', label: `${mapCopy.footprints} ${feet}`, dot: '#A8EB5A' },
+    { key: 'flag', label: `${mapCopy.flags} ${flags}`, dot: colors.pink },
+  ];
+
   return (
-    <SubScreen
-      title="쉼터"
-      back="/rest"
-      broadcast={{ message: withPrefix(notice ?? MAP_BROADCAST), time: timeLabel(new Date()) }}
-    >
+    <SubScreen title="쉼터" back="/rest" broadcast={{ message: withPrefix(notice ?? MAP_BROADCAST), time: timeLabel(new Date()) }}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.head}>
           <View style={styles.chips}>
-            <Text style={[styles.chip, { color: colors.health }]}>
-              {mapCopy.footprints} {feet}
-            </Text>
-            <Text style={[styles.chip, { color: colors.yellow }]}>
-              {mapCopy.flags} {flags}
-            </Text>
+            {chips.map((c) => {
+              const on = filter === c.key;
+              return (
+                <Pressable
+                  key={c.key}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: on }}
+                  onPress={() => setFilter(c.key)}
+                  style={[styles.chip, on && styles.chipOn]}
+                >
+                  {c.dot && <View style={[styles.dot, { backgroundColor: c.dot }]} />}
+                  <Text style={[styles.chipText, on && styles.chipTextOn]}>{c.label}</Text>
+                </Pressable>
+              );
+            })}
           </View>
           <Text style={styles.fire}>
             쉼 지수 <Text style={styles.fireNum}>{rest ?? '-'}</Text>
-            {rest !== null ? ` · ${LEISURE_STATUS[fireBand(rest)]}` : ''}
           </Text>
         </View>
 
-        <View style={styles.map} onLayout={(e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width)}>
-          {width > 0 && (
+        <View style={[styles.map, { height: height || undefined }]} onLayout={(e: LayoutChangeEvent) => setWidth(Math.round(e.nativeEvent.layout.width))}>
+          {art && xml !== '' && (
             <>
-              <Svg width={width} height={MAP_HEIGHT} style={StyleSheet.absoluteFill}>
-                {path.length > 1 && (
-                  <Polyline
-                    points={path.map((p) => `${halfW + p.x * scale},${halfH + p.y * scale}`).join(' ')}
-                    fill="none"
-                    stroke={colors.health}
-                    strokeWidth={2.4}
-                    strokeDasharray="2 8"
-                    strokeLinecap="round"
-                  />
-                )}
-              </Svg>
-              <View style={[styles.pin, at(0, 0)]} pointerEvents="none">
-                <SvgXml xml={villagePinSvg()} width={PIN_SIZE + 8} height={PIN_SIZE + 8} />
-              </View>
-              {pins.map(({ place: p, x, y }) => {
-                const on = selected?.id === p.id;
-                return (
+              <SvgXml xml={xml} width={width} height={height} />
+              {art.mapped
+                .filter((p) => (p.visited ? filter !== 'flag' : filter !== 'foot'))
+                .map((p) => (
                   <Pressable
                     key={p.id}
                     accessibilityRole="button"
                     accessibilityLabel={`${p.visited ? '발자국' : '깃발'} ${p.name}`}
                     onPress={() => setPicked(p.id)}
-                    style={[styles.pin, at(x, y), on && styles.pinOn]}
-                  >
-                    <SvgXml
-                      xml={p.visited ? footprintSvg(colors.health) : flagSvg(colors.yellow, keptDays(p, today) >= FLAG_OLD_DAYS)}
-                      width={PIN_SIZE - 6}
-                      height={PIN_SIZE - 2}
-                    />
-                    <Text style={styles.pinName} numberOfLines={1}>
-                      {p.name}
-                    </Text>
-                  </Pressable>
-                );
-              })}
+                    style={{ position: 'absolute', left: p.x - HIT / 2, top: p.visited ? p.y - HIT / 2 : p.y - 40, width: HIT, height: p.visited ? HIT : 50 }}
+                  />
+                ))}
               {places.length === 0 && <Text style={styles.mapEmpty}>{mapCopy.empty}</Text>}
             </>
           )}
@@ -166,7 +163,7 @@ export default function PlaceMapScreen() {
           selected.visited ? (
             <FootprintCard place={selected} count={countOf(places, selected)} onAgain={() => onWishAgain(selected)} />
           ) : (
-            <FlagCard place={selected} scheduled={scheduledDate(selected, events, today)} today={today} />
+            <FlagCard place={selected} scheduled={scheduledDate(selected, events, today)} today={today} pushed={selected.id === pushed?.id} />
           )
         ) : (
           places.length > 0 && <Text style={styles.pick}>{mapCopy.pick}</Text>
@@ -185,19 +182,13 @@ function countOf(places: readonly Place[], p: Place): number | undefined {
   return latest.id === p.id ? same.length : undefined;
 }
 
-function FlagCard({ place, scheduled, today }: { place: Place; scheduled: DayKey | null; today: DayKey }) {
+function FlagCard({ place, scheduled, today, pushed }: { place: Place; scheduled: DayKey | null; today: DayKey; pushed: boolean }) {
   const days = keptDays(place, today);
-  const old = days >= FLAG_OLD_DAYS;
   return (
-    <View style={styles.cardWrap}>
-      {old && !scheduled && (
-        <View style={styles.bubble}>
-          <Text style={styles.bubbleText}>{flagOldLine(days)}</Text>
-        </View>
-      )}
-      <View style={styles.card}>
+    <View style={styles.card}>
+      <View style={styles.cardTop}>
         <View style={styles.cardIcon}>
-          <SvgXml xml={flagSvg(colors.yellow, old)} width={26} height={30} />
+          <SvgXml xml={flagSvg(colors.yellow)} width={26} height={30} />
         </View>
         <Pressable style={styles.cardBody} onPress={() => router.push({ pathname: '/place-new', params: { id: place.id } })}>
           <Text style={styles.cardName} numberOfLines={1}>
@@ -219,28 +210,32 @@ function FlagCard({ place, scheduled, today }: { place: Place; scheduled: DayKey
           )}
         </Pressable>
         <View style={styles.cardBtns}>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.push({ pathname: '/place-new', params: { id: place.id, mode: 'schedule' } })}
-            style={[styles.btn, styles.btnSub]}
-          >
-            <Text style={[styles.btnText, { color: colors.text }]}>{mapCopy.scheduleBtn}</Text>
+          <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/place-new', params: { id: place.id, mode: 'schedule' } })} style={styles.btn}>
+            <Text style={styles.btnText}>{mapCopy.scheduleBtn}</Text>
           </Pressable>
-          <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/place-new', params: { id: place.id, mode: 'visit' } })} style={styles.btn}>
-            <Text style={styles.btnText}>{mapCopy.visitedBtn}</Text>
+          <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/place-new', params: { id: place.id, mode: 'visit' } })} style={[styles.btn, styles.btnSub]}>
+            <Text style={[styles.btnText, { color: colors.text }]}>{mapCopy.visitedBtn}</Text>
           </Pressable>
         </View>
       </View>
+      {pushed && !scheduled && (
+        <View style={styles.bubbleRow}>
+          <Ijang mood="base" size={52} />
+          <View style={styles.bubble}>
+            <Text style={styles.bubbleText}>{flagOldLine(days)}</Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
 
 function FootprintCard({ place, count, onAgain }: { place: Place; count: number | undefined; onAgain: () => void }) {
   return (
-    <View style={styles.cardWrap}>
-      <View style={styles.card}>
+    <View style={styles.card}>
+      <View style={styles.cardTop}>
         <View style={styles.cardIcon}>
-          <SvgXml xml={footprintSvg(colors.health)} width={26} height={30} />
+          <SvgXml xml={footprintSvg('#A8EB5A')} width={26} height={30} />
         </View>
         <Pressable style={styles.cardBody} onPress={() => router.push({ pathname: '/place-new', params: { id: place.id } })}>
           <View style={styles.nameRow}>
@@ -270,60 +265,45 @@ function FootprintCard({ place, count, onAgain }: { place: Place; count: number 
 
 const styles = StyleSheet.create({
   content: { padding: 12, gap: 12, paddingBottom: 24 },
-  head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 4 },
-  chips: { flexDirection: 'row', gap: 6 },
-  chip: {
-    fontFamily: fonts.bodyHeavy,
-    fontSize: 13,
-    backgroundColor: colors.cardSub,
-    borderRadius: 99,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    overflow: 'hidden',
-  },
-  fire: { fontFamily: fonts.bodyHeavy, fontSize: 12, color: colors.textSub },
+  head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  chips: { flexDirection: 'row', gap: 8 },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 34, paddingHorizontal: 14, borderRadius: 17, backgroundColor: '#232B60' },
+  chipOn: { backgroundColor: colors.yellow, borderBottomWidth: 3, borderBottomColor: '#C9A800' },
+  dot: { width: 9, height: 9, borderRadius: 5 },
+  chipText: { fontFamily: fonts.bodyHeavy, fontSize: 14, color: colors.text },
+  chipTextOn: { color: colors.line },
+  fire: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.textSub },
   fireNum: { fontFamily: fonts.numberBold, fontSize: 15, color: colors.leisure },
-  map: { height: MAP_HEIGHT, borderRadius: 26, backgroundColor: '#181F4C', overflow: 'hidden', borderWidth: 2, borderColor: '#2B3370' },
-  pin: { position: 'absolute', width: PIN_SIZE, height: PIN_SIZE + 14, alignItems: 'center' },
-  pinOn: { backgroundColor: 'rgba(255,225,77,.16)', borderRadius: 14 },
-  pinName: { fontFamily: fonts.bodyHeavy, fontSize: 10, color: colors.textSub, maxWidth: 64, textAlign: 'center' },
-  mapEmpty: { position: 'absolute', bottom: 24, left: 20, right: 20, textAlign: 'center', fontFamily: fonts.bodyBold, fontSize: 13, lineHeight: 19, color: colors.textMuted },
+  map: { borderRadius: 26, overflow: 'hidden' },
+  mapEmpty: { position: 'absolute', bottom: 70, left: 20, right: 20, textAlign: 'center', fontFamily: fonts.bodyBold, fontSize: 13, lineHeight: 19, color: colors.textMuted },
   adds: { flexDirection: 'row', gap: 8 },
   add: { flex: 1, height: 40, borderRadius: 20, borderWidth: 2, borderStyle: 'dashed', borderColor: '#333C7A', alignItems: 'center', justifyContent: 'center' },
   addText: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.textSub },
   pick: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.textMuted, textAlign: 'center' },
-  cardWrap: { gap: 8 },
-  bubble: { backgroundColor: colors.card, borderRadius: 18, paddingVertical: 10, paddingHorizontal: 14 },
-  bubbleText: { fontFamily: fonts.bodyBold, fontSize: 13, lineHeight: 19, color: colors.text },
-  card: { backgroundColor: colors.cardSub, borderRadius: 22, paddingVertical: 12, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  cardIcon: { width: 40, height: 40, borderRadius: 14, backgroundColor: colors.night, alignItems: 'center', justifyContent: 'center' },
+  card: { backgroundColor: colors.cardSub, borderRadius: 26, padding: 14, gap: 12 },
+  cardTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  cardIcon: { width: 52, height: 52, borderRadius: 16, backgroundColor: colors.yellow, alignItems: 'center', justifyContent: 'center' },
   cardBody: { flex: 1, gap: 3 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  cardName: { flexShrink: 1, fontFamily: fonts.bodyHeavy, fontSize: 15, color: colors.text },
-  cardSub: { fontFamily: fonts.bodyBold, fontSize: 12, lineHeight: 17, color: colors.textMuted },
+  cardName: { flexShrink: 1, fontFamily: fonts.bodyHeavy, fontSize: 18, color: colors.text },
+  cardSub: { fontFamily: fonts.bodyBold, fontSize: 13, lineHeight: 18, color: colors.textMuted },
   cardNote: { fontFamily: fonts.bodyBold, fontSize: 12, lineHeight: 17, color: colors.textSub },
   num: { fontFamily: fonts.number },
-  count: {
-    fontFamily: fonts.bodyHeavy,
-    fontSize: 11,
-    color: colors.yellow,
-    backgroundColor: colors.track,
-    borderRadius: 99,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    overflow: 'hidden',
-  },
+  count: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.yellow, backgroundColor: colors.track, borderRadius: 99, paddingHorizontal: 8, paddingVertical: 2, overflow: 'hidden' },
   cardBtns: { gap: 6 },
   btn: {
-    height: 34,
-    paddingHorizontal: 12,
-    borderRadius: 17,
+    height: 38,
+    paddingHorizontal: 16,
+    borderRadius: 19,
     backgroundColor: colors.pink,
     justifyContent: 'center',
     alignItems: 'center',
     borderBottomWidth: 3,
     borderBottomColor: colors.pinkShadow,
   },
-  btnSub: { backgroundColor: colors.track, borderBottomColor: '#232B60' },
-  btnText: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.line },
+  btnSub: { backgroundColor: '#2E3775', borderBottomColor: '#232B60' },
+  btnText: { fontFamily: fonts.bodyHeavy, fontSize: 14, color: colors.line },
+  bubbleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  bubble: { flex: 1, backgroundColor: colors.text, borderRadius: 20, paddingVertical: 12, paddingHorizontal: 16 },
+  bubbleText: { fontFamily: fonts.bodyBold, fontSize: 14, lineHeight: 21, color: colors.line },
 });

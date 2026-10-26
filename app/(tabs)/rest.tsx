@@ -44,11 +44,15 @@ import { useRestLogs } from '../../src/state/restLogs';
 import { restRange, useRestView } from '../../src/state/restView';
 import { Ijang } from '../../src/ui/characters';
 import { indexIconSvg } from '../../src/ui/characters/icons';
-import { fireSvg, logCellSvg, noteSvg } from '../../src/ui/characters/restIcons';
-import { PrimaryButton } from '../../src/ui/components/PrimaryButton';
+import { fireHeight, fireSvg } from '../../src/ui/characters/restIcons';
 import { Screen } from '../../src/ui/components/Screen';
 import { REST_FEATURES } from '../../src/ui/features';
 import { colors, fonts } from '../../src/ui/theme';
+
+/** 불 상태 제목 색 (디자인 15a: 사그라들 때 주황) */
+const FIRE_COLOR = { none: colors.textSub, blaze: '#FFC23C', burning: '#FFA13C', dying: '#FF9A3C', out: '#FF8A5C' } as const;
+/** 이번 주 월 ~ 일 중 오늘 칸 (0 = 월) */
+const weekCol = (d: DayKey) => (weekdayOf(d) + 6) % 7;
 
 const timeLabel = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 const dotted = (d: DayKey) => {
@@ -136,35 +140,33 @@ export default function RestScreen() {
   };
 
   const band = v.band ?? 'none';
+  const todayCol = weekCol(today);
 
   return (
     <Screen title="쉼터" broadcast={{ message: withPrefix(notice ?? REST_BROADCAST[band]), time: timeLabel(new Date()) }}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {/* 모닥불 카드 (디자인 15a): 불 · 상태 · 이번 주 장작 · 장작 던지기 */}
         <View style={styles.card}>
-          <View style={styles.fireRow}>
-            <SvgXml xml={fireSvg(v.band)} width={96} height={96} />
-            <View style={styles.fireText}>
-              <Text style={styles.fireLine}>{FIRE_LINE[band]}</Text>
-              <Text style={styles.fireSub}>
-                {restCopy.statusTitle} <Text style={styles.fireNum}>{v.rest ?? '-'}</Text> · {sinceFireLabel(v.sinceFire)}
-              </Text>
-              <Text style={styles.bandChip}>{v.bandLabel}</Text>
+          <SvgXml xml={fireSvg(v.band)} width={200} height={fireHeight(v.band)} style={styles.fire} />
+          <Text style={[styles.fireLine, { color: FIRE_COLOR[band] }]}>{FIRE_LINE[band]}</Text>
+          <Text style={styles.fireSub}>
+            {restCopy.statusTitle} <Text style={styles.fireNum}>{v.rest ?? '-'}</Text> · {sinceFireLabel(v.sinceFire)}
+          </Text>
+          <View style={styles.weekBox}>
+            <Text style={styles.weekTitle}>이번 주 장작</Text>
+            <View style={styles.week}>
+              {WEEK_LABELS.map((w, i) => (
+                <View key={w} style={styles.day}>
+                  <View style={[styles.pill, v.week[i] && styles.pillOn]} />
+                  <Text style={[styles.dayLabel, i === todayCol && styles.dayToday]}>{w}</Text>
+                </View>
+              ))}
             </View>
           </View>
-          <Text style={styles.weekTitle}>이번 주 장작</Text>
-          <View style={styles.week}>
-            {WEEK_LABELS.map((w, i) => (
-              <View key={w} style={styles.day}>
-                <View style={[styles.dayCell, v.week[i] && styles.dayOn]}>
-                  {v.week[i] && <SvgXml xml={logCellSvg()} width={24} height={24} />}
-                </View>
-                <Text style={[styles.dayLabel, i === 6 && { color: colors.pinkSoft }]}>{w}</Text>
-              </View>
-            ))}
-          </View>
+          <Pressable accessibilityRole="button" onPress={() => router.push('/rest-throw')} style={({ pressed }) => [styles.throwBtn, pressed && styles.throwPressed]}>
+            <Text style={styles.throwText}>장작 던지기</Text>
+          </Pressable>
         </View>
-
-        <PrimaryButton label="장작 던지기" onPress={() => router.push('/rest-throw')} />
 
         {REST_FEATURES.signal && v.signal && (
           <View style={styles.signal}>
@@ -194,17 +196,14 @@ export default function RestScreen() {
         {open && (
           <View style={styles.noteWrap}>
             <View style={styles.bubbleRow}>
-              <Ijang mood="base" size={48} />
+              <Ijang mood="base" size={52} />
               <View style={styles.bubble}>
                 <Text style={styles.bubbleText}>{noteCopy.intro}</Text>
               </View>
             </View>
             {note ? (
               <View style={styles.note}>
-                <View style={styles.noteHead}>
-                  <SvgXml xml={noteSvg()} width={20} height={20} />
-                  <Text style={styles.noteHeader}>{noteCopy.header}</Text>
-                </View>
+                <Text style={styles.noteHeader}>{noteCopy.header}</Text>
                 <Text style={styles.noteText}>
                   {freeDay && dayName
                     ? noteLine(note.name, keptDays(note, today), weekWord(freeDay, today), dayName)
@@ -215,7 +214,7 @@ export default function RestScreen() {
                     <Text style={[styles.btnText, { color: colors.text }]}>{noteCopy.other}</Text>
                   </Pressable>
                   {freeDay && dayName && (
-                    <Pressable accessibilityRole="button" onPress={onPick} style={styles.btn}>
+                    <Pressable accessibilityRole="button" onPress={onPick} style={[styles.btn, styles.btnPink]}>
                       <Text style={styles.btnText}>{noteButton(dayName)}</Text>
                     </Pressable>
                   )}
@@ -253,29 +252,32 @@ export default function RestScreen() {
 
 const styles = StyleSheet.create({
   content: { padding: 12, gap: 12, paddingBottom: 24 },
-  card: { backgroundColor: colors.cardSub, borderRadius: 24, paddingVertical: 14, paddingHorizontal: 16, gap: 12 },
-  fireRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  fireText: { flex: 1, gap: 4 },
-  fireLine: { fontFamily: fonts.title, fontSize: 20, color: colors.yellow },
-  fireSub: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.textSub },
-  fireNum: { fontFamily: fonts.numberBold, fontSize: 16, color: colors.leisure },
-  bandChip: {
-    alignSelf: 'flex-start',
-    fontFamily: fonts.bodyHeavy,
-    fontSize: 12,
-    color: colors.line,
-    backgroundColor: colors.leisure,
-    borderRadius: 99,
-    paddingHorizontal: 10,
-    paddingVertical: 2,
-    overflow: 'hidden',
-  },
+  card: { backgroundColor: colors.cardSub, borderRadius: 28, paddingTop: 14, paddingBottom: 16, paddingHorizontal: 16, alignItems: 'center', gap: 6 },
+  fire: { marginBottom: 2 },
+  fireLine: { fontFamily: fonts.title, fontSize: 26, lineHeight: 32, textAlign: 'center' },
+  fireSub: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.textSub, textAlign: 'center', marginBottom: 8 },
+  fireNum: { fontFamily: fonts.numberBold, fontSize: 15, color: colors.text },
+  weekBox: { alignSelf: 'stretch', backgroundColor: '#141A44', borderRadius: 20, paddingVertical: 10, paddingHorizontal: 14, gap: 8 },
   weekTitle: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.textSub },
   week: { flexDirection: 'row', justifyContent: 'space-between' },
-  day: { alignItems: 'center', gap: 4 },
-  dayCell: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.night, alignItems: 'center', justifyContent: 'center' },
-  dayOn: { backgroundColor: '#3A2A55' },
-  dayLabel: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.textMuted },
+  day: { alignItems: 'center', gap: 5, flex: 1 },
+  pill: { width: 30, height: 14, borderRadius: 7, borderWidth: 2.5, borderColor: '#333C7A' },
+  pillOn: { backgroundColor: '#8B5A38', borderColor: '#8B5A38' },
+  dayLabel: { fontFamily: fonts.bodyHeavy, fontSize: 12, color: colors.textMuted },
+  dayToday: { color: colors.yellow },
+  throwBtn: {
+    alignSelf: 'stretch',
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: colors.yellow,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: 4,
+    borderBottomColor: '#C9A800',
+    marginTop: 6,
+  },
+  throwPressed: { transform: [{ translateY: 2 }], borderBottomWidth: 2 },
+  throwText: { fontFamily: fonts.bodyHeavy, fontSize: 17, color: colors.line },
   signal: { backgroundColor: '#262A63', borderRadius: 24, padding: 14, gap: 10, borderWidth: 2, borderColor: '#4A4F99' },
   signalHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   signalTitle: { fontFamily: fonts.bodyHeavy, fontSize: 14, color: '#E4D6FF' },
@@ -285,27 +287,18 @@ const styles = StyleSheet.create({
   signalLabel: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.text },
   signalValue: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.textSub, textAlign: 'center' },
   signalLine: { fontFamily: fonts.bodyHeavy, fontSize: 13, lineHeight: 20, color: colors.text },
-  noteWrap: { gap: 8 },
-  bubbleRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  bubble: { flex: 1, backgroundColor: colors.card, borderRadius: 18, paddingVertical: 10, paddingHorizontal: 14 },
-  bubbleText: { fontFamily: fonts.bodyBold, fontSize: 13, lineHeight: 19, color: colors.text },
-  note: { backgroundColor: '#2A2F6E', borderRadius: 22, padding: 14, gap: 10 },
-  noteHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  noteHeader: { fontFamily: fonts.bodyHeavy, fontSize: 12, color: colors.yellow },
-  noteText: { fontFamily: fonts.bodyHeavy, fontSize: 15, lineHeight: 22, color: colors.text },
-  noteBtns: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8 },
-  btn: {
-    height: 36,
-    paddingHorizontal: 14,
-    borderRadius: 18,
-    backgroundColor: colors.pink,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderBottomWidth: 3,
-    borderBottomColor: colors.pinkShadow,
-  },
-  btnSub: { backgroundColor: colors.track, borderBottomColor: '#232B60' },
-  btnText: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.line },
+  noteWrap: { gap: 10 },
+  bubbleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  bubble: { flex: 1, backgroundColor: colors.text, borderRadius: 20, paddingVertical: 12, paddingHorizontal: 16 },
+  bubbleText: { fontFamily: fonts.bodyBold, fontSize: 14, lineHeight: 21, color: colors.line },
+  note: { backgroundColor: colors.card, borderRadius: 26, borderWidth: 3, borderColor: '#3F4A9A', padding: 16, gap: 10 },
+  noteHeader: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.leisure },
+  noteText: { fontFamily: fonts.bodyHeavy, fontSize: 18, lineHeight: 26, color: colors.text },
+  noteBtns: { flexDirection: 'row', gap: 10, marginTop: 4 },
+  btn: { flex: 1, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center' },
+  btnSub: { backgroundColor: '#2E3775' },
+  btnPink: { backgroundColor: colors.pink, borderBottomWidth: 4, borderBottomColor: colors.pinkShadow },
+  btnText: { fontFamily: fonts.bodyHeavy, fontSize: 15, color: colors.line },
   empty: { fontFamily: fonts.bodyBold, fontSize: 13, lineHeight: 19, color: colors.textMuted, paddingHorizontal: 4 },
   mapRow: { backgroundColor: colors.cardSub, borderRadius: 22, paddingVertical: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center' },
   mapBody: { flex: 1, gap: 2 },
