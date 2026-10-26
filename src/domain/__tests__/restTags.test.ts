@@ -75,3 +75,11 @@ describe('태그 고치기', () => {
     expect(isKnownPlace('남산', ctx.places)).toBe(false);
   });
 });
+
+describe('외식 · 드라이브 · 게임 (기록 시트 쉼 칩과 같은 말)', () => {
+  it('활동 태그로 읽는다', () => {
+    expect(labels('퇴근하고 외식')).toEqual(['activity:외식']);
+    expect(labels('동네 맛집 갔다')).toEqual(['activity:외식']);
+    expect(labels('드라이브하고 게임')).toEqual(['activity:드라이브', 'activity:게임']);
+  });
+});

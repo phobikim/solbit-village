@@ -7,6 +7,7 @@ import {
   emptyDraft,
   isDraftComplete,
   normalizeDraft,
+  LEISURE_PRESETS,
   recordHeadline,
   RECORD_EDIT_WINDOW_DAYS,
 } from '../records';
@@ -127,5 +128,11 @@ describe('일한 날 / 쉬는 날 기본값', () => {
   it('새 기록 초안이 그 기본값으로 시작한다', () => {
     expect(emptyDraft(defaultDayType('2026-10-24')).dayType).toBe('rest');
     expect(emptyDraft(defaultDayType('2026-10-26')).dayType).toBe('work');
+  });
+});
+
+describe('쉼 칩 기본값', () => {
+  it('산책 · 드라이브 · 게임 · 외식 (2026-10-26)', () => {
+    expect([...LEISURE_PRESETS]).toEqual(['산책', '드라이브', '게임', '외식']);
   });
 });

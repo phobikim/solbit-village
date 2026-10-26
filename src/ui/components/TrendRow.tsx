@@ -33,9 +33,12 @@ export function TrendRow({ kind, values, summary }: Props) {
   return (
     <View style={styles.row} accessibilityLabel={`${LABEL[kind]} ${summary}`}>
       <Text style={styles.label}>{LABEL[kind]}</Text>
-      <Svg viewBox={`0 0 ${VB_W} ${VB_H}`} preserveAspectRatio="none" width="100%" height={36} style={styles.chart}>
-        <Path d={linePath(values)} stroke={col} strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      </Svg>
+      {/* 그래프 칸: 이름과 요약 글자를 뺀 나머지 너비. Svg의 width="100%"가 행 전체 너비로 잡혀 화면 밖으로 나가는 걸 막으려고 칸으로 감싼다 */}
+      <View style={styles.chart}>
+        <Svg viewBox={`0 0 ${VB_W} ${VB_H}`} preserveAspectRatio="none" width="100%" height={36}>
+          <Path d={linePath(values)} stroke={col} strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </Svg>
+      </View>
       <Text style={[styles.summary, { color: col }]}>{summary}</Text>
     </View>
   );
@@ -44,6 +47,6 @@ export function TrendRow({ kind, values, summary }: Props) {
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 36 },
   label: { width: 44, fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.text },
-  chart: { flex: 1 },
+  chart: { flex: 1, minWidth: 0, height: 36, overflow: 'hidden' },
   summary: { width: 64, textAlign: 'right', fontFamily: fonts.bodyHeavy, fontSize: 12 },
 });

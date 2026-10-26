@@ -11,7 +11,7 @@ import type { Condition, Contact, DayRecord, DayType, WorkLevel } from './types'
 export const RECORD_EDIT_WINDOW_DAYS = 7;
 
 /** 여가 기본 칩 */
-export const LEISURE_PRESETS = ['산책', '운동', '영화', '휴식'] as const;
+export const LEISURE_PRESETS = ['산책', '드라이브', '게임', '외식'] as const;
 
 /** 메모·여가 직접 입력 최대 길이 */
 export const TEXT_MAX_LENGTH = 60;
