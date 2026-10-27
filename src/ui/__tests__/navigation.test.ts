@@ -1,4 +1,4 @@
-import { tabOfPath } from '../navigation';
+import { hidesBottomBar, tabOfPath } from '../navigation';
 
 describe('하단 바 탭 (마을 · 장부 · 이웃 · 쉼터 · 나)', () => {
   it('탭 화면', () => {
@@ -21,5 +21,13 @@ describe('하단 바 탭 (마을 · 장부 · 이웃 · 쉼터 · 나)', () => {
     expect(tabOfPath('/morning-news')).toBeNull();
     expect(tabOfPath('/meadow')).toBeNull();
     expect(tabOfPath('/restaurant')).toBeNull();
+  });
+});
+
+describe('전체 화면', () => {
+  it('/wake에서는 하단 바를 숨긴다', () => {
+    expect(hidesBottomBar('/wake')).toBe(true);
+    expect(hidesBottomBar('/')).toBe(false);
+    expect(hidesBottomBar('/records')).toBe(false);
   });
 });

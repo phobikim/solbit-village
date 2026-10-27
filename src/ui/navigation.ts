@@ -16,3 +16,13 @@ export function tabOfPath(path: string): TabKey | null {
   for (const [tab, pages] of PAGES) if (pages.some((p) => path === p || path.startsWith(`${p}/`))) return tab;
   return null;
 }
+
+/** 아침 첫 화면 "솔이 깨우기" 다음에 갈 곳. 컨디션 화면이 생기면 여기만 바꾼다. */
+export const AFTER_WAKE_HREF = '/(tabs)' as const;
+
+/** 하단 바를 숨기는 전체 화면 */
+const FULLSCREEN_PATHS: readonly string[] = ['/wake'];
+
+export function hidesBottomBar(path: string): boolean {
+  return FULLSCREEN_PATHS.includes(path);
+}

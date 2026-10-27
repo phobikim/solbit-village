@@ -1,5 +1,5 @@
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -7,6 +7,9 @@ import { Platform, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { initDb } from '../src/data/db';
+import { SETTING, getSetting } from '../src/data/settings';
+import { shouldShowWake } from '../src/domain/morning';
+import { FEATURES } from '../src/ui/features';
 import { setupNotificationHandler } from '../src/notifications';
 import { BottomBar } from '../src/ui/components/BottomBar';
 import { useVisibleHeight } from '../src/ui/useVisibleHeight';
@@ -24,7 +27,11 @@ export default function RootLayout() {
 
   useEffect(() => {
     initDb()
-      .then(() => __DEV__ && console.log('[db] ready'))
+      .then(async () => {
+        __DEV__ && console.log('[db] ready');
+        // 아침 흐름이 켜져 있고 오늘 아직 안 마쳤으면 솔이 깨우기부터
+        if (FEATURES.morningFlow && shouldShowWake(await getSetting(SETTING.morningDoneDay), new Date())) router.replace('/wake');
+      })
       .catch((e) => console.warn('[db] init failed', e));
   }, []);
 
@@ -44,6 +51,7 @@ export default function RootLayout() {
             <Stack.Screen name="record" options={{ presentation: 'modal' }} />
             <Stack.Screen name="seed-result" options={{ presentation: 'transparentModal', animation: 'fade', contentStyle: { backgroundColor: 'transparent' } }} />
             <Stack.Screen name="morning-news" options={{ presentation: 'transparentModal', animation: 'fade', contentStyle: { backgroundColor: 'transparent' } }} />
+            <Stack.Screen name="wake" options={{ animation: 'fade', gestureEnabled: false }} />
             <Stack.Screen name="settings" />
             <Stack.Screen name="neighbor-new" options={{ presentation: 'modal' }} />
             <Stack.Screen name="ledger/new" options={{ presentation: 'modal' }} />

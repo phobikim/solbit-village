@@ -46,7 +46,8 @@
       ],
       "expo-sqlite",
       "expo-notifications",
-      "expo-sharing"
+      "expo-sharing",
+      "expo-video"
     ],
     "extra": {
       "router": {

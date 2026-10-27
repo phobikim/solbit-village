@@ -122,3 +122,9 @@ export function broadcastText(s: BroadcastSituation): string {
       return withPrefix(s.boardEmpty ? broadcasts.boardEmpty : broadcasts.quiet);
   }
 }
+
+/** 아침 첫 화면 "솔이 깨우기" 이장 말풍선. 침대가 없어서 "이불" 표현은 쓰지 않는다. */
+export const wakeBroadcast = {
+  morning: `${BROADCAST_PREFIX} 솔이는 아직 꿈속이유.`,
+  midday: `${BROADCAST_PREFIX} 해가 중천이구먼. 솔이는 아직 꿈속이유.`,
+} as const;

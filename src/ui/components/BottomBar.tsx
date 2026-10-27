@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SvgXml } from 'react-native-svg';
 
 import { tabIconSvg, type TabIcon } from '../characters/icons';
-import { tabOfPath } from '../navigation';
+import { hidesBottomBar, tabOfPath } from '../navigation';
 import { colors, fonts } from '../theme';
 
 type Tab = { key: TabIcon; label: string; href: '/' | '/records' | '/neighbors' | '/rest' | '/me' };
@@ -28,6 +28,7 @@ export function BottomBar() {
   const last = useRef<TabIcon>('village');
   const current = tabOfPath(path) ?? last.current;
   last.current = current;
+  if (hidesBottomBar(path)) return null;
 
   return (
     <View style={[styles.wrap, { marginBottom: 6 + insets.bottom }]} accessibilityRole="tablist">

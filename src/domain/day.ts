@@ -20,6 +20,15 @@ export function timeOfDayAt(at: Date): 'day' | 'night' {
   return h >= DAY_START_HOUR && h < NIGHT_START_HOUR ? 'day' : 'night';
 }
 
+/** 아침 첫 화면 문구가 "해가 중천"으로 바뀌는 시각 (시, 기기 현지) */
+export const MIDDAY_START_HOUR = 11;
+
+/** 하루 경계(04:00) 기준으로 11:00 이후인가. 00:00~03:59는 전날의 늦은 시각이라 true. */
+export function isMiddayOrLater(at: Date): boolean {
+  const sinceBoundary = (at.getHours() - DAY_BOUNDARY_HOUR + 24) % 24;
+  return sinceBoundary >= MIDDAY_START_HOUR - DAY_BOUNDARY_HOUR;
+}
+
 /** 'YYYY-MM-DD' */
 export type DayKey = string;
 

@@ -25,6 +25,8 @@ export const SETTING = {
   newsAlarmOn: 'news_alarm_on',
   /** 아침 알림 시각 'HH:MM' */
   newsAlarmTime: 'news_alarm_time',
+  /** 아침 흐름을 마친 날 (YYYY-MM-DD). 아직 쓰는 곳 없음 — 컨디션 이후 화면과 함께 만든다. 지금은 읽기만. */
+  morningDoneDay: 'morning_done_day',
   /** 쪽지 제안 기억 (JSON: 장소별 마지막 제안일 · 오늘의 쪽지) */
   restNote: 'rest_note',
 } as const;

@@ -24,3 +24,7 @@ export const BACKUP_ERROR = {
   broken: '파일이 망가져서 읽을 수 없습니다.',
   failed: '처리하지 못했습니다. 다시 시도해 주세요.',
 } as const;
+
+export const DEV_WAKE_TITLE = '개발자 · 솔이 깨우기';
+export const DEV_WAKE_SUB = '아침 첫 화면 확인용';
+export const WAKE_BUTTON = '솔이 깨우기';

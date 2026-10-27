@@ -15,7 +15,9 @@ import { useRecords } from '../../src/state/records';
 import { meRange, useMeView } from '../../src/state/tabViews';
 import { Soli } from '../../src/ui/characters';
 import { Avatar } from '../../src/ui/components/Avatar';
+import { DEV_WAKE_SUB, DEV_WAKE_TITLE } from '../../src/copy/settings.ko';
 import { DevTools } from '../../src/ui/components/DevTools';
+import { FEATURES } from '../../src/ui/features';
 import { MenuCard } from '../../src/ui/components/MenuCard';
 import { Screen } from '../../src/ui/components/Screen';
 import { TrendRow } from '../../src/ui/components/TrendRow';
@@ -107,6 +109,9 @@ export default function MeScreen() {
           subtitle="알림 시간 · 백업"
           onPress={() => router.push('/settings')}
         />
+        {!FEATURES.morningFlow && (
+          <MenuCard icon="settings" iconBg={colors.track} iconColor={colors.textMuted} title={DEV_WAKE_TITLE} subtitle={DEV_WAKE_SUB} onPress={() => router.push('/wake')} />
+        )}
         {__DEV__ && <DevTools />}
       </ScrollView>
     </Screen>

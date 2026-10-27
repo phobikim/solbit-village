@@ -7,3 +7,8 @@ export const REST_FEATURES = {
   /** 1년 전 오늘 (꺼 둔 채 유지) */
   yearAgo: false,
 } as const;
+
+/** 아침 흐름 (솔이 깨우기 → 컨디션 …). false면 앱 시작 때 자동으로 뜨지 않고, 웹 /wake · 나 탭 개발자 항목으로만 연다. */
+export const FEATURES = {
+  morningFlow: false,
+} as const;
