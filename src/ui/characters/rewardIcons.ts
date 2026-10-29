@@ -1,0 +1,8 @@
+// 아침 하루 고르기 · 마을 보상표의 아이콘 3종 (assets/icons 와 같은 그림). SvgXml로 그린다. 모두 viewBox 0 0 32 32.
+// 원본 SVG의 메타데이터(c2pa)는 그림과 무관해서 뺐다.
+
+export const ICON_COIN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32"><circle cx="16" cy="16" r="13.5" fill="#FFE14D" stroke="#10142E" stroke-width="3"></circle><circle cx="16" cy="16" r="9.5" fill="none" stroke="#E0A800" stroke-width="1.8"></circle><path d="M16 22.5V15.5" stroke="#B07A00" stroke-width="2.2" stroke-linecap="round"></path><path d="M16 16.5C16 13.2 13.8 11.4 10.6 11.4 10.6 14.6 12.8 16.5 16 16.5Z" fill="#B07A00"></path><path d="M16 14.6C16 11.3 18.2 9.5 21.4 9.5 21.4 12.7 19.2 14.6 16 14.6Z" fill="#B07A00"></path></svg>`;
+
+export const ICON_ENERGY = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32"><circle cx="16" cy="16" r="13.5" fill="#A8EB5A" stroke="#10142E" stroke-width="3"></circle><path d="M18 6.5L10.5 17.5H15.2L13.6 25.5 21.5 14H16.6Z" fill="#FFE14D" stroke="#10142E" stroke-width="2.2" stroke-linejoin="round"></path></svg>`;
+
+export const ICON_TROPHY = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32"><path d="M9.5 9H5.5V11A5 5 0 0 0 10.5 16M22.5 9H26.5V11A5 5 0 0 1 21.5 16" fill="none" stroke="#10142E" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9 4.5H23V12A7 7 0 0 1 9 12Z" fill="#FFE14D" stroke="#10142E" stroke-width="2.6" stroke-linejoin="round"></path><path d="M14 19H18V23H14Z" fill="#FFC23C" stroke="#10142E" stroke-width="2.4" stroke-linejoin="round"></path><path d="M9.5 23H22.5V27.5H9.5Z" fill="#FFC23C" stroke="#10142E" stroke-width="2.6" stroke-linejoin="round"></path></svg>`;

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="https://hangeul.pstatic.net/hangeul_static/css/nanum-square-round.css">
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="image-slot.js"></script>
+<style>html,body{margin:0;min-height:100%;background:#0D1130;color:#FFFFFF;font-family:'NanumSquareRound',sans-serif;word-break:keep-all}a{color:#FFE14D;text-decoration:none}a:hover{color:#FF4FA0}button{font-family:inherit}</style>
+</helmet>
+<section style="background:#0D1130;padding:64px 72px 72px;display:flex;flex-direction:column;gap:48px">
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="font-family:'Fredoka';font-size:14px;font-weight:600;letter-spacing:.12em;color:#A8EB5A">TURN 22 · 아침 준비 2/3</div>
+    <div style="font-family:'Bagel Fat One';font-size:40px;color:#FFE14D">오늘 하루 고르기</div>
+    <div style="font-size:15px;color:#C9CEF5;max-width:760px;line-height:1.6">상태 3개를 나란히 둡니다. 각 화면은 직접 눌러 볼 수 있습니다. 솔이 자리에 눈 뜬 기본 솔이 이미지를 끌어다 놓아 주세요.</div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start">
+    <sc-for list="{{ frames }}" as="f" hint-placeholder-count="3">
+      <div id="{{ f.anchor }}" style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-family:'Fredoka';font-weight:700;font-size:14px;background:#FFE14D;color:#10142E;border-radius:999px;padding:4px 12px">{{ f.anchor }}</span>
+          <span style="font-size:15px;font-weight:700;color:#FFFFFF">{{ f.title }}</span>
+        </div>
+        <div style="position:relative;width:390px;height:844px;border-radius:44px;overflow:hidden;background:#EAF6FF;color:#10142E;box-shadow:0 0 0 8px #232B60">
+          <div style="position:absolute;left:0;right:0;top:0;height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;font-family:'Fredoka';font-weight:600;font-size:15px;color:#10142E;box-sizing:border-box">
+            <span>9:41</span>
+            <div style="display:flex;gap:5px;align-items:center"><div style="width:17px;height:10px;border-radius:2px;background:#10142E"></div><div style="width:24px;height:11px;border-radius:3px;border:1.5px solid #10142E;box-sizing:border-box;padding:1px"><div style="width:70%;height:100%;border-radius:1px;background:#10142E"></div></div></div>
+          </div>
+          <div style="position:absolute;left:0;right:0;top:56px;display:flex;justify-content:center;gap:8px;align-items:center" aria-label="1단계 하루 / 복장 / 마을">
+            <div style="width:24px;height:8px;border-radius:4px;background:#FF4FA0"></div>
+            <div style="width:8px;height:8px;border-radius:4px;background:#C9CEF5"></div>
+            <div style="width:8px;height:8px;border-radius:4px;background:#C9CEF5"></div>
+          </div>
+          <div style="position:absolute;left:12px;right:12px;top:78px;background:#232B60;border-radius:22px;padding:14px 16px;display:flex;gap:12px;align-items:center;color:#FFFFFF">
+            <div style="width:44px;height:44px;flex:none;border-radius:50%;background:#FFE14D;overflow:hidden;display:flex;justify-content:center"><img src="soli-assets/ijang-plain.svg" alt="" style="width:46px;height:51px;flex:none;margin-top:2px;display:block"></div>
+            <div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span style="font-size:12px;font-weight:800;color:#FFE14D">이장</span><span style="font-size:15px;font-weight:700;line-height:1.5">{{ f.line }}</span></div>
+          </div>
+          <div style="position:absolute;left:0;right:0;top:170px;height:206px;display:flex;justify-content:center">
+            <div style="position:absolute;top:4px;width:184px;height:184px;border-radius:50%;background:#FFE14D;opacity:.35"></div>
+            <div style="position:absolute;top:184px;width:104px;height:16px;border-radius:50%;background:#10142E;opacity:.12"></div>
+            <div style="position:absolute;top:14px;width:150px;height:176px">
+              <image-slot id="{{ f.slotId }}" shape="rect" fit="contain" placeholder="눈 뜬 솔이 (서 있는 포즈)" style="display:block;width:100%;height:100%"></image-slot>
+            </div>
+          </div>
+          <div style="position:absolute;left:16px;right:16px;top:392px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:15px;font-weight:800;color:#10142E">오늘은</div>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+              <sc-for list="{{ f.days }}" as="d" hint-placeholder-count="3">
+                <button onClick="{{ d.pick }}" aria-pressed="{{ d.on }}" style="height:92px;border-radius:20px;border:2px solid {{ d.border }};background:{{ d.bg }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;padding:0;color:#10142E">
+                  <svg width="32" height="32" viewBox="0 0 28 28" fill="none" stroke="#10142E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><sc-for list="{{ d.paths }}" as="p"><path d="{{ p }}"></path></sc-for></svg>
+                  <span style="font-size:15px;font-weight:800">{{ d.label }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="position:absolute;left:16px;right:16px;top:526px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:15px;font-weight:800;color:#10142E">몸은</div>
+            <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px">
+              <sc-for list="{{ f.conds }}" as="c" hint-placeholder-count="5">
+                <button onClick="{{ c.pick }}" aria-pressed="{{ c.on }}" style="height:84px;border-radius:18px;border:2px solid {{ c.border }};background:{{ c.bg }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:0 2px;color:#10142E">
+                  <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#10142E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><sc-for list="{{ c.paths }}" as="p"><path d="{{ p }}"></path></sc-for></svg>
+                  <span style="font-size:12px;font-weight:800;line-height:1.2;text-align:center">{{ c.label }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <button onClick="{{ f.next }}" disabled="{{ f.disabled }}" style="position:absolute;left:16px;right:16px;bottom:40px;height:56px;border-radius:28px;border:none;background:{{ f.btnBg }};color:{{ f.btnInk }};box-shadow:0 5px 0 {{ f.btnShadow }};font-family:'Bagel Fat One';font-size:20px;cursor:pointer">다음</button>
+          <button style="position:absolute;left:0;right:0;margin:0 auto;bottom:8px;width:140px;height:28px;border:none;background:transparent;color:#5A6194;font-size:13px;font-weight:700;cursor:pointer">나중에 할래유</button>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { sel: [{ day: null, cond: null }, { day: 'work', cond: 'clear' }, { day: 'rest', cond: 'storm' }] };
+  set(i, k, v) {
+    this.setState(s => ({ sel: s.sel.map((x, j) => j === i ? { ...x, [k]: x[k] === v && k === 'cond' ? null : v } : x) }));
+  }
+  renderVals() {
+    const cloud = 'M7 17h14a4.5 4.5 0 0 0 0-9 6.5 6.5 0 0 0-12.4-1.6A5 5 0 0 0 7 17z';
+    const DAYS = [
+      { k: 'work', label: '일', paths: ['M4 10h20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V12a2 2 0 0 1 2-2z', 'M10 10V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3', 'M2 16h24', 'M14 15v2'] },
+      { k: 'rest', label: '쉼', paths: ['M4 12h15v4a6 6 0 0 1-6 6h-3a6 6 0 0 1-6-6z', 'M19 13.5h1.5a3 3 0 0 1 0 6H18', 'M9.5 4.5v3', 'M13.5 4.5v3', 'M3 25.5h18'] },
+      { k: 'play', label: '놀기', paths: ['M14 2.5c4 0 7 3.2 7 7.6 0 5-3.6 9.4-7 9.4s-7-4.4-7-9.4c0-4.4 3-7.6 7-7.6z', 'M12.6 19.5h2.8l-1.4 2z', 'M14 21.5c-2 1.8 2 2.8 0 4.5'] }
+    ];
+    const CONDS = [
+      { k: 'clear', label: '맑음', paths: ['M14 9a5 5 0 1 1 0 10 5 5 0 0 1 0-10z', 'M14 2.5v2.5', 'M14 23v2.5', 'M2.5 14H5', 'M23 14h2.5', 'M5.9 5.9l1.8 1.8', 'M20.3 20.3l1.8 1.8', 'M5.9 22.1l1.8-1.8', 'M20.3 7.7l1.8-1.8'] },
+      { k: 'partly', label: '구름 조금', paths: ['M10 5a4 4 0 0 0-3.6 5.8', 'M10 1.5v1', 'M3 8H2', 'M4.8 3.3l.8.8', 'M15.2 3.3l-.8.8', 'M11 24h11a4 4 0 0 0 0-8 5.8 5.8 0 0 0-11-1.4A4.6 4.6 0 0 0 11 24z'] },
+      { k: 'cloudy', label: '흐림', paths: ['M7 22h14a5 5 0 0 0 0-10 7 7 0 0 0-13.3-1.8A5.9 5.9 0 0 0 7 22z'] },
+      { k: 'rain', label: '비', paths: [cloud, 'M9 21v3', 'M14 21v4', 'M19 21v3'] },
+      { k: 'storm', label: '폭풍', paths: [cloud, 'M15 19.5l-3 4h4l-3 4'] }
+    ];
+    const META = [{ anchor: '22a', title: '선택 전' }, { anchor: '22b', title: '일 + 맑음' }, { anchor: '22c', title: '쉼 + 폭풍' }];
+    const card = on => ({ on, border: on ? '#FF4FA0' : '#FFFFFF', bg: on ? '#FFE3F0' : '#FFFFFF' });
+    const frames = this.state.sel.map((s, i) => ({
+      ...META[i],
+      slotId: 'soli-awake-' + (i + 1),
+      line: s.cond === 'storm' ? '...오늘은 푹 쉬어유.' : '오늘은 무슨 날이고, 몸은 어떠유?',
+      days: DAYS.map(d => ({ ...d, ...card(s.day === d.k), pick: () => this.set(i, 'day', d.k) })),
+      conds: CONDS.map(c => ({ ...c, ...card(s.cond === c.k), pick: () => this.set(i, 'cond', c.k) })),
+      disabled: !s.day,
+      btnBg: s.day ? '#FF4FA0' : '#C9CEF5',
+      btnInk: s.day ? '#10142E' : '#5A6194',
+      btnShadow: s.day ? '#B32A6E' : '#C9CEF5',
+      next: () => {}
+    }));
+    return { frames };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="https://hangeul.pstatic.net/hangeul_static/css/nanum-square-round.css">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>html{background:#101012!important;min-height:100%}body{margin:0;min-height:100%;background:#101012;color:#ECEAF2;font-family:'NanumSquareRound',sans-serif}a{color:inherit;text-decoration:none}a:hover{opacity:.92}textarea{font:inherit}textarea::placeholder{color:inherit;opacity:.5}</style>
+</helmet>
+
+<section style="background:#101012;padding:64px 72px 96px;display:flex;flex-direction:column;gap:48px">
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="font-family:'Fredoka';font-size:14px;letter-spacing:.12em;color:#8C8AA0">TURN 3</div>
+    <div style="font-size:30px;font-weight:800">대표 캐릭터 + 낮/밤 한 컨셉</div>
+    <div style="font-size:15px;color:#A9A6C0;max-width:760px;line-height:1.6;text-wrap:pretty">2a 풀블리드 구성을 기본으로 삼았습니다. 같은 화면이 시간대에 따라 낮과 밤으로 바뀌고, 밤이 기본입니다. 폰트는 나눔스퀘어라운드(한글)와 Fredoka(영문/숫자)입니다.</div>
+  </div>
+
+  <div id="3a" style="display:flex;flex-direction:column;gap:20px;max-width:1000px">
+    <div style="display:flex;align-items:center;gap:10px"><span style="background:#ECEAF2;color:#101012;font-family:'Fredoka';font-size:13px;font-weight:600;padding:4px 10px;border-radius:99px">3a</span><span style="font-size:18px;font-weight:800">대표 캐릭터 · 솔이</span></div>
+    <div style="display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:20px;background:#17192C;border-radius:36px;padding:20px">
+      <div style="height:420px;border-radius:28px;background:radial-gradient(circle at 50% 42%,#2E3260 0,#1B1E38 70%);display:grid;place-items:center">{{ soliBig }}</div>
+      <div style="display:flex;flex-direction:column;gap:20px;padding:12px 8px">
+        <div style="display:flex;flex-direction:column;gap:6px"><span style="font-family:'Fredoka';font-size:15px;color:#A9A6C0">Soli</span><span style="font-size:34px;font-weight:800">솔이</span></div>
+        <div style="font-size:15px;line-height:1.7;color:#C9C6DA;text-wrap:pretty">솔빛 마을에 사는 동그란 새싹. 굵은 선 하나로 그린 단순한 몸에, 표정과 잎 모양으로 오늘 컨디션을 보여줍니다.</div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+          <div style="background:#1F2240;border-radius:24px;padding:14px 8px 14px;display:flex;flex-direction:column;align-items:center;gap:6px">{{ soliTired }}<span style="font-size:15px;font-weight:800">지침</span><span style="font-size:12px;color:#A9A6C0">잎이 축 처져요</span></div>
+          <div style="background:#1F2240;border-radius:24px;padding:14px 8px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:inset 0 0 0 1.5px #FFC27A">{{ soliNormal }}<span style="font-size:15px;font-weight:800">보통</span><span style="font-size:12px;color:#A9A6C0">평소의 솔이</span></div>
+          <div style="background:#1F2240;border-radius:24px;padding:14px 8px 14px;display:flex;flex-direction:column;align-items:center;gap:6px">{{ soliHappy }}<span style="font-size:15px;font-weight:800">신남</span><span style="font-size:12px;color:#A9A6C0">꽃이 피어요</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font-size:13px;font-weight:800;color:#A9A6C0">유머 컷 · 기록에 반응하는 솔이</span>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;word-break:keep-all;text-align:center">
+            <div style="background:#1F2240;border-radius:24px;padding:14px 6px 12px;display:flex;flex-direction:column;align-items:center;gap:6px">{{ soliCoffee }}<span style="font-size:13px;font-weight:800">카페인 수혈 중</span><span style="font-size:11px;color:#A9A6C0">건강 낮음</span></div>
+            <div style="background:#1F2240;border-radius:24px;padding:14px 6px 12px;display:flex;flex-direction:column;align-items:center;gap:6px">{{ soliLaptop }}<span style="font-size:13px;font-weight:800">오늘도 야근</span><span style="font-size:11px;color:#A9A6C0">일 강도 3</span></div>
+            <div style="background:#1F2240;border-radius:24px;padding:14px 6px 12px;display:flex;flex-direction:column;align-items:center;gap:6px">{{ soliPa }}<span style="font-size:13px;font-weight:800">장 보고 왔어요</span><span style="font-size:11px;color:#A9A6C0">여가 기록</span></div>
+            <div style="background:#1F2240;border-radius:24px;padding:14px 6px 12px;display:flex;flex-direction:column;align-items:center;gap:6px">{{ soliFlag }}<span style="font-size:13px;font-weight:800">퇴근!</span><span style="font-size:11px;color:#A9A6C0">일 강도 1</span></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#A9A6C0">
+          <div style="display:flex;align-items:center;gap:6px"><span style="width:18px;height:18px;border-radius:50%;background:#FFF6D6"></span>몸 #FFF6D6</div>
+          <div style="display:flex;align-items:center;gap:6px"><span style="width:18px;height:18px;border-radius:50%;background:#8ED46E"></span>잎 #8ED46E</div>
+          <div style="display:flex;align-items:center;gap:6px"><span style="width:18px;height:18px;border-radius:50%;background:#FF8E8E"></span>볼 #FF8E8E</div>
+          <div style="display:flex;align-items:center;gap:6px"><span style="width:18px;height:18px;border-radius:50%;background:#FFB25E"></span>입 #FFB25E</div>
+          <div style="display:flex;align-items:center;gap:6px"><span style="width:18px;height:18px;border-radius:50%;background:#2E1C16;box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)"></span>선 #2E1C16</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:56px;align-items:flex-start">
+
+    <div id="3b" style="display:flex;flex-direction:column;gap:20px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#ECEAF2;color:#101012;font-family:'Fredoka';font-size:13px;font-weight:600;padding:4px 10px;border-radius:99px">3b</span><span style="font-size:18px;font-weight:800">메인 · 밤 (기본)</span></div>
+      <div style="width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;background:#12162E;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 40px 80px -30px rgba(0,0,0,.8);color:#F2EEF8">
+        {{ sceneNight }}
+        <div style="position:absolute;left:0;right:0;bottom:0;height:300px;background:linear-gradient(rgba(18,20,38,0),#12142A 70%);pointer-events:none"></div>
+        <div style="position:absolute;left:0;right:0;top:0">
+          <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-family:'Fredoka';font-size:16px;font-weight:600"><span>9:41</span><div style="display:flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="5" y="5" width="3" height="7" rx="1"></rect><rect x="10" y="2" width="3" height="10" rx="1"></rect><rect x="15" y="0" width="3" height="12" rx="1" opacity=".35"></rect></svg><svg width="26" height="12" viewBox="0 0 26 12"><rect x=".5" y=".5" width="22" height="11" rx="3.5" fill="none" stroke="currentColor" opacity=".4"></rect><rect x="2.5" y="2.5" width="15" height="7" rx="2" fill="currentColor"></rect></svg></div></div>
+          <div style="padding:10px 24px 0;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="display:flex;flex-direction:column;gap:4px"><span style="font-family:'Fredoka';font-size:14px;color:#A9A6C0">Solbit Village · Night</span><span style="font-size:27px;font-weight:800;letter-spacing:-.02em">솔빛 마을</span></div>
+              <div style="width:58px;height:58px;border-radius:50%;background:rgba(28,30,54,.7);box-shadow:inset 0 0 0 1.5px rgba(255,194,122,.5);display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'Fredoka';font-size:11px;font-weight:600;color:#FFC27A;line-height:1">LV</span><span style="font-family:'Fredoka';font-size:26px;font-weight:600;line-height:1">7</span></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px"><div style="flex:1;height:8px;border-radius:99px;background:rgba(255,255,255,.12)"><div style="width:64%;height:100%;border-radius:99px;background:#FFC27A;box-shadow:0 0 12px rgba(255,194,122,.6)"></div></div><span style="font-family:'Fredoka';font-size:13px;color:#A9A6C0">1,280 / 2,000</span></div>
+          </div>
+        </div>
+        <div style="position:absolute;top:296px;left:22px;max-width:228px;background:rgba(28,30,54,.82);backdrop-filter:blur(12px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);border-radius:24px 24px 8px 24px;padding:13px 16px;display:flex;flex-direction:column;gap:4px">
+          <span style="font-size:15px;font-weight:800">💌 민수가 편지를 보냈어요</span>
+          <span style="font-size:13px;color:#C9C6DA">요즘 어떻게 지내?</span>
+        </div>
+        <div style="position:absolute;left:50%;top:398px;transform:translateX(-50%)">{{ soliNight }}</div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:0 16px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:12px 6px;border-radius:28px;background:rgba(28,30,54,.72);backdrop-filter:blur(12px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:44px;height:44px;border-radius:50%;background:conic-gradient(#FF8F8F 0 62%,rgba(255,255,255,.12) 0);display:grid;place-items:center"><div style="width:36px;height:36px;border-radius:50%;background:#1F2240;display:grid;place-items:center;color:#FF8F8F"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg></div></div><span style="font-size:12px;color:#C9C6DA">건강 <b style="font-family:'Fredoka';font-size:14px;font-weight:600;color:#F2EEF8">62</b></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:44px;height:44px;border-radius:50%;background:conic-gradient(#8FA8FF 0 78%,rgba(255,255,255,.12) 0);display:grid;place-items:center"><div style="width:36px;height:36px;border-radius:50%;background:#1F2240;display:grid;place-items:center;color:#8FA8FF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4"></path><path d="M6 4h11l-2.5 4L17 12H6z" fill="currentColor"></path></svg></div></div><span style="font-size:12px;color:#C9C6DA">일 <b style="font-family:'Fredoka';font-size:14px;font-weight:600;color:#F2EEF8">78</b></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:44px;height:44px;border-radius:50%;background:conic-gradient(#FFCB6B 0 54%,rgba(255,255,255,.12) 0);display:grid;place-items:center"><div style="width:36px;height:36px;border-radius:50%;background:#1F2240;display:grid;place-items:center;color:#FFCB6B"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 19.5a5.5 5.5 0 0 1 11 0z"></path><circle cx="17" cy="9" r="2.5"></circle><path d="M15.6 13.4A4.6 4.6 0 0 1 21 18.5h-4.6a7 7 0 0 0-.8-5.1z"></path></svg></div></div><span style="font-size:12px;color:#C9C6DA">관계 <b style="font-family:'Fredoka';font-size:14px;font-weight:600;color:#F2EEF8">54</b></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:44px;height:44px;border-radius:50%;background:conic-gradient(#7FD6AE 0 38%,rgba(255,255,255,.12) 0);display:grid;place-items:center"><div style="width:36px;height:36px;border-radius:50%;background:#1F2240;display:grid;place-items:center;color:#7FD6AE"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"></path><path d="M12 13C12 9 9 7 5 7c0 4 3 6 7 6z" fill="currentColor"></path><path d="M12 11c0-3 2.5-5 6-5 0 3-2.5 5-6 5z" fill="currentColor"></path></svg></div></div><span style="font-size:12px;color:#C9C6DA">여가 <b style="font-family:'Fredoka';font-size:14px;font-weight:600;color:#F2EEF8">38</b></span></div>
+          </div>
+          <a href="#3d" style="height:58px;border-radius:29px;background:#FFC27A;color:#1E1A2E;display:flex;align-items:center;justify-content:center;gap:10px;font-size:17px;font-weight:800;box-shadow:0 10px 30px -8px rgba(255,194,122,.55)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 11-11-3-3L5 16z"></path></svg>오늘 기록하기</a>
+          <div style="height:62px;display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:18px;font-size:11px;font-weight:700;color:#7A7896">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#F2EEF8"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"></circle><path d="M4.5 14c3-2 5-2 7.5 0s4.5 2 7.5 0"></path></svg>세계</div>
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="4" width="14" height="16" rx="4"></rect><path d="M9 9h6M9 13h4"></path></svg>기록</div>
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3"></circle><path d="M3.5 19a5.5 5.5 0 0 1 11 0"></path><circle cx="17" cy="9" r="2.4"></circle><path d="M15.5 13.6A4.5 4.5 0 0 1 21 18"></path></svg>인연</div>
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="9" r="3.5"></circle><path d="M5.5 20a6.5 6.5 0 0 1 13 0"></path></svg>나</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="3c" style="display:flex;flex-direction:column;gap:20px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#ECEAF2;color:#101012;font-family:'Fredoka';font-size:13px;font-weight:600;padding:4px 10px;border-radius:99px">3c</span><span style="font-size:18px;font-weight:800">메인 · 낮</span></div>
+      <div style="width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;background:#BFE3FF;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 40px 80px -30px rgba(0,0,0,.8);color:#2E3440">
+        {{ sceneDay }}
+        <div style="position:absolute;left:0;right:0;bottom:0;height:300px;background:linear-gradient(rgba(255,248,236,0),#FFF6E8 70%);pointer-events:none"></div>
+        <div style="position:absolute;left:0;right:0;top:0">
+          <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-family:'Fredoka';font-size:16px;font-weight:600"><span>2:10</span><div style="display:flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="5" y="5" width="3" height="7" rx="1"></rect><rect x="10" y="2" width="3" height="10" rx="1"></rect><rect x="15" y="0" width="3" height="12" rx="1" opacity=".35"></rect></svg><svg width="26" height="12" viewBox="0 0 26 12"><rect x=".5" y=".5" width="22" height="11" rx="3.5" fill="none" stroke="currentColor" opacity=".4"></rect><rect x="2.5" y="2.5" width="15" height="7" rx="2" fill="currentColor"></rect></svg></div></div>
+          <div style="padding:10px 24px 0;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="display:flex;flex-direction:column;gap:4px"><span style="font-family:'Fredoka';font-size:14px;color:#4E5768">Solbit Village · Afternoon</span><span style="font-size:27px;font-weight:800;letter-spacing:-.02em">솔빛 마을</span></div>
+              <div style="width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.75);box-shadow:inset 0 0 0 1.5px rgba(232,150,60,.45);display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'Fredoka';font-size:11px;font-weight:600;color:#C7782A;line-height:1">LV</span><span style="font-family:'Fredoka';font-size:26px;font-weight:600;line-height:1">7</span></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px"><div style="flex:1;height:8px;border-radius:99px;background:rgba(255,255,255,.7)"><div style="width:64%;height:100%;border-radius:99px;background:#FFAE5C"></div></div><span style="font-family:'Fredoka';font-size:13px;color:#4E5768">1,280 / 2,000</span></div>
+          </div>
+        </div>
+        <div style="position:absolute;top:296px;left:22px;max-width:228px;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-radius:24px 24px 8px 24px;padding:13px 16px;display:flex;flex-direction:column;gap:4px;box-shadow:0 10px 24px -10px rgba(46,52,64,.3)">
+          <span style="font-size:15px;font-weight:800">💌 민수가 편지를 보냈어요</span>
+          <span style="font-size:13px;color:#4E5768">요즘 어떻게 지내?</span>
+        </div>
+        <div style="position:absolute;left:50%;top:398px;transform:translateX(-50%)">{{ soliDay }}</div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:0 16px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:12px 6px;border-radius:28px;background:rgba(255,255,255,.82);backdrop-filter:blur(12px);box-shadow:0 10px 24px -12px rgba(46,52,64,.25)">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:44px;height:44px;border-radius:50%;background:conic-gradient(#FF8F8F 0 62%,rgba(46,52,64,.08) 0);display:grid;place-items:center"><div style="width:36px;height:36px;border-radius:50%;background:#FFFFFF;display:grid;place-items:center;color:#F06F6F"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg></div></div><span style="font-size:12px;color:#4E5768">건강 <b style="font-family:'Fredoka';font-size:14px;font-weight:600;color:#2E3440">62</b></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:44px;height:44px;border-radius:50%;background:conic-gradient(#8FA8FF 0 78%,rgba(46,52,64,.08) 0);display:grid;place-items:center"><div style="width:36px;height:36px;border-radius:50%;background:#FFFFFF;display:grid;place-items:center;color:#6A86E8"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4"></path><path d="M6 4h11l-2.5 4L17 12H6z" fill="currentColor"></path></svg></div></div><span style="font-size:12px;color:#4E5768">일 <b style="font-family:'Fredoka';font-size:14px;font-weight:600;color:#2E3440">78</b></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:44px;height:44px;border-radius:50%;background:conic-gradient(#FFCB6B 0 54%,rgba(46,52,64,.08) 0);display:grid;place-items:center"><div style="width:36px;height:36px;border-radius:50%;background:#FFFFFF;display:grid;place-items:center;color:#E3A63A"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 19.5a5.5 5.5 0 0 1 11 0z"></path><circle cx="17" cy="9" r="2.5"></circle><path d="M15.6 13.4A4.6 4.6 0 0 1 21 18.5h-4.6a7 7 0 0 0-.8-5.1z"></path></svg></div></div><span style="font-size:12px;color:#4E5768">관계 <b style="font-family:'Fredoka';font-size:14px;font-weight:600;color:#2E3440">54</b></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:44px;height:44px;border-radius:50%;background:conic-gradient(#7FD6AE 0 38%,rgba(46,52,64,.08) 0);display:grid;place-items:center"><div style="width:36px;height:36px;border-radius:50%;background:#FFFFFF;display:grid;place-items:center;color:#43B585"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"></path><path d="M12 13C12 9 9 7 5 7c0 4 3 6 7 6z" fill="currentColor"></path><path d="M12 11c0-3 2.5-5 6-5 0 3-2.5 5-6 5z" fill="currentColor"></path></svg></div></div><span style="font-size:12px;color:#4E5768">여가 <b style="font-family:'Fredoka';font-size:14px;font-weight:600;color:#2E3440">38</b></span></div>
+          </div>
+          <a href="#3d" style="height:58px;border-radius:29px;background:#2E3440;color:#FFFFFF;display:flex;align-items:center;justify-content:center;gap:10px;font-size:17px;font-weight:800;box-shadow:0 10px 24px -10px rgba(46,52,64,.6)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 11-11-3-3L5 16z"></path></svg>오늘 기록하기</a>
+          <div style="height:62px;display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:18px;font-size:11px;font-weight:700;color:#8A90A0">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#2E3440"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"></circle><path d="M4.5 14c3-2 5-2 7.5 0s4.5 2 7.5 0"></path></svg>세계</div>
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="4" width="14" height="16" rx="4"></rect><path d="M9 9h6M9 13h4"></path></svg>기록</div>
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3"></circle><path d="M3.5 19a5.5 5.5 0 0 1 11 0"></path><circle cx="17" cy="9" r="2.4"></circle><path d="M15.5 13.6A4.5 4.5 0 0 1 21 18"></path></svg>인연</div>
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="9" r="3.5"></circle><path d="M5.5 20a6.5 6.5 0 0 1 13 0"></path></svg>나</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="3d" style="display:flex;flex-direction:column;gap:20px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#ECEAF2;color:#101012;font-family:'Fredoka';font-size:13px;font-weight:600;padding:4px 10px;border-radius:99px">3d</span><span style="font-size:18px;font-weight:800">오늘 기록 시트 · 밤</span></div>
+      <div style="width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;background:#12162E;box-shadow:0 0 0 1px rgba(255,255,255,.06);color:#F2EEF8">
+        {{ sceneNight2 }}
+        <div style="position:absolute;inset:0;background:rgba(8,9,20,.55)"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;background:#1C1F3A;border-radius:38px 38px 0 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.08);padding:12px 20px 34px;display:flex;flex-direction:column;gap:22px">
+          <div style="width:40px;height:5px;border-radius:3px;background:#34385E;align-self:center"></div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="display:flex;flex-direction:column;gap:4px"><span style="font-family:'Fredoka';font-size:14px;color:#A9A6C0">Tonight's note</span><span style="font-size:24px;font-weight:800">오늘 기록</span></div><span style="font-size:12px;font-weight:700;color:#FFC27A;box-shadow:inset 0 0 0 1px rgba(255,194,122,.45);padding:6px 12px;border-radius:99px">약 30초</span></div>
+          <div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:13px;font-weight:700;color:#A9A6C0">컨디션</span>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-size:14px;font-weight:700">
+              <div style="height:96px;border-radius:26px;background:#252948;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#A9A6C0">{{ faceT }}지침</div>
+              <div style="height:96px;border-radius:26px;background:#3A3150;box-shadow:inset 0 0 0 2px #FFC27A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-weight:800">{{ faceN }}보통</div>
+              <div style="height:96px;border-radius:26px;background:#252948;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#A9A6C0">{{ faceH }}신남</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:13px;font-weight:700;color:#A9A6C0">일 강도</span>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-size:14px;font-weight:700;color:#A9A6C0">
+              <div style="height:52px;border-radius:26px;background:#252948;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Fredoka';font-size:18px;font-weight:600">1</span>가볍게</div>
+              <div style="height:52px;border-radius:26px;background:#2A3260;box-shadow:inset 0 0 0 2px #8FA8FF;color:#F2EEF8;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Fredoka';font-size:18px;font-weight:600">2</span>보통</div>
+              <div style="height:52px;border-radius:26px;background:#252948;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Fredoka';font-size:18px;font-weight:600">3</span>빡빡</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:13px;font-weight:700;color:#A9A6C0">한 줄 기록</span>
+            <textarea rows="2" placeholder="오늘 누구를 만났나요? 뭘 하며 쉬었나요?" style="resize:none;border:none;outline:none;background:#252948;border-radius:22px;padding:14px 16px;font-size:15px;color:#F2EEF8;font-family:'NanumSquareRound'"></textarea>
+          </div>
+          <div style="height:58px;border-radius:29px;background:#FFC27A;color:#1E1A2E;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800">마을에 남기기</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  prop(p, L) {
+    const o = w => `stroke="${L}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
+    if (p === 'coffee') return `<path d="M132 92 L176 92 L170 178 Q154 184 138 178 Z" fill="#EAF4FA" ${o(5)}/>
+<path d="M135.5 120 L172.5 120 L170 178 Q154 184 138 178 Z" fill="#7A4E33"/><rect x="142" y="126" width="12" height="11" rx="3" fill="#FFFFFF" opacity=".55" transform="rotate(-12 148 131)"/><rect x="156" y="134" width="11" height="10" rx="3" fill="#FFFFFF" opacity=".5" transform="rotate(10 161 139)"/>
+<path d="M132 92 L176 92 L170 178 Q154 184 138 178 Z" fill="none" ${o(5)}/>
+<path d="M126 92 Q154 80 182 92 Z" fill="#EAF4FA" ${o(5)}/><path d="M160 86 L170 46" stroke="${L}" stroke-width="11" stroke-linecap="round"/><path d="M160 86 L170 46" stroke="#7FD6AE" stroke-width="5" stroke-linecap="round"/>`;
+    if (p === 'laptop') return `<rect x="118" y="104" width="64" height="46" rx="6" fill="#D7DCE6" ${o(5)}/><rect x="126" y="111" width="48" height="32" rx="3" fill="#33406A"/><path d="M132 120 H156 M132 127 H164 M132 134 H148" stroke="#8FA8FF" stroke-width="2.6" stroke-linecap="round"/><rect x="112" y="150" width="76" height="10" rx="4" fill="#BFC5D0" ${o(5)}/>`;
+    if (p === 'pa') return `<path d="M124 200 L184 58" stroke="${L}" stroke-width="18" stroke-linecap="round"/><path d="M124 200 L150 139" stroke="#FFFDF4" stroke-width="10" stroke-linecap="round"/><path d="M150 139 L184 58" stroke="#7CCB5A" stroke-width="10" stroke-linecap="round"/>
+<path d="M174 82 Q176 52 196 36" stroke="${L}" stroke-width="12" stroke-linecap="round" fill="none"/><path d="M174 82 Q176 52 196 36" stroke="#6CB84C" stroke-width="5" stroke-linecap="round" fill="none"/>
+<path d="M170 92 Q156 64 160 40" stroke="${L}" stroke-width="12" stroke-linecap="round" fill="none"/><path d="M170 92 Q156 64 160 40" stroke="#8ED46E" stroke-width="5" stroke-linecap="round" fill="none"/>
+<path d="M122 204 L114 212 M124 205 L122 215 M127 204 L132 212" stroke="${L}" stroke-width="3" stroke-linecap="round"/>`;
+    if (p === 'flag') return `<path d="M156 168 L156 58" stroke="${L}" stroke-width="9" stroke-linecap="round"/><path d="M156 168 L156 58" stroke="#C9A27E" stroke-width="3.5" stroke-linecap="round"/><path d="M158 58 H204 Q208 58 208 62 V90 Q208 94 204 94 H158 Z" fill="#FFC27A" ${o(5)}/><text x="182" y="82" text-anchor="middle" font-family="NanumSquareRound, sans-serif" font-weight="800" font-size="16" fill="${L}">퇴근</text>`;
+    return '';
+  }
+  soli(m, p) {
+    const t = m === 'tired', h = m === 'happy';
+    const L = '#2E1C16', body = '#FFF6D6', foot = '#FFC98A', la = '#8ED46E', lb = '#6CC152';
+    const o = w => `stroke="${L}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
+    const stemD = t ? 'M100 60 C100 48 94 42 84 40' : 'M100 60 C100 48 102 40 106 32';
+    const leaves = t
+      ? ['M86 41 C76 36 62 42 60 54 C72 56 84 50 86 41Z', 'M84 40 C86 30 80 22 70 20 C66 30 72 38 84 40Z']
+      : ['M104 40 C92 28 76 28 70 36 C80 46 94 48 104 40Z', 'M106 32 C116 18 132 16 140 22 C132 34 118 38 106 32Z'];
+    const flower = h ? [0, 1, 2, 3, 4].map(i => { const a = i * 1.2566; return `<circle cx="${(106 + Math.sin(a) * 6).toFixed(1)}" cy="${(28 - Math.cos(a) * 6).toFixed(1)}" r="5.2" fill="#FF9FB4" ${o(3)}/>`; }).join('') + `<circle cx="106" cy="28" r="3.6" fill="#FFD66B" ${o(2.4)}/>` : '';
+    const mit = (x, y, r) => `<ellipse cx="${x}" cy="${y}" rx="17" ry="21" transform="rotate(${r} ${x} ${y})" fill="${body}" ${o(6)}/>`;
+    const backArms = h ? mit(36, 94, -40) : t ? mit(34, 156, 10) : mit(32, 140, 20);
+    const frontArm = p ? this.prop(p, L) + mit(150, 152, -20) : h ? mit(164, 94, 40) : t ? mit(166, 156, -10) : mit(164, 112, -40);
+    const sk = `stroke="${L}" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none"`;
+    const eyes = t ? `<path d="M66 132 H82 M118 132 H134" ${sk}/>`
+      : h ? `<path d="M66 134 Q74 122 82 134 M118 134 Q126 122 134 134" ${sk}/>`
+      : `<ellipse cx="74" cy="130" rx="6" ry="7.5" fill="${L}"/><ellipse cx="126" cy="130" rx="6" ry="7.5" fill="${L}"/>`;
+    const mouth = t ? `<path d="M92 148 Q96 144 100 148 Q104 152 108 148" stroke="${L}" stroke-width="4.5" stroke-linecap="round" fill="none"/><path d="M156 76 C150 86 150 92 156 92 C162 92 162 86 156 76Z" fill="#A8D8FF" ${o(3.5)}/>`
+      : h ? `<path d="M90 142 Q100 144 110 142 Q109 157 100 157 Q91 157 90 142Z" fill="#5A2A24" ${o(4.5)}/><path d="M94 151 Q100 147 106 151 Q104 155 100 155 Q96 155 94 151Z" fill="#FF8C8C"/>`
+      : `<ellipse cx="100" cy="144" rx="7.5" ry="5.5" fill="#FFB25E" ${o(4.5)}/>`;
+    return `<svg viewBox="0 0 200 220" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible">
+<ellipse cx="100" cy="208" rx="64" ry="9" fill="#BFD6E2" opacity=".28"/>
+<path d="M78 196 Q76 208 84 208 Q92 208 90 196Z M110 196 Q108 208 116 208 Q124 208 122 196Z" fill="${foot}" ${o(5)}/>
+${backArms}
+<path d="${stemD}" ${o(10)} fill="none"/><path d="${stemD}" stroke="#5FB04A" stroke-width="4" stroke-linecap="round" fill="none"/>
+<path d="${leaves[0]}" fill="${la}" ${o(5)}/><path d="${leaves[1]}" fill="${lb}" ${o(5)}/>${flower}
+<ellipse cx="100" cy="130" rx="72" ry="69" fill="${body}" ${o(6)}/>
+${frontArm}
+<circle cx="58" cy="148" r="9" fill="#FF8E8E" opacity=".85"/><circle cx="142" cy="148" r="9" fill="#FF8E8E" opacity=".85"/>
+${eyes}${mouth}
+</svg>`;
+  }
+  soliSticker(m) {
+    const t = m === 'tired', h = m === 'happy';
+    const L = '#4A2E28', body = '#FFD9A8', belly = '#FFF1D8', pad = '#EDAA78', hat = '#8FD3B0', brim = '#6CC09A', rib = '#4FA27E', la = '#9BDC6E', lb = '#74C65A';
+    const o = `stroke="${L}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"`;
+    const arms = h ? [[34, 100, -35], [166, 100, 35]] : t ? [[36, 156, -8], [164, 156, 8]] : [[33, 144, -25], [167, 144, 25]];
+    const armEl = a => arms.map(([x, y, r]) => `<ellipse cx="${x}" cy="${y}" rx="${h ? 12 : 16}" ry="${h ? 16 : 12}" transform="rotate(${r} ${x} ${y})" ${a}/>`).join('');
+    const feet = a => `<ellipse cx="70" cy="196" rx="26" ry="13" transform="rotate(-10 70 196)" ${a}/><ellipse cx="130" cy="196" rx="26" ry="13" transform="rotate(10 130 196)" ${a}/>`;
+    const bodyEl = a => `<circle cx="100" cy="130" r="68" ${a}/>`;
+    const hatD = 'M38 116 C34 64 68 50 100 50 C132 50 166 64 162 116 Z';
+    const brimD = 'M33 110 C60 97 140 97 167 110 C170 118 168 124 165 128 C140 115 60 115 35 128 C32 124 31 117 33 110Z';
+    const stemD = t ? 'M100 52 C100 42 94 36 84 34' : 'M100 52 C100 42 102 34 106 26';
+    const leaves = t
+      ? ['M86 35 C76 30 62 36 60 48 C72 50 84 44 86 35Z', 'M84 34 C86 24 80 16 70 14 C66 24 72 32 84 34Z']
+      : ['M104 34 C92 22 76 22 70 30 C80 40 94 42 104 34Z', 'M106 26 C116 12 132 10 140 16 C132 28 118 32 106 26Z'];
+    const sil = `fill="#fff" stroke="#fff" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"`;
+    const back = `<g filter="url(#soliDrop)">${armEl(sil)}${feet(sil)}${bodyEl(sil)}<path d="${hatD}" ${sil}/><path d="${brimD}" ${sil}/><path d="${stemD}" ${sil}/>${leaves.map(d => `<path d="${d}" ${sil}/>`).join('')}</g>`;
+    const ribs = [56, 68, 80, 92, 108, 120, 132, 144].map(x => `<path d="M${x} ${x < 70 || x > 130 ? 84 : 66} Q${x + (x < 100 ? -2 : 2)} 90 ${x} 104" stroke="${rib}" stroke-width="2.4" stroke-linecap="round" fill="none" opacity=".55"/>`).join('');
+    const flower = h ? [0, 1, 2, 3, 4].map(i => { const a = i * 1.2566; return `<circle cx="${(106 + Math.sin(a) * 6).toFixed(1)}" cy="${(22 - Math.cos(a) * 6).toFixed(1)}" r="5" fill="#FFB4C6" ${o.replace('4"', '2.6"')}/>`; }).join('') + `<circle cx="106" cy="22" r="3.4" fill="#FFD66B"/>` : '';
+    const sk = `stroke="${L}" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" fill="none"`;
+    const eyes = t ? `<path d="M77 141 Q84 145 91 141 M109 141 Q116 145 123 141" ${sk}/>`
+      : h ? `<path d="M77 143 Q84 133 91 143 M109 143 Q116 133 123 143" ${sk}/>`
+      : `<ellipse cx="85" cy="140" rx="4.2" ry="5" fill="${L}"/><ellipse cx="115" cy="140" rx="4.2" ry="5" fill="${L}"/><circle cx="86.4" cy="138.2" r="1.4" fill="#fff"/><circle cx="116.4" cy="138.2" r="1.4" fill="#fff"/>`;
+    const mouth = t ? `<path d="M93 156 Q96.5 152.5 100 156 Q103.5 159.5 107 156" ${sk}/><path d="M156 96 C151 105 151 110 156 110 C161 110 161 105 156 96Z" fill="#A8D8FF" ${o.replace('4"', '2.6"')}/>`
+      : h ? `<path d="M91 150 Q100 152 109 150 Q108 165 100 165 Q92 165 91 150Z" fill="#7A3530" ${o.replace('4"', '3.2"')}/><path d="M94.5 159 Q100 154.5 105.5 159 Q103.5 163 100 163 Q96.5 163 94.5 159Z" fill="#FF8C8C"/>`
+      : `<path d="M93 151 Q96.5 155.5 100 151 Q103.5 155.5 107 151" ${sk}/>`;
+    return `<svg viewBox="0 0 200 220" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible">
+<defs><filter id="soliDrop" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#0A0A1E" flood-opacity=".28"/></filter></defs>
+${back}
+<path d="${stemD}" stroke="${L}" stroke-width="9" stroke-linecap="round" fill="none"/><path d="${stemD}" stroke="#5FB04A" stroke-width="4" stroke-linecap="round" fill="none"/>
+<path d="${leaves[0]}" fill="${la}" ${o}/><path d="${leaves[1]}" fill="${lb}" ${o}/>${flower}
+${armEl(`fill="${body}" ${o}`)}
+${bodyEl(`fill="${body}" ${o}`)}
+<ellipse cx="100" cy="178" rx="32" ry="17" fill="${belly}"/>
+<path d="${hatD}" fill="${hat}" ${o}/>${ribs}
+<path d="${brimD}" fill="${brim}" ${o}/>
+<path d="M44 112 Q100 102 156 112" stroke="#BDEBD3" stroke-width="3" stroke-linecap="round" fill="none" opacity=".7"/>
+<ellipse cx="68" cy="153" rx="8.5" ry="5.5" fill="#FF9E8A" opacity=".85"/><ellipse cx="132" cy="153" rx="8.5" ry="5.5" fill="#FF9E8A" opacity=".85"/>
+${eyes}${mouth}
+${feet(`fill="${body}" ${o}`)}
+<ellipse cx="66" cy="199" rx="12" ry="6" transform="rotate(-10 66 199)" fill="${pad}"/><ellipse cx="134" cy="199" rx="12" ry="6" transform="rotate(10 134 199)" fill="${pad}"/>
+</svg>`;
+  }
+  soliOld(m) {
+    const ink = '#3B2F2A', body = '#FFF3E2', shade = '#F4DCBE', la = '#7ED3A8', lb = '#5FBF8F';
+    const t = m === 'tired', h = m === 'happy';
+    const stem = `stroke="#58B486" stroke-width="5" stroke-linecap="round" fill="none"`;
+    const sprout = t
+      ? `<path d="M100 54 C100 42 94 36 84 34" ${stem}/><path d="M86 35 C76 30 62 36 60 48 C72 50 84 44 86 35Z" fill="${la}"/><path d="M84 34 C86 24 80 16 70 14 C66 24 72 32 84 34Z" fill="${lb}"/>`
+      : `<path d="M100 54 C100 42 102 34 106 26" ${stem}/><path d="M104 34 C92 22 76 22 70 30 C80 40 94 42 104 34Z" fill="${la}"/><path d="M106 26 C116 12 132 10 140 16 C132 28 118 32 106 26Z" fill="${lb}"/>` +
+        (h ? [0, 1, 2, 3, 4].map(i => { const a = i * 1.2566; return `<circle cx="${(106 + Math.sin(a) * 6).toFixed(1)}" cy="${(22 - Math.cos(a) * 6).toFixed(1)}" r="5" fill="#FFB4C6"/>`; }).join('') + `<circle cx="106" cy="22" r="3.6" fill="#FFD66B"/>` : '');
+    const soft = `stroke="${ink}" stroke-width="1.2" stroke-linejoin="round"`;
+    const foot = '#F2C29A', footS = '#E5AE84';
+    const eye = x => `<g transform="translate(${x} 118)"><ellipse cx="0" cy="0" rx="4.6" ry="8.6" fill="${ink}"/><ellipse cx="0.6" cy="-3.6" rx="2.2" ry="3" fill="#fff"/><ellipse cx="-0.4" cy="4.4" rx="1.2" ry="1.4" fill="#fff" opacity=".55"/></g>`;
+    const eyes = t
+      ? `<path d="M82 119 Q88 124 94 119.6 Q88 121.6 82 119Z" fill="${ink}" ${soft}/><path d="M106 119.6 Q112 124 118 119 Q112 121.6 106 119.6Z" fill="${ink}" ${soft}/>`
+      : h ? `<path d="M82 121 Q88 111 94 121 Q88 116.4 82 121Z" fill="${ink}" ${soft}/><path d="M106 121 Q112 111 118 121 Q112 116.4 106 121Z" fill="${ink}" ${soft}/>`
+      : eye(88) + eye(112);
+    const mouth = t
+      ? `<path d="M96 138 Q100 135.4 104 138 Q100 136.8 96 138Z" fill="${ink}" ${soft}/><path d="M154 82 C149 91 149 96 154 96 C159 96 159 91 154 82Z" fill="#A8D8FF"/>`
+      : h ? `<path d="M94.5 133 Q100 134 105.5 133 Q104.8 141 100 141 Q95.2 141 94.5 133Z" fill="${ink}" ${soft}/><ellipse cx="100" cy="138.4" rx="3" ry="1.8" fill="#FF8C8C"/>`
+      : `<path d="M96.5 134 Q100 137 103.5 134 Q100 135.4 96.5 134Z" fill="${ink}" ${soft}/>`;
+    const arms = h
+      ? `<ellipse cx="36" cy="94" rx="12" ry="16" transform="rotate(-35 36 94)" fill="${body}" stroke="rgba(150,100,50,.18)" stroke-width="2"/><ellipse cx="164" cy="94" rx="12" ry="16" transform="rotate(35 164 94)" fill="${body}" stroke="rgba(150,100,50,.18)" stroke-width="2"/>`
+      : `<ellipse cx="33" cy="140" rx="16" ry="12" transform="rotate(-25 33 140)" fill="${body}" stroke="rgba(150,100,50,.18)" stroke-width="2"/><ellipse cx="167" cy="140" rx="16" ry="12" transform="rotate(25 167 140)" fill="${body}" stroke="rgba(150,100,50,.18)" stroke-width="2"/>`;
+    return `<svg viewBox="0 0 200 220" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible">
+<ellipse cx="100" cy="210" rx="62" ry="7" fill="rgba(0,0,0,.2)"/>
+<g transform="translate(0 6)">${sprout}</g>
+${arms}
+<circle cx="100" cy="128" r="70" fill="${body}" stroke="rgba(150,100,50,.18)" stroke-width="2"/>
+<path d="M36 156 C48 188 76 198 100 198 C124 198 152 188 164 156 C150 182 126 192 100 192 C74 192 50 182 36 156Z" fill="${shade}" opacity=".7"/>
+<ellipse cx="70" cy="86" rx="13" ry="7" transform="rotate(-35 70 86)" fill="#fff" opacity=".75"/>
+<defs><filter id="soliBlush" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.4"/></filter></defs><g filter="url(#soliBlush)"><ellipse cx="70" cy="132" rx="10" ry="6" fill="#FFB0A0" opacity=".65"/><ellipse cx="130" cy="132" rx="10" ry="6" fill="#FFB0A0" opacity=".65"/></g>
+${eyes}${mouth}
+<ellipse cx="68" cy="197" rx="28" ry="14" transform="rotate(-10 68 197)" fill="${foot}"/><ellipse cx="132" cy="197" rx="28" ry="14" transform="rotate(10 132 197)" fill="${foot}"/>
+<path d="M44 200 Q68 212 92 200" stroke="${footS}" stroke-width="2" fill="none" stroke-linecap="round" opacity=".7"/><path d="M108 200 Q132 212 156 200" stroke="${footS}" stroke-width="2" fill="none" stroke-linecap="round" opacity=".7"/>
+</svg>`;
+  }
+  scene(night) {
+    const c = night
+      ? { s1: '#12162E', s2: '#232849', s3: '#3A3459', far: '#26324C', near: '#1C2539', tree: '#2D4848', wall: '#3A3F5C', roofs: ['#4B5180', '#5A4A78'], win: '#FFC27A', cloud: '#3A3F68' }
+      : { s1: '#9FD3FF', s2: '#D9F0FF', s3: '#FFF1DC', far: '#BFE6B5', near: '#9ED79A', tree: '#7CC88A', wall: '#FFF8EE', roofs: ['#FF9F8F', '#8FA8FF'], win: '#E9D9C3', cloud: '#FFFFFF' };
+    const id = night ? 'skyN' : 'skyD';
+    const cloud = (x, y, s) => `<path transform="translate(${x} ${y}) scale(${s})" d="M-8 12 H38 A9 9 0 0 0 36 -4 A14 14 0 0 0 10 -10 A15 15 0 0 0 -8 12 Z" fill="${c.cloud}" stroke="${c.cloud}" stroke-width="3" stroke-linejoin="round"/>`;
+    const house = (x, y, r) => `<g transform="translate(${x} ${y})">${night ? `<circle cx="0" cy="-2" r="22" fill="#FFC27A" opacity=".16"/>` : ''}<rect x="-16" y="-14" width="32" height="26" rx="8" fill="${c.wall}"/><path d="M-21 -9 Q0 -36 21 -9 Z" fill="${r}"/><rect x="-5" y="-6" width="10" height="10" rx="4" fill="${c.win}"/></g>`;
+    const stars = night ? [[40, 120], [96, 180], [150, 108], [210, 160], [250, 96], [352, 140], [70, 250], [190, 270], [340, 320], [24, 360], [120, 330], [262, 380]].map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i % 3 ? 1.4 : 2.2}" fill="#FFF6DA" opacity="${i % 2 ? .6 : .9}"/>`).join('') : '';
+    const sky = night
+      ? `<circle cx="300" cy="230" r="64" fill="#FFF0C8" opacity=".1"/><circle cx="300" cy="230" r="28" fill="#FFF0C8"/>`
+      : `<circle cx="300" cy="230" r="58" fill="#FFFFFF" opacity=".35"/><circle cx="300" cy="230" r="34" fill="#FFE08A"/>`;
+    const flies = night ? [[70, 590], [320, 580], [36, 640], [356, 630]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="7" fill="#FFD27A" opacity=".18"/><circle cx="${x}" cy="${y}" r="2.2" fill="#FFD27A"/>`).join('') : [[50, 610], [84, 628], [316, 620], [350, 600]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3" fill="#FFF8EE"/><circle cx="${x}" cy="${y}" r="1.3" fill="#FFCB6B"/>`).join('');
+    return `<svg viewBox="0 0 390 844" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" style="display:block">
+<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c.s1}"/><stop offset=".55" stop-color="${c.s2}"/><stop offset="1" stop-color="${c.s3}"/></linearGradient></defs>
+<rect width="390" height="844" fill="url(#${id})"/>${stars}${sky}${cloud(266, 252, 1.6)}${cloud(30, 310, .9)}
+<path d="M-20 550 C60 490 140 490 210 525 C270 555 340 510 410 498 V844 H-20Z" fill="${c.far}"/>
+${house(62, 510, c.roofs[0])}${house(322, 496, c.roofs[1])}
+<circle cx="112" cy="522" r="14" fill="${c.tree}"/><circle cx="138" cy="530" r="10" fill="${c.tree}"/><circle cx="268" cy="534" r="12" fill="${c.tree}"/>
+<path d="M-20 600 C80 560 170 570 230 590 C300 612 350 580 410 570 V844 H-20Z" fill="${c.near}"/>${flies}
+</svg>`;
+  }
+  face(cx, cy, s, m, ink, o = {}) {
+    const t = m === 'tired', h = m === 'happy';
+    const st = `stroke="${ink}" stroke-width="3.6" stroke-linecap="round" fill="none"`;
+    const eyes = t ? `<path d="M-30 -2 Q-20 4 -10 -2 M10 -2 Q20 4 30 -2" ${st}/>`
+      : h ? `<path d="M-30 2 Q-20 -11 -10 2 M10 2 Q20 -11 30 2" ${st}/>`
+      : `<ellipse cx="-20" cy="-2" rx="5.6" ry="7.2" fill="${ink}"/><ellipse cx="20" cy="-2" rx="5.6" ry="7.2" fill="${ink}"/><circle cx="-18" cy="-5.5" r="2" fill="#fff"/><circle cx="22" cy="-5.5" r="2" fill="#fff"/>`;
+    const cheeks = `<ellipse cx="-36" cy="16" rx="10" ry="6" fill="#FFB4A2" opacity=".7"/><ellipse cx="36" cy="16" rx="10" ry="6" fill="#FFB4A2" opacity=".7"/>`;
+    const mouth = o.noMouth ? '' : t ? `<path d="M-7 21 Q0 16 7 21" ${st}/>`
+      : h ? `<path d="M-12 13 Q0 32 12 13 Z" fill="${ink}" stroke="${ink}" stroke-width="2" stroke-linejoin="round"/><path d="M-6 22 Q0 27 6 22 Q0 19 -6 22Z" fill="#FF8C8C"/>`
+      : `<path d="M-6 15 Q0 21 6 15" ${st}/>`;
+    const sweat = t && !o.noSweat ? `<path d="M54 -44 C49 -35 49 -30 54 -30 C59 -30 59 -35 54 -44Z" fill="#A8D8FF"/>` : '';
+    return `<g transform="translate(${cx} ${cy}) scale(${s})">${cheeks}${eyes}${mouth}${sweat}</g>`;
+  }
+  sparkle(x, y, r = 7, c = '#FFD66B') { return `<path d="M${x} ${y - r} Q${x + 1.5} ${y - 1.5} ${x + r} ${y} Q${x + 1.5} ${y + 1.5} ${x} ${y + r} Q${x - 1.5} ${y + 1.5} ${x - r} ${y} Q${x - 1.5} ${y - 1.5} ${x} ${y - r}Z" fill="${c}"/>`; }
+  wrapC(inner) { return `<svg viewBox="0 0 200 220" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible"><ellipse cx="100" cy="210" rx="54" ry="7" fill="rgba(0,0,0,.22)"/>${inner}</svg>`; }
+  chars(k, m) {
+    const t = m === 'tired', h = m === 'happy', W = this;
+    if (k === 1) {
+      const f = t ? '#C9CEDF' : '#F4F6FF';
+      return W.wrapC(`<ellipse cx="80" cy="198" rx="12" ry="7" fill="#D9DEEE"/><ellipse cx="120" cy="198" rx="12" ry="7" fill="#D9DEEE"/>
+<path d="M52 194 C22 194 14 160 34 146 C20 118 46 94 70 104 C74 70 124 64 136 94 C162 84 186 110 174 134 C192 148 186 194 156 194 Z" fill="${f}"/>
+<ellipse cx="72" cy="112" rx="13" ry="7" transform="rotate(-25 72 112)" fill="#fff" opacity=".9"/>
+${t ? `<path d="M30 204 C27 210 27 213 30 213 C33 213 33 210 30 204Z M172 196 C169 202 169 205 172 205 C175 205 175 202 172 196Z M48 214 C46 218 46 220 48 220 C50 220 50 218 48 214Z" fill="#8FC4F0"/>` : ''}
+${h ? W.sparkle(30, 96) + W.sparkle(176, 86, 9) + W.sparkle(160, 60, 5) : ''}
+${W.face(100, 150, 1, m, '#3B3550')}`);
+    }
+    if (k === 2) {
+      const body = t ? '#E2C89A' : '#FFD796';
+      return W.wrapC(`${t ? '' : `<circle cx="100" cy="132" r="${h ? 104 : 88}" fill="#FFC27A" opacity="${h ? .22 : .14}"/>`}
+<path d="M82 62 Q100 28 118 62" stroke="#6C5A8E" stroke-width="6" stroke-linecap="round" fill="none"/>
+<ellipse cx="86" cy="204" rx="10" ry="6" fill="#6C5A8E"/><ellipse cx="114" cy="204" rx="10" ry="6" fill="#6C5A8E"/>
+<rect x="44" y="70" width="112" height="126" rx="54" fill="${body}"/>
+<ellipse cx="100" cy="132" rx="40" ry="46" fill="#FFF4D6" opacity="${t ? .3 : .75}"/>
+<rect x="70" y="58" width="60" height="20" rx="10" fill="#6C5A8E"/><rect x="78" y="188" width="44" height="12" rx="6" fill="#6C5A8E"/>
+<ellipse cx="68" cy="98" rx="9" ry="5" transform="rotate(-35 68 98)" fill="#fff" opacity=".8"/>
+${h ? W.sparkle(28, 110) + W.sparkle(172, 96, 9) + W.sparkle(158, 168, 5) : ''}
+${W.face(100, 136, .9, m, '#4A3A2E')}`);
+    }
+    if (k === 3) {
+      const shade = '#B2AAC6';
+      return W.wrapC(`<ellipse cx="24" cy="164" rx="10" ry="13" transform="rotate(20 24 164)" fill="${shade}"/><ellipse cx="176" cy="164" rx="10" ry="13" transform="rotate(-20 176 164)" fill="${shade}"/>
+<path d="M100 80 C156 80 180 120 180 156 C180 190 146 202 100 202 C54 202 20 190 20 156 C20 120 44 80 100 80Z" fill="#CFC8DE"/>
+<path d="M30 176 C44 194 70 198 100 198 C130 198 156 194 170 176 C152 190 128 192 100 192 C72 192 48 190 30 176Z" fill="${shade}" opacity=".8"/>
+<path d="M44 108 C64 70 136 70 156 108 C140 96 124 106 112 98 C100 106 88 98 76 104 C66 98 54 102 44 108Z" fill="${t ? '#B6CFA6' : '#8FCB8A'}"/>
+${t ? `<path d="M60 102 C58 112 62 116 64 112 M136 100 C138 110 134 114 132 110" stroke="#8FB088" stroke-width="4" stroke-linecap="round" fill="none"/>` : ''}
+${h ? `<rect x="125" y="68" width="8" height="14" rx="4" fill="#FFF3E2"/><path d="M114 72 C114 56 144 56 144 72 Z" fill="#FF8F8F"/><circle cx="124" cy="65" r="2.4" fill="#fff"/><circle cx="134" cy="63" r="2" fill="#fff"/>` + W.sparkle(30, 92) : ''}
+<ellipse cx="62" cy="122" rx="11" ry="6" transform="rotate(-25 62 122)" fill="#fff" opacity=".6"/>
+${W.face(100, 148, .95, m, '#3B3550')}`);
+    }
+    if (k === 4) {
+      const arms = h ? `<ellipse cx="56" cy="146" rx="9" ry="14" transform="rotate(-40 56 146)" fill="#7FB497"/><ellipse cx="144" cy="146" rx="9" ry="14" transform="rotate(40 144 146)" fill="#7FB497"/>`
+        : `<ellipse cx="60" cy="174" rx="9" ry="13" transform="rotate(20 60 174)" fill="#7FB497"/><ellipse cx="140" cy="174" rx="9" ry="13" transform="rotate(-20 140 174)" fill="#7FB497"/>`;
+      return W.wrapC(`<ellipse cx="86" cy="204" rx="12" ry="7" fill="#7A5A44"/><ellipse cx="114" cy="204" rx="12" ry="7" fill="#7A5A44"/>
+<rect x="64" y="148" width="72" height="54" rx="27" fill="#8FC2A6"/>${arms}
+<circle cx="100" cy="106" r="60" fill="#FFE6D2"/>
+<g ${t ? 'transform="rotate(-9 100 80)"' : ''}><rect x="95" y="30" width="10" height="20" rx="5" fill="#7A5A44"/>
+${h ? `<path d="M104 36 C114 24 128 24 132 30 C124 40 112 42 104 36Z" fill="#7ED3A8"/>` : ''}
+<path d="M38 102 C32 44 168 44 162 102 C150 86 128 80 100 80 C72 80 50 86 38 102Z" fill="#B98257"/>
+<path d="M60 70 Q70 64 80 70 M90 62 Q100 56 110 62 M120 70 Q130 64 140 70" stroke="#9C6A44" stroke-width="3" stroke-linecap="round" fill="none"/></g>
+${W.face(100, 120, .85, m, '#3B2F2A')}`);
+    }
+    if (k === 5) {
+      const wool = t ? '#E6E2EA' : '#FFFDF7';
+      let ring = '';
+      for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; ring += `<circle cx="${(100 + Math.cos(a) * 54).toFixed(1)}" cy="${(120 + Math.sin(a) * 52).toFixed(1)}" r="24" fill="${wool}"/>`; }
+      const ears = t ? `<ellipse cx="44" cy="134" rx="17" ry="9" transform="rotate(40 44 134)" fill="#FFD3C4"/><ellipse cx="156" cy="134" rx="17" ry="9" transform="rotate(-40 156 134)" fill="#FFD3C4"/>`
+        : `<ellipse cx="42" cy="118" rx="17" ry="9" transform="rotate(-20 42 118)" fill="#FFD3C4"/><ellipse cx="158" cy="118" rx="17" ry="9" transform="rotate(20 158 118)" fill="#FFD3C4"/>`;
+      return W.wrapC(`<rect x="76" y="180" width="12" height="24" rx="6" fill="#5A4E6E"/><rect x="112" y="180" width="12" height="24" rx="6" fill="#5A4E6E"/>
+${ring}<circle cx="100" cy="120" r="58" fill="${wool}"/>
+<circle cx="100" cy="62" r="14" fill="${wool}"/><circle cx="86" cy="68" r="11" fill="${wool}"/><circle cx="114" cy="68" r="11" fill="${wool}"/>
+${h ? [0, 1, 2, 3, 4].map(i => { const a = i * 1.2566; return `<circle cx="${(118 + Math.sin(a) * 5).toFixed(1)}" cy="${(56 - Math.cos(a) * 5).toFixed(1)}" r="4.2" fill="#FFB4C6"/>`; }).join('') + `<circle cx="118" cy="56" r="3" fill="#FFD66B"/>` : ''}
+${ears}<ellipse cx="100" cy="134" rx="42" ry="38" fill="#FFE9DC"/>
+${W.face(100, 134, .78, m, '#3B3550')}`);
+    }
+    const wings = h ? `<ellipse cx="36" cy="112" rx="13" ry="24" transform="rotate(-35 36 112)" fill="#F7AE88"/><ellipse cx="164" cy="112" rx="13" ry="24" transform="rotate(35 164 112)" fill="#F7AE88"/>`
+      : `<ellipse cx="36" cy="146" rx="13" ry="24" transform="rotate(18 36 146)" fill="#F7AE88"/><ellipse cx="164" cy="146" rx="13" ry="24" transform="rotate(-18 164 146)" fill="#F7AE88"/>`;
+    const beak = h ? `<path d="M90 136 L110 136 L100 145 Z M93 149 L107 149 L100 155 Z" fill="#FFB347" stroke="#FFB347" stroke-width="3" stroke-linejoin="round"/>`
+      : t ? `<path d="M94 142 L106 142 L100 150 Z" fill="#FFB347" stroke="#FFB347" stroke-width="3" stroke-linejoin="round"/>`
+      : `<path d="M91 138 L109 138 L100 148 Z" fill="#FFB347" stroke="#FFB347" stroke-width="3" stroke-linejoin="round"/>`;
+    return W.wrapC(`<path d="M86 196 v10 M114 196 v10" stroke="#FFB347" stroke-width="5" stroke-linecap="round"/>${wings}
+<path d="M100 64 C94 48 104 40 114 42 C106 48 106 56 100 64Z M100 64 C96 52 86 48 80 52 C88 54 94 58 100 64Z" fill="#FFB08A"/>
+<circle cx="100" cy="132" r="68" fill="#FFC9A8"/><ellipse cx="100" cy="156" rx="44" ry="40" fill="#FFF1E4"/>
+<ellipse cx="66" cy="96" rx="12" ry="7" transform="rotate(-30 66 96)" fill="#fff" opacity=".7"/>
+${h ? W.sparkle(30, 70) + W.sparkle(172, 62, 9) : ''}
+${W.face(100, 122, .85, m, '#3B2F2A', { noMouth: true })}${beak}`);
+  }
+  c = null;
+  renderVals() {
+    if (!this.c) {
+      const el = (html, style) => React.createElement('div', { style, dangerouslySetInnerHTML: { __html: html } });
+      const s = (m, w, p) => el(this.soli(m, p), { width: w, height: w * 1.1 });
+      const full = { position: 'absolute', inset: 0 };
+      this.c = { soliBig: s('normal', 250), soliTired: s('tired', 96), soliNormal: s('normal', 96), soliHappy: s('happy', 96), soliDay: s('normal', 140), soliNight: s('normal', 140), faceT: s('tired', 52), faceN: s('normal', 52), faceH: s('happy', 52), soliCoffee: s('normal', 96, 'coffee'), soliLaptop: s('tired', 96, 'laptop'), soliPa: s('normal', 96, 'pa'), soliFlag: s('happy', 96, 'flag'), sceneDay: el(this.scene(false), full), sceneNight: el(this.scene(true), full), sceneNight2: el(this.scene(true), full) };
+    }
+    return this.c;
+  }
+}
+</script>
+</body>
+</html>

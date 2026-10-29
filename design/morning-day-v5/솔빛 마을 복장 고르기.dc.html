@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="https://hangeul.pstatic.net/hangeul_static/css/nanum-square-round.css">
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>html,body{margin:0;min-height:100%;background:#0D1130;color:#FFFFFF;font-family:'NanumSquareRound',sans-serif;word-break:keep-all}a{color:#FFE14D;text-decoration:none}a:hover{color:#FF4FA0}button{font-family:inherit}.pg::-webkit-scrollbar{display:none}</style>
+</helmet>
+<section style="background:#0D1130;padding:64px 72px 72px;display:flex;flex-direction:column;gap:56px;border-bottom:1px solid #232B60">
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="font-family:'Fredoka';font-size:14px;font-weight:600;letter-spacing:.12em;color:#A8EB5A">TURN 26 · 복장 고르기</div>
+    <div style="font-family:'Bagel Fat One';font-size:40px;color:#FFE14D">솔이네 옷장</div>
+    <div style="font-size:15px;color:#C9CEF5;max-width:760px;line-height:1.6">기본 포즈(200×240)와 같은 캔버스·기준점으로 아이템 25개를 그렸습니다. 앞뒤가 갈리는 후드티·망토·크로스백은 back/front 2장으로 나눠 총 28개 파일이고, soli-assets 폴더에 있습니다. 화면의 탭과 칸은 눌러서 바로 입혀 볼 수 있습니다.</div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start">
+    <sc-for list="{{ frames }}" as="f" hint-placeholder-count="4">
+      <div id="{{ f.anchor }}" style="display:flex;flex-direction:column;gap:20px;width:390px">
+        <div style="display:flex;align-items:center;gap:10px"><span style="background:#FFE14D;color:#10142E;font-family:'Fredoka';font-size:13px;font-weight:700;padding:3px 11px;border-radius:99px">{{ f.anchor }}</span><span style="font-size:18px;font-weight:800">{{ f.title }}</span></div>
+        <div style="width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;background:#141A3E;box-shadow:0 0 0 1px #2B3370,0 30px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;color:#FFFFFF">
+          <div style="height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-family:'Fredoka';font-size:16px;font-weight:600"><span>9:41</span><span style="width:24px;height:11px;border-radius:4px;border:1.5px solid rgba(255,255,255,.5);display:flex;padding:1.5px;box-sizing:border-box"><span style="width:40%;background:#FF4FA0;border-radius:2px"></span></span></div>
+          <div style="flex:none;padding:2px 20px 12px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-family:'Bagel Fat One';font-size:28px;line-height:1.15;color:#FFE14D">아침 준비</span>
+            <div style="display:flex;align-items:center;gap:4px" aria-label="하루, 복장, 마을 중 2단계">
+              <span style="width:30px;height:30px;border-radius:50%;background:#2B3370;display:grid;place-items:center;color:#A8EB5A"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="8" cy="15" rx="3" ry="4.5"></ellipse><ellipse cx="16" cy="9" rx="3" ry="4.5"></ellipse></svg></span>
+              <svg width="22" height="4" viewBox="0 0 22 4"><path d="M2 2H20" stroke="#A8EB5A" stroke-width="3" stroke-dasharray="1 6" stroke-linecap="round"></path></svg>
+              <span style="width:30px;height:30px;border-radius:50%;background:#A8EB5A;display:grid;place-items:center;color:#10142E"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="8" cy="15" rx="3" ry="4.5"></ellipse><ellipse cx="16" cy="9" rx="3" ry="4.5"></ellipse></svg></span>
+              <svg width="22" height="4" viewBox="0 0 22 4"><path d="M2 2H20" stroke="#4A5290" stroke-width="3" stroke-dasharray="1 6" stroke-linecap="round"></path></svg>
+              <svg width="24" height="30" viewBox="0 0 26 32"><rect x="3" y="2" width="2.6" height="29" rx="1.3" fill="#FFFFFF"></rect><path d="M5.6 3h17l-4 5 4 5h-17z" fill="#FF4FA0"></path></svg>
+            </div>
+          </div>
+          <div style="flex:none;margin:0 12px;background:#232B60;border-radius:22px;padding:12px 14px;display:flex;gap:12px;align-items:center;box-shadow:0 8px 20px rgba(0,0,0,.3)">
+            <div style="position:relative;width:44px;height:44px;flex:none"><div style="width:44px;height:44px;border-radius:50%;background:#FFE14D;overflow:hidden;display:flex;justify-content:center"><img src="soli-assets/ijang-plain.svg" alt="" style="width:46px;height:51px;flex:none;margin-top:2px;display:block"></div><div style="position:absolute;right:-4px;bottom:-4px;width:20px;height:20px;border-radius:50%;background:#FF4FA0;display:grid;place-items:center;color:#10142E;box-shadow:0 0 0 2px #232B60"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9h3l10-6v18L6 15H3z"></path></svg></div></div>
+            <div style="display:flex;flex-direction:column;gap:4px;min-width:0"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:800;color:#FFE14D">마을 방송</span><span style="font-family:'Fredoka';font-size:12px;font-weight:600;color:#8F96CC">7:14</span></div><span style="font-size:14px;font-weight:700;line-height:1.5">오늘은 뭘 입을 거유?</span></div>
+          </div>
+          <div style="flex:none;margin:10px 12px 0;height:250px;position:relative;border-radius:24px;overflow:hidden;background:#1E2558">
+            <div style="position:absolute;left:0;right:0;bottom:0;height:70px;background:#182050"></div>
+            <div style="position:absolute;left:0;right:0;bottom:70px;height:3px;background:#2B3370"></div>
+            <div style="position:absolute;left:30px;top:34px;width:56px;height:46px;box-sizing:border-box;border:5px solid #8A5A3C;border-radius:6px;background:#3A4488;overflow:hidden"><svg width="46" height="36" viewBox="0 0 46 36" style="display:block"><circle cx="32" cy="12" r="6" fill="#FFE14D"></circle><path d="M-2 36V26C8 18 18 18 26 24C32 20 40 20 48 26V36Z" fill="#2F6B4A"></path></svg></div>
+            <div style="position:absolute;left:290px;top:36px;width:50px;height:160px;box-sizing:border-box;border:5px solid #8A5A3C;border-radius:25px 25px 8px 8px;background:#33407E"></div>
+            <div style="position:absolute;left:296px;top:194px;width:6px;height:18px;border-radius:3px;background:#6B4430"></div>
+            <div style="position:absolute;left:328px;top:194px;width:6px;height:18px;border-radius:3px;background:#6B4430"></div>
+            <div style="position:absolute;left:48px;top:194px;width:270px;height:48px;border-radius:50%;background:#4B3D8F;display:flex;padding:8px 14px;box-sizing:border-box"><div style="flex:1;border-radius:50%;border:2.5px dashed #C49BFF"></div></div>
+            <div style="position:absolute;left:133px;top:212px;width:100px;height:14px;border-radius:50%;background:#2E2463"></div>
+            <div style="position:absolute;left:98px;top:26px;width:170px;height:204px">
+              <sc-if value="{{ f.layers }}"><sc-for list="{{ f.layers }}" as="l" hint-placeholder-count="0"><img src="{{ l.src }}" alt="" style="position:absolute;left:0;top:0;width:170px;height:204px;display:block"></sc-for></sc-if>
+            </div>
+          </div>
+          <div style="flex:1;margin-top:12px;position:relative;background:#232B60;border-radius:28px 28px 0 0;padding:12px 14px 0;display:flex;flex-direction:column;box-shadow:0 -8px 20px rgba(0,0,0,.25)">
+            <div style="flex:none;position:relative;height:10px;margin:0 2px">
+              <div style="position:absolute;left:0;top:0;width:10px;height:10px;border-radius:3px;background:#5E3C28"></div>
+              <div style="position:absolute;right:0;top:0;width:10px;height:10px;border-radius:3px;background:#5E3C28"></div>
+              <div style="position:absolute;left:6px;right:6px;top:2px;height:6px;border-radius:3px;background:#8A5A3C"></div>
+            </div>
+            <div style="flex:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px">
+              <sc-for list="{{ f.tabs }}" as="t" hint-placeholder-count="6">
+                <div style="display:flex;flex-direction:column;align-items:center">
+                  <div style="width:2px;height:8px;background:#8A5A3C"></div>
+                  <button onClick="{{ t.pick }}" aria-pressed="{{ t.on }}" style="width:100%;height:52px;border:none;border-radius:14px;background:{{ t.bg }};color:{{ t.ink }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:0">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><sc-for list="{{ t.icon }}" as="p"><path d="{{ p }}"></path></sc-for></svg>
+                    <span style="font-size:11px;font-weight:800;line-height:1">{{ t.label }}</span>
+                  </button>
+                </div>
+              </sc-for>
+            </div>
+            <div class="pg" ref="{{ f.pagerRef }}" onScroll="{{ f.onScroll }}" style="flex:none;margin-top:12px;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none">
+              <sc-for list="{{ f.pages }}" as="pg" hint-placeholder-count="1">
+                <div style="flex:none;width:100%;scroll-snap-align:start;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(2,76px);gap:8px">
+                  <sc-for list="{{ pg.cells }}" as="c" hint-placeholder-count="8">
+                    <button onClick="{{ c.pick }}" aria-pressed="{{ c.on }}" aria-label="{{ c.name }}" style="position:relative;border:none;border-radius:16px;background:#1E2558;box-shadow:{{ c.ring }};display:grid;place-items:center;cursor:{{ c.cursor }};padding:0">
+                      <sc-if value="{{ c.isNone }}"><svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="#8F96CC" stroke-width="3" stroke-linecap="round"><circle cx="15" cy="15" r="11"></circle><path d="M7.5 22.5L22.5 7.5"></path></svg></sc-if>
+                      <sc-if value="{{ c.isItem }}"><div style="position:relative;width:60px;height:60px;overflow:hidden"><sc-for list="{{ c.thumb }}" as="l" hint-placeholder-count="0"><img src="{{ l.src }}" alt="" style="position:absolute;left:{{ l.l }}px;top:{{ l.t }}px;width:{{ l.w }}px;height:{{ l.h }}px;max-width:none;display:block"></sc-for></div></sc-if>
+                      <sc-if value="{{ c.isLocked }}"><svg width="48" height="48" viewBox="0 0 60 60"><path d="{{ c.sil }}" fill="#2E3672"></path></svg><span style="position:absolute;right:7px;bottom:7px;width:20px;height:20px;border-radius:7px;background:#141A3E;display:grid;place-items:center;color:#8F96CC"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2.5" fill="currentColor"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></span></sc-if>
+                      <sc-if value="{{ c.on }}"><span style="position:absolute;right:-5px;top:-5px;width:22px;height:22px;border-radius:50%;background:#FFE14D;display:grid;place-items:center;box-shadow:0 0 0 2.5px #232B60"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10142E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span></sc-if>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+            <div style="flex:none;height:22px;display:flex;justify-content:center;align-items:center;gap:6px">
+              <sc-for list="{{ f.dots }}" as="d" hint-placeholder-count="0"><button onClick="{{ d.go }}" aria-label="페이지" style="width:{{ d.w }}px;height:7px;border:none;padding:0;border-radius:4px;background:{{ d.bg }};cursor:pointer;transition:width .15s"></button></sc-for>
+            </div>
+            <div style="position:absolute;left:16px;right:16px;bottom:34px;display:flex;align-items:center;gap:12px">
+              <button onClick="{{ f.strip }}" style="flex:none;width:72px;height:44px;border:none;background:transparent;color:#8F96CC;font-size:13px;font-weight:800;cursor:pointer;padding:0">전부 벗기</button>
+              <button style="flex:1;height:56px;border-radius:28px;border:none;background:#FF4FA0;color:#10142E;box-shadow:0 5px 0 #B32A6E;font-family:'Bagel Fat One';font-size:20px;cursor:pointer">이대로 가기</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  <div id="26g" style="display:flex;flex-direction:column;gap:24px">
+    <div style="display:flex;align-items:center;gap:10px"><span style="background:#FFE14D;color:#10142E;font-family:'Fredoka';font-size:13px;font-weight:700;padding:3px 11px;border-radius:99px">26g</span><span style="font-size:18px;font-weight:800">아이템 시트 · 25개</span></div>
+    <sc-for list="{{ sheet }}" as="g" hint-placeholder-count="6">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:15px;font-weight:800;color:#FFE14D">{{ g.label }}</span><span style="font-family:'Fredoka';font-size:12px;font-weight:600;color:#8F96CC">{{ g.count }}</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:14px">
+          <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="4">
+            <div style="width:150px;display:flex;flex-direction:column;gap:8px">
+              <div style="width:150px;height:150px;border-radius:22px;background:#1E2558;display:grid;place-items:center"><div style="position:relative;width:124px;height:124px;overflow:hidden"><sc-for list="{{ it.thumb }}" as="l" hint-placeholder-count="0"><img src="{{ l.src }}" alt="" style="position:absolute;left:{{ l.l }}px;top:{{ l.t }}px;width:{{ l.w }}px;height:{{ l.h }}px;max-width:none;display:block"></sc-for></div></div>
+              <div style="display:flex;flex-direction:column;gap:2px;padding:0 4px"><span style="font-size:14px;font-weight:800">{{ it.name }}</span><sc-for list="{{ it.files }}" as="fn"><span style="font-family:'Fredoka';font-size:11px;font-weight:500;color:#8F96CC;word-break:break-all">{{ fn }}</span></sc-for></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  <div id="26h" style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;gap:10px"><span style="background:#FFE14D;color:#10142E;font-family:'Fredoka';font-size:13px;font-weight:700;padding:3px 11px;border-radius:99px">26h</span><span style="font-size:18px;font-weight:800">착용 조합 6가지</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:16px">
+      <sc-for list="{{ combos }}" as="cb" hint-placeholder-count="6">
+        <div style="width:220px;display:flex;flex-direction:column;gap:10px">
+          <div style="position:relative;width:220px;height:264px;border-radius:24px;background:#1E2558;overflow:hidden">
+            <div style="position:absolute;left:40px;top:232px;width:140px;height:18px;border-radius:50%;background:#2E2463"></div>
+            <div style="position:absolute;left:10px;top:12px;width:200px;height:240px"><sc-for list="{{ cb.layers }}" as="l" hint-placeholder-count="0"><img src="{{ l.src }}" alt="" style="position:absolute;left:0;top:0;width:200px;height:240px;display:block"></sc-for></div>
+          </div>
+          <span style="font-size:13px;line-height:1.55;color:#C9CEF5;padding:0 4px">{{ cb.names }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="max-width:760px;background:#1E2558;border-radius:22px;padding:16px 20px;display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:1.5;color:#C9CEF5">
+      <span><b style="color:#FFE14D">겹침 순서</b> 등 back층 → 후드 back층 → 솔이 → 발 → 몸 → 얼굴 → 머리 → 등 front층 → 손</span>
+      <span><b style="color:#FFE14D">고정 기준</b> 모든 파일 viewBox 0 -20 200 240. 기본 포즈 위에 같은 크기로 겹치면 맞습니다. 손 아이템은 오른팔 끝을 다시 그려 쥔 모양을 만듭니다.</span>
+    </div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { fr: [
+    { tab: 'head', page: 0, wear: { head: 'straw' } },
+    { tab: 'body', page: 0, wear: { head: 'beanie', body: 'scarf' } },
+    { tab: 'back', page: 0, wear: { back: 'cape', hand: 'balloon', head: 'catears' } },
+    { tab: 'face', page: 0, wear: { face: 'heart' } }
+  ] };
+  pagers = [];
+  upd(i, fn, cb) { this.setState(s => ({ fr: s.fr.map((x, j) => j === i ? fn(x) : x) }), cb); }
+  renderVals() {
+    const A = 'soli-assets/';
+    const SLOTS = [
+      { k: 'head', label: '머리', icon: ['M3 17h18', 'M6.5 17c0-6 2.5-10 5.5-10s5.5 4 5.5 10'] },
+      { k: 'face', label: '얼굴', icon: ['M3 12a3.5 3.5 0 1 0 7 0a3.5 3.5 0 1 0-7 0', 'M14 12a3.5 3.5 0 1 0 7 0a3.5 3.5 0 1 0-7 0', 'M10 11.5q2-1.5 4 0'] },
+      { k: 'body', label: '몸', icon: ['M8.5 4L4 7l2 4 2-1v10h8V10l2 1 2-4-4.5-3c-.8 1.8-2 2.8-3.5 2.8S9.3 5.8 8.5 4z'] },
+      { k: 'back', label: '등', icon: ['M6.5 9a5.5 5.5 0 0 1 11 0v10.5a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1z', 'M10 4.2V3h4v1.2', 'M9.5 14h5v3h-5z'] },
+      { k: 'hand', label: '손', icon: ['M7 9h9v8a3 3 0 0 1-3 3h-3a3 3 0 0 1-3-3z', 'M16 11h1.5a2 2 0 0 1 0 4H16', 'M9.5 3.5v2.5', 'M13 3.5v2.5'] },
+      { k: 'feet', label: '발', icon: ['M7.5 3.5h5v8l5.5 2a2.5 2.5 0 0 1 2 2.5v2.5H6.5V4.5a1 1 0 0 1 1-1z', 'M6.5 16h13.5'] }
+    ];
+    const IT = [
+      ['head', 'headphones', '회색 헤드폰', [12, 14, 176, 134]], ['head', 'straw', '밀짚모자', [10, 14, 180, 92]], ['head', 'beanie', '비니', [26, 14, 148, 102]], ['head', 'wizard', '마법사 모자', [24, -18, 152, 118]], ['head', 'catears', '고양이 귀 머리띠', [26, 14, 148, 98]],
+      ['face', 'glasses', '동그란 안경', [24, 110, 152, 42]], ['face', 'heart', '하트 선글라스', [24, 106, 152, 46]], ['face', 'star', '별 스티커', [128, 135, 36, 36]],
+      ['body', 'scarf', '스카프', [14, 140, 172, 86]], ['body', 'overall', '멜빵 오버올', [14, 140, 172, 70]], ['body', 'raincoat', '노란 우비', [8, 108, 184, 102]], ['body', 'sweater', '줄무늬 스웨터', [8, 108, 184, 102]], ['body', 'hoodie', '후드티', [8, 108, 184, 102], 1], ['body', 'plaid', '체크남방', [8, 108, 184, 102]],
+      ['back', 'wings', '작은 천사 날개', [0, 76, 200, 74]], ['back', 'cape', '망토', [8, 124, 184, 100], 1], ['back', 'crossbag', '크로스백', [22, 84, 156, 114], 1], ['back', 'bundle', '보따리', [4, 62, 192, 138]],
+      ['hand', 'coffee', '커피컵', [146, 114, 48, 64]], ['hand', 'umbrella', '접힌 우산', [146, 118, 50, 100]], ['hand', 'balloon', '풍선', [146, 4, 54, 160]], ['hand', 'book', '작은 책', [146, 130, 46, 54]],
+      ['feet', 'boots', '노란 장화', [66, 176, 68, 42]], ['feet', 'sneakers', '핑크 스니커즈', [66, 190, 68, 28]], ['feet', 'slippers', '털 슬리퍼', [64, 190, 72, 28]]
+    ].map(([slot, id, name, bb, split]) => ({ slot, id, name, bb, split: !!split }));
+    const byId = {}; IT.forEach(it => byId[it.id] = it);
+    const file = (it, part) => `outfit-${it.slot}-${it.id}${part ? '-' + part : ''}.svg`;
+    const files = it => it.split ? [file(it, 'back'), file(it, 'front')] : [file(it)];
+    const layers = w => {
+      const g = k => w[k] && byId[w[k]], out = [], b = g('back'), bo = g('body');
+      if (b) out.push(file(b, b.split ? 'back' : ''));
+      if (bo && bo.split) out.push(file(bo, 'back'));
+      out.push('soli-pose-base.svg');
+      ['feet', 'body', 'face', 'head'].forEach(k => { const it = g(k); if (it) out.push(file(it, it.split ? 'front' : '')); });
+      if (b && b.split) out.push(file(b, 'front'));
+      if (g('hand')) out.push(file(g('hand')));
+      return out.map(f => ({ src: A + f }));
+    };
+    const thumb = (it, T) => {
+      const [x, y, w, h] = it.bb, s = Math.min(T * (w > h * 1.6 ? 1.05 : .88) / w, T * .88 / h, 1.3);
+      const pos = { l: +(-x * s + (T - w * s) / 2).toFixed(1), t: +(-(y + 20) * s + (T - h * s) / 2).toFixed(1), w: +(200 * s).toFixed(1), h: +(240 * s).toFixed(1) };
+      return files(it).map(f => ({ src: A + f, ...pos }));
+    };
+    const dressed = (it, T) => {
+      const [bx, by, bw, bh] = it.bb, x0 = Math.min(14, bx), y0 = Math.min(14, by), x1 = Math.max(186, bx + bw), y1 = Math.max(210, by + bh);
+      const uw = x1 - x0, uh = y1 - y0, s = Math.min(T * .9 / 196, T * .96 / uw, T * .96 / uh);
+      const pos = { l: +(-x0 * s + (T - uw * s) / 2).toFixed(1), t: +(-(y0 + 20) * s + (T - uh * s) / 2).toFixed(1), w: +(200 * s).toFixed(1), h: +(240 * s).toFixed(1) };
+      return layers({ [it.slot]: it.id }).map(l => ({ src: l.src, ...pos }));
+    };
+    const LOCK = {
+      face: ['M6 28c0-8 8-12 14-10 4 1 6 4 10 4s6-3 10-4c6-2 14 2 14 10s-8 12-14 10c-4-1-6-5-10-5s-6 4-10 5C14 40 6 36 6 28z', 'M30 30c-4-6-12-8-18-4-4 3-5 8-9 8 4 4 12 6 18 2 4-2 7-4 9-6 2 2 5 4 9 6 6 4 14 2 18-2-4 0-5-5-9-8-6-4-14-2-18 4z'],
+      body: ['M23 6h14l-1 10 14 36H10l14-36z', 'M17 8l8 5 5 8 5-8 8-5 7 8v35H10V16z']
+    };
+    const frames = this.state.fr.map((s, i) => {
+      const cells = [{ isNone: true, name: '없음', on: !s.wear[s.tab], pick: () => this.upd(i, x => ({ ...x, wear: { ...x.wear, [s.tab]: null } })) }]
+        .concat(IT.filter(it => it.slot === s.tab).map(it => ({ isItem: true, name: it.name, on: s.wear[s.tab] === it.id, thumb: dressed(it, 60), pick: () => this.upd(i, x => ({ ...x, wear: { ...x.wear, [s.tab]: it.id } })) })))
+        .concat((LOCK[s.tab] || []).map(sil => ({ isLocked: true, name: '잠김', sil, on: false, pick: () => {} })))
+        .map(c => ({ ...c, ring: c.on ? 'inset 0 0 0 3px #FFE14D' : 'none', cursor: c.isLocked ? 'default' : 'pointer' }));
+      const pages = []; for (let p = 0; p < cells.length; p += 8) pages.push({ cells: cells.slice(p, p + 8) });
+      const go = p => { const el = this.pagers[i]; if (el) el.scrollTo({ left: p * el.clientWidth, behavior: 'smooth' }); };
+      return {
+        anchor: ['26c', '26d', '26e', '26f'][i],
+        title: ['머리 탭 · 밀짚모자', '몸 탭 · 스카프 + 비니', '등 탭 · 망토 + 풍선 + 고양이 귀', '얼굴 탭 · 잠긴 칸'][i],
+        layers: layers(s.wear),
+        tabs: SLOTS.map(t => { const on = s.tab === t.k; return { ...t, on, bg: on ? '#FFE14D' : '#1E2558', ink: on ? '#10142E' : '#C9CEF5', pick: () => this.upd(i, x => ({ ...x, tab: t.k, page: 0 }), () => { const el = this.pagers[i]; if (el) el.scrollLeft = 0; }) }; }),
+        pages,
+        dots: pages.length > 1 ? pages.map((_, p) => ({ w: p === s.page ? 18 : 7, bg: p === s.page ? '#FFE14D' : '#4A5290', go: () => go(p) })) : [],
+        pagerRef: el => { this.pagers[i] = el; },
+        onScroll: e => { const el = e.currentTarget, p = Math.round(el.scrollLeft / el.clientWidth); if (p !== s.page) this.upd(i, x => ({ ...x, page: p })); },
+        strip: () => this.upd(i, x => ({ ...x, wear: {} }))
+      };
+    });
+    const sheet = SLOTS.map(sl => { const items = IT.filter(it => it.slot === sl.k); return { label: sl.label, count: items.length + '개', items: items.map(it => ({ name: it.name, files: files(it), thumb: (sl.k === 'body' || sl.k === 'back') ? dressed(it, 124) : thumb(it, 124) })) }; });
+    const C = [
+      { head: 'wizard', face: 'heart', body: 'raincoat', back: 'wings', hand: 'umbrella', feet: 'boots' },
+      { head: 'straw', face: 'star', body: 'overall', back: 'crossbag', feet: 'boots' },
+      { head: 'catears', face: 'glasses', body: 'hoodie', hand: 'book', feet: 'slippers' },
+      { head: 'headphones', body: 'plaid', back: 'bundle', hand: 'coffee', feet: 'sneakers' },
+      { head: 'beanie', face: 'star', body: 'sweater', back: 'cape', hand: 'balloon', feet: 'sneakers' },
+      { head: 'wizard', body: 'raincoat', back: 'crossbag' }
+    ];
+    const combos = C.map(w => ({ layers: layers(w), names: SLOTS.filter(sl => w[sl.k]).map(sl => byId[w[sl.k]].name).join(' · ') }));
+    return { frames, sheet, combos };
+  }
+}
+</script>
+</body>
+</html>

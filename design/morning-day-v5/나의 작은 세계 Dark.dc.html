@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/static/woff2/SUIT.css">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Orbit&family=Noto+Serif+KR:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>html{background:#101012!important;min-height:100%}body{margin:0;min-height:100%;background:#101012;color:#E9E7E3;font-family:'Pretendard',sans-serif}a{color:inherit;text-decoration:none}a:hover{opacity:.9}textarea{font:inherit}textarea::placeholder{color:inherit;opacity:.5}</style>
+</helmet>
+
+<section style="background:#101012;padding:64px 72px 40px;display:flex;flex-direction:column;gap:36px">
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="font-size:13px;letter-spacing:.14em;color:#8C8A86">TURN 2 · DARK · MAIN</div>
+    <div style="font-size:30px;font-weight:700">메인 화면 — 다크 3안</div>
+    <div style="font-size:15px;color:#A5A39E;max-width:760px;text-wrap:pretty">마을이 화면 대부분을 차지하고 UI는 최소로 둡니다. 마을 영역은 일러스트를 끌어다 놓을 수 있는 이미지 자리입니다. 같은 id를 쓰는 기록 시트 배경에도 같은 이미지가 들어갑니다.</div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:56px;align-items:flex-start">
+
+    <!-- 2a Lantern -->
+    <div id="2a" style="display:flex;flex-direction:column;gap:20px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#E9E7E3;color:#101012;font-size:13px;font-weight:700;padding:4px 10px;border-radius:99px">2a</span><span style="font-size:18px;font-weight:600">등불 — 풀블리드</span></div>
+      <div style="width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;background:#14110F;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 40px 80px -30px rgba(0,0,0,.8);font-family:'Pretendard';color:#F3ECE4">
+        <div style="position:absolute;inset:0;color:#A89E93"><image-slot id="village-2a" shape="rect" placeholder="마을 일러스트 · 세로 풀블리드 (밤, 구름 조금)"></image-slot></div>
+        <div style="position:absolute;left:0;right:0;top:0;height:230px;background:linear-gradient(#14110F 10%,rgba(20,17,15,0));pointer-events:none"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:340px;background:linear-gradient(rgba(20,17,15,0),#14110F 62%);pointer-events:none"></div>
+        <div style="position:absolute;left:0;right:0;top:0;pointer-events:none">
+          <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:15px;font-weight:600"><span>9:41</span><div style="display:flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="5" y="5" width="3" height="7" rx="1"></rect><rect x="10" y="2" width="3" height="10" rx="1"></rect><rect x="15" y="0" width="3" height="12" rx="1" opacity=".35"></rect></svg><svg width="26" height="12" viewBox="0 0 26 12"><rect x=".5" y=".5" width="22" height="11" rx="3.5" fill="none" stroke="currentColor" opacity=".4"></rect><rect x="2.5" y="2.5" width="15" height="7" rx="2" fill="currentColor"></rect></svg></div></div>
+          <div style="padding:10px 24px 0;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="display:flex;flex-direction:column;gap:2px"><span style="font-family:'Instrument Serif';font-style:italic;font-size:16px;color:#A89E93">Solbit Village</span><span style="font-size:27px;font-weight:700;letter-spacing:-.02em">솔빛 마을</span></div>
+              <div style="width:58px;height:58px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(245,183,107,.45);display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-size:10px;letter-spacing:.12em;color:#F5B76B">LV</span><span style="font-family:'Instrument Serif';font-size:30px;line-height:.9">7</span></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px"><div style="flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,.12)"><div style="width:64%;height:100%;border-radius:99px;background:#F5B76B;box-shadow:0 0 10px rgba(245,183,107,.6)"></div></div><span style="font-size:12px;color:#A89E93">1,280 / 2,000</span></div>
+          </div>
+        </div>
+        <div style="position:absolute;top:322px;left:24px;max-width:240px;background:rgba(32,27,24,.82);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08);border-radius:22px 22px 22px 8px;padding:12px 16px;display:flex;flex-direction:column;gap:3px">
+          <span style="font-size:15px;font-weight:600">💌 민수가 편지를 보냈어요</span>
+          <span style="font-size:13px;color:#BFB4A8">요즘 어떻게 지내?</span>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:0 16px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:12px 6px;border-radius:26px;background:rgba(32,27,24,.6);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.06)">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:44px;height:44px;border-radius:50%;background:conic-gradient(#FF8E86 0 62%,rgba(255,255,255,.1) 0);display:grid;place-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#1E1A17;display:grid;place-items:center;color:#FF8E86"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg></div></div><span style="font-size:12px;color:#BFB4A8">건강 <b style="color:#F3ECE4;font-weight:600">62</b></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:44px;height:44px;border-radius:50%;background:conic-gradient(#94AEFF 0 78%,rgba(255,255,255,.1) 0);display:grid;place-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#1E1A17;display:grid;place-items:center;color:#94AEFF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4"></path><path d="M6 4h11l-2.5 4L17 12H6"></path></svg></div></div><span style="font-size:12px;color:#BFB4A8">일 <b style="color:#F3ECE4;font-weight:600">78</b></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:44px;height:44px;border-radius:50%;background:conic-gradient(#E9C27A 0 54%,rgba(255,255,255,.1) 0);display:grid;place-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#1E1A17;display:grid;place-items:center;color:#E9C27A"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"></circle><path d="M3.5 19a5.5 5.5 0 0 1 11 0"></path><circle cx="17" cy="9" r="2.4"></circle><path d="M15.5 13.6A4.5 4.5 0 0 1 21 18"></path></svg></div></div><span style="font-size:12px;color:#BFB4A8">관계 <b style="color:#F3ECE4;font-weight:600">54</b></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:44px;height:44px;border-radius:50%;background:conic-gradient(#86D6B0 0 38%,rgba(255,255,255,.1) 0);display:grid;place-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#1E1A17;display:grid;place-items:center;color:#86D6B0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"></path><path d="M12 13C12 9 9 7 5 7c0 4 3 6 7 6z"></path><path d="M12 11c0-3 2.5-5 6-5 0 3-2.5 5-6 5z"></path></svg></div></div><span style="font-size:12px;color:#BFB4A8">여가 <b style="color:#F3ECE4;font-weight:600">38</b></span></div>
+          </div>
+          <a href="#3a" style="height:60px;border-radius:30px;background:#F5B76B;color:#1A1410;display:flex;align-items:center;justify-content:center;gap:10px;font-size:17px;font-weight:700;box-shadow:0 10px 30px -8px rgba(245,183,107,.55)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 11-11-3-3L5 16z"></path></svg>오늘 기록하기</a>
+          <div style="height:62px;display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:18px;font-size:11px;color:#7F766D">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#F3ECE4;font-weight:600"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8"></circle><path d="M4.5 14c3-2 5-2 7.5 0s4.5 2 7.5 0"></path></svg>세계</div>
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="4" width="14" height="16" rx="4"></rect><path d="M9 9h6M9 13h4"></path></svg>기록</div>
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3"></circle><path d="M3.5 19a5.5 5.5 0 0 1 11 0"></path><circle cx="17" cy="9" r="2.4"></circle><path d="M15.5 13.6A4.5 4.5 0 0 1 21 18"></path></svg>인연</div>
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="9" r="3.5"></circle><path d="M5.5 20a6.5 6.5 0 0 1 13 0"></path></svg>나</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:#1A1A1D;border:1px solid #26262A;border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:16px">
+        <div style="font-size:12px;letter-spacing:.12em;color:#8C8A86">PALETTE</div>
+        <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;font-size:11px;color:#A5A39E;text-align:center">
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#14110F;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)"></div>밤<span>#14110F</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#F5B76B"></div>등불<span>#F5B76B</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#FF8E86"></div>건강<span>#FF8E86</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#94AEFF"></div>일<span>#94AEFF</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#E9C27A"></div>관계<span>#E9C27A</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#86D6B0"></div>여가<span>#86D6B0</span></div>
+        </div>
+        <div style="font-size:12px;letter-spacing:.12em;color:#8C8A86">TYPE</div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:22px;font-weight:700">솔빛 마을</span><span style="font-size:12px;color:#8C8A86">Pretendard · 한글 전체</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:'Instrument Serif';font-style:italic;font-size:24px">Solbit Village, Lv 7</span><span style="font-size:12px;color:#8C8A86">Instrument Serif · 영문/숫자</span></div>
+      </div>
+    </div>
+
+    <!-- 2b Orbit -->
+    <div id="2b" style="display:flex;flex-direction:column;gap:20px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#E9E7E3;color:#101012;font-size:13px;font-weight:700;padding:4px 10px;border-radius:99px">2b</span><span style="font-size:18px;font-weight:600">궤도 — 창 속의 마을 + HUD</span></div>
+      <div style="width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;background:#0E1020;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 40px 80px -30px rgba(0,0,0,.8);font-family:'SUIT';color:#EEF0FF;display:flex;flex-direction:column">
+        <div style="height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:15px;font-weight:700"><span>9:41</span><div style="display:flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="5" y="5" width="3" height="7" rx="1"></rect><rect x="10" y="2" width="3" height="10" rx="1"></rect><rect x="15" y="0" width="3" height="12" rx="1" opacity=".35"></rect></svg><svg width="26" height="12" viewBox="0 0 26 12"><rect x=".5" y=".5" width="22" height="11" rx="3.5" fill="none" stroke="currentColor" opacity=".4"></rect><rect x="2.5" y="2.5" width="15" height="7" rx="2" fill="currentColor"></rect></svg></div></div>
+        <div style="flex:1;min-height:0;margin:4px 12px 0;border-radius:38px;overflow:hidden;position:relative;background:#171A30;box-shadow:inset 0 0 0 1px #262A48;color:#7F86B0">
+          <image-slot id="village-2b" shape="rect" placeholder="마을 일러스트 · 세로형 (밤, 구름 조금)"></image-slot>
+          <div style="position:absolute;top:12px;left:12px;right:84px;background:rgba(14,16,32,.74);backdrop-filter:blur(14px);border-radius:24px;padding:12px 14px;display:flex;flex-direction:column;gap:9px;color:#EEF0FF;pointer-events:none">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:20px;font-weight:800;letter-spacing:-.02em">솔빛 마을</span><span style="font-family:'Orbit';font-size:14px;color:#A9BCFF">LV.07</span></div>
+            <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:3px"><span style="height:6px;border-radius:3px;background:#A9BCFF"></span><span style="height:6px;border-radius:3px;background:#A9BCFF"></span><span style="height:6px;border-radius:3px;background:#A9BCFF"></span><span style="height:6px;border-radius:3px;background:#A9BCFF"></span><span style="height:6px;border-radius:3px;background:#A9BCFF"></span><span style="height:6px;border-radius:3px;background:#A9BCFF"></span><span style="height:6px;border-radius:3px;background:linear-gradient(90deg,#A9BCFF 40%,#2A2F52 0)"></span><span style="height:6px;border-radius:3px;background:#2A2F52"></span><span style="height:6px;border-radius:3px;background:#2A2F52"></span><span style="height:6px;border-radius:3px;background:#2A2F52"></span></div>
+            <span style="font-family:'Orbit';font-size:11px;color:#9096B8">1280 / 2000</span>
+          </div>
+          <div style="position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:8px;pointer-events:none">
+            <div style="width:62px;padding:8px 0 6px;border-radius:22px;background:rgba(14,16,32,.74);backdrop-filter:blur(14px);display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:40px;height:40px;border-radius:50%;background:conic-gradient(#FF7AA8 0 62%,#2A2F52 0);display:grid;place-items:center"><div style="width:34px;height:34px;border-radius:50%;background:#14172B;display:grid;place-items:center;color:#FF7AA8"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg></div></div><span style="font-family:'Orbit';font-size:12px;color:#EEF0FF">62</span><span style="font-size:10px;color:#9096B8;margin-top:-3px">건강</span></div>
+            <div style="width:62px;padding:8px 0 6px;border-radius:22px;background:rgba(14,16,32,.74);backdrop-filter:blur(14px);display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:40px;height:40px;border-radius:50%;background:conic-gradient(#7C9CFF 0 78%,#2A2F52 0);display:grid;place-items:center"><div style="width:34px;height:34px;border-radius:50%;background:#14172B;display:grid;place-items:center;color:#7C9CFF"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4"></path><path d="M6 4h11l-2.5 4L17 12H6z" fill="currentColor"></path></svg></div></div><span style="font-family:'Orbit';font-size:12px;color:#EEF0FF">78</span><span style="font-size:10px;color:#9096B8;margin-top:-3px">일</span></div>
+            <div style="width:62px;padding:8px 0 6px;border-radius:22px;background:rgba(14,16,32,.74);backdrop-filter:blur(14px);display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:40px;height:40px;border-radius:50%;background:conic-gradient(#FFD36E 0 54%,#2A2F52 0);display:grid;place-items:center"><div style="width:34px;height:34px;border-radius:50%;background:#14172B;display:grid;place-items:center;color:#FFD36E"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 19.5a5.5 5.5 0 0 1 11 0z"></path><circle cx="17" cy="9" r="2.5"></circle><path d="M15.6 13.4A4.6 4.6 0 0 1 21 18.5h-4.6a7 7 0 0 0-.8-5.1z"></path></svg></div></div><span style="font-family:'Orbit';font-size:12px;color:#EEF0FF">54</span><span style="font-size:10px;color:#9096B8;margin-top:-3px">관계</span></div>
+            <div style="width:62px;padding:8px 0 6px;border-radius:22px;background:rgba(14,16,32,.74);backdrop-filter:blur(14px);display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:40px;height:40px;border-radius:50%;background:conic-gradient(#5EE6C0 0 38%,#2A2F52 0);display:grid;place-items:center"><div style="width:34px;height:34px;border-radius:50%;background:#14172B;display:grid;place-items:center;color:#5EE6C0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"></path><path d="M12 13C12 9 9 7 5 7c0 4 3 6 7 6z" fill="currentColor"></path><path d="M12 11c0-3 2.5-5 6-5 0 3-2.5 5-6 5z" fill="currentColor"></path></svg></div></div><span style="font-family:'Orbit';font-size:12px;color:#EEF0FF">38</span><span style="font-size:10px;color:#9096B8;margin-top:-3px">여가</span></div>
+          </div>
+          <div style="position:absolute;left:14px;bottom:16px;max-width:250px;background:#EEF0FF;color:#0E1020;border-radius:22px 22px 22px 8px;padding:12px 16px;display:flex;flex-direction:column;gap:3px;box-shadow:0 12px 30px -10px rgba(124,156,255,.6)">
+            <span style="font-size:15px;font-weight:800">💌 민수가 편지를 보냈어요</span>
+            <span style="font-size:13px;color:#4A4F72">요즘 어떻게 지내?</span>
+          </div>
+        </div>
+        <div style="height:112px;flex-shrink:0;display:grid;grid-template-columns:1fr 1fr 96px 1fr 1fr;align-items:start;padding:14px 12px 0;box-sizing:border-box;font-size:11px;color:#6E7499">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:10px;color:#EEF0FF;font-weight:700"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8"></circle><path d="M4.5 14c3-2 5-2 7.5 0s4.5 2 7.5 0"></path></svg>세계</div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="4" width="14" height="16" rx="4"></rect><path d="M9 9h6M9 13h4"></path></svg>기록</div>
+          <a href="#3b" style="display:flex;flex-direction:column;align-items:center;gap:7px;color:#EEF0FF;font-weight:700"><span style="width:64px;height:64px;border-radius:50%;background:#7C9CFF;color:#0E1020;display:grid;place-items:center;box-shadow:0 0 0 6px #171A30,0 10px 30px -4px rgba(124,156,255,.7)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 11-11-3-3L5 16z"></path></svg></span>오늘 기록하기</a>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3"></circle><path d="M3.5 19a5.5 5.5 0 0 1 11 0"></path><circle cx="17" cy="9" r="2.4"></circle><path d="M15.5 13.6A4.5 4.5 0 0 1 21 18"></path></svg>인연</div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="9" r="3.5"></circle><path d="M5.5 20a6.5 6.5 0 0 1 13 0"></path></svg>나</div>
+        </div>
+      </div>
+      <div style="background:#1A1A1D;border:1px solid #26262A;border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:16px">
+        <div style="font-size:12px;letter-spacing:.12em;color:#8C8A86">PALETTE</div>
+        <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;font-size:11px;color:#A5A39E;text-align:center">
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#0E1020;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)"></div>심야<span>#0E1020</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#171A30;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)"></div>창<span>#171A30</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#FF7AA8"></div>건강<span>#FF7AA8</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#7C9CFF"></div>일<span>#7C9CFF</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#FFD36E"></div>관계<span>#FFD36E</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#5EE6C0"></div>여가<span>#5EE6C0</span></div>
+        </div>
+        <div style="font-size:12px;letter-spacing:.12em;color:#8C8A86">TYPE</div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:'SUIT';font-size:22px;font-weight:800">솔빛 마을</span><span style="font-size:12px;color:#8C8A86">SUIT · 한글 UI</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:'Orbit';font-size:20px">LV.07 · 1280</span><span style="font-size:12px;color:#8C8A86">Orbit · 숫자/HUD</span></div>
+      </div>
+    </div>
+
+    <!-- 2c Journal -->
+    <div id="2c" style="display:flex;flex-direction:column;gap:20px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#E9E7E3;color:#101012;font-size:13px;font-weight:700;padding:4px 10px;border-radius:99px">2c</span><span style="font-size:18px;font-weight:600">밤의 일기 — 에디토리얼</span></div>
+      <div style="width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;background:#1A1A1C;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 40px 80px -30px rgba(0,0,0,.8);font-family:'Pretendard';color:#ECE9E3;display:flex;flex-direction:column">
+        <div style="height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:15px;font-weight:600"><span>9:41</span><div style="display:flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="5" y="5" width="3" height="7" rx="1"></rect><rect x="10" y="2" width="3" height="10" rx="1"></rect><rect x="15" y="0" width="3" height="12" rx="1" opacity=".35"></rect></svg><svg width="26" height="12" viewBox="0 0 26 12"><rect x=".5" y=".5" width="22" height="11" rx="3.5" fill="none" stroke="currentColor" opacity=".4"></rect><rect x="2.5" y="2.5" width="15" height="7" rx="2" fill="currentColor"></rect></svg></div></div>
+        <div style="padding:10px 24px 16px;display:flex;flex-direction:column;gap:10px;flex-shrink:0">
+          <span style="font-family:'Instrument Serif';font-style:italic;font-size:17px;color:#9C9A94">Monday, October 19</span>
+          <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:'Noto Serif KR';font-size:28px;font-weight:600;letter-spacing:-.02em">솔빛 마을</span><span style="font-family:'Instrument Serif';font-size:30px">Lv. 7</span></div>
+          <div style="display:flex;align-items:center;gap:10px"><div style="flex:1;height:2px;background:#313135"><div style="width:64%;height:100%;background:#ECE9E3"></div></div><span style="font-size:12px;color:#9C9A94">다음 레벨까지 720</span></div>
+        </div>
+        <div style="flex:1;min-height:0;margin:0 16px;border-radius:30px;overflow:hidden;position:relative;background:#232326;color:#7E7C77">
+          <image-slot id="village-2c" shape="rect" placeholder="마을 일러스트 · 세로형 (밤, 구름 조금)"></image-slot>
+          <div style="position:absolute;left:12px;right:12px;bottom:12px;background:#ECE9E3;color:#1A1A1C;border-radius:22px;padding:12px 12px 12px 16px;display:flex;align-items:center;gap:12px">
+            <span style="font-size:22px">💌</span>
+            <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:700">민수가 편지를 보냈어요</span><span style="font-family:'Noto Serif KR';font-size:13px;color:#55534E">"요즘 어떻게 지내?"</span></div>
+            <span style="font-size:13px;font-weight:600;background:#1A1A1C;color:#ECE9E3;padding:8px 14px;border-radius:99px">읽기</span>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:18px 20px 4px;flex-shrink:0">
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:36px;height:36px;border-radius:50%;background:conic-gradient(#E7897A 0 62%,#313135 0);display:grid;place-items:center;flex-shrink:0"><div style="width:32px;height:32px;border-radius:50%;background:#1A1A1C;display:grid;place-items:center;color:#E7897A"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg></div></div><div style="display:flex;flex-direction:column"><span style="font-family:'Instrument Serif';font-size:22px;line-height:1">62</span><span style="font-size:11px;color:#9C9A94">건강</span></div></div>
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:36px;height:36px;border-radius:50%;background:conic-gradient(#8FA6C9 0 78%,#313135 0);display:grid;place-items:center;flex-shrink:0"><div style="width:32px;height:32px;border-radius:50%;background:#1A1A1C;display:grid;place-items:center;color:#8FA6C9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4"></path><path d="M6 4h11l-2.5 4L17 12H6"></path></svg></div></div><div style="display:flex;flex-direction:column"><span style="font-family:'Instrument Serif';font-size:22px;line-height:1">78</span><span style="font-size:11px;color:#9C9A94">일</span></div></div>
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:36px;height:36px;border-radius:50%;background:conic-gradient(#D9B26F 0 54%,#313135 0);display:grid;place-items:center;flex-shrink:0"><div style="width:32px;height:32px;border-radius:50%;background:#1A1A1C;display:grid;place-items:center;color:#D9B26F"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"></circle><path d="M3.5 19a5.5 5.5 0 0 1 11 0"></path><circle cx="17" cy="9" r="2.4"></circle><path d="M15.5 13.6A4.5 4.5 0 0 1 21 18"></path></svg></div></div><div style="display:flex;flex-direction:column"><span style="font-family:'Instrument Serif';font-size:22px;line-height:1">54</span><span style="font-size:11px;color:#9C9A94">관계</span></div></div>
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:36px;height:36px;border-radius:50%;background:conic-gradient(#93B58C 0 38%,#313135 0);display:grid;place-items:center;flex-shrink:0"><div style="width:32px;height:32px;border-radius:50%;background:#1A1A1C;display:grid;place-items:center;color:#93B58C"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"></path><path d="M12 13C12 9 9 7 5 7c0 4 3 6 7 6z"></path><path d="M12 11c0-3 2.5-5 6-5 0 3-2.5 5-6 5z"></path></svg></div></div><div style="display:flex;flex-direction:column"><span style="font-family:'Instrument Serif';font-size:22px;line-height:1">38</span><span style="font-size:11px;color:#9C9A94">여가</span></div></div>
+        </div>
+        <div style="padding:14px 16px 8px;flex-shrink:0"><a href="#3c" style="height:56px;border-radius:28px;background:#ECE9E3;color:#1A1A1C;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700">오늘 기록하기</a></div>
+        <div style="height:64px;flex-shrink:0;display:grid;grid-template-columns:repeat(4,1fr);padding:4px 12px 20px;box-sizing:border-box;font-size:12px;color:#77756F">
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#ECE9E3;font-weight:600">세계<span style="width:4px;height:4px;border-radius:50%;background:#ECE9E3"></span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">기록<span style="width:4px;height:4px"></span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">인연<span style="width:4px;height:4px"></span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">나<span style="width:4px;height:4px"></span></div>
+        </div>
+      </div>
+      <div style="background:#1A1A1D;border:1px solid #26262A;border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:16px">
+        <div style="font-size:12px;letter-spacing:.12em;color:#8C8A86">PALETTE</div>
+        <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;font-size:11px;color:#A5A39E;text-align:center">
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#1A1A1C;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)"></div>먹<span>#1A1A1C</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#ECE9E3"></div>종이<span>#ECE9E3</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#E7897A"></div>건강<span>#E7897A</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#8FA6C9"></div>일<span>#8FA6C9</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#D9B26F"></div>관계<span>#D9B26F</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center"><div style="width:38px;height:38px;border-radius:50%;background:#93B58C"></div>여가<span>#93B58C</span></div>
+        </div>
+        <div style="font-size:12px;letter-spacing:.12em;color:#8C8A86">TYPE</div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:'Noto Serif KR';font-size:22px;font-weight:600">솔빛 마을</span><span style="font-size:12px;color:#8C8A86">Noto Serif KR · 제목</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:16px">요즘 어떻게 지내?</span><span style="font-size:12px;color:#8C8A86">Pretendard · 본문</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:'Instrument Serif';font-size:24px">Lv. 7 — 62 78 54</span><span style="font-size:12px;color:#8C8A86">Instrument Serif · 숫자</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section style="background:#101012;padding:40px 72px 96px;display:flex;flex-direction:column;gap:36px">
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="font-size:13px;letter-spacing:.14em;color:#8C8A86">TURN 2 · DARK · SHEET</div>
+    <div style="font-size:30px;font-weight:700">오늘 기록 시트</div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:56px;align-items:flex-start">
+
+    <div id="3a" style="display:flex;flex-direction:column;gap:20px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#E9E7E3;color:#101012;font-size:13px;font-weight:700;padding:4px 10px;border-radius:99px">3a</span><span style="font-size:18px;font-weight:600">등불</span></div>
+      <div style="width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;background:#14110F;box-shadow:0 0 0 1px rgba(255,255,255,.06);font-family:'Pretendard';color:#F3ECE4">
+        <div style="position:absolute;inset:0;color:#A89E93"><image-slot id="village-2a" shape="rect" placeholder="마을 일러스트"></image-slot></div>
+        <div style="position:absolute;inset:0;background:rgba(10,8,7,.6);pointer-events:none"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;background:#1E1A17;border-radius:36px 36px 0 0;box-shadow:0 -1px 0 rgba(255,255,255,.08);padding:12px 20px 34px;display:flex;flex-direction:column;gap:22px">
+          <div style="width:40px;height:5px;border-radius:3px;background:#3A332D;align-self:center"></div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="display:flex;flex-direction:column;gap:2px"><span style="font-family:'Instrument Serif';font-style:italic;font-size:16px;color:#A89E93">Tonight's note</span><span style="font-size:24px;font-weight:700">오늘 기록</span></div><span style="font-size:12px;color:#F5B76B;box-shadow:inset 0 0 0 1px rgba(245,183,107,.4);padding:5px 11px;border-radius:99px">약 30초</span></div>
+          <div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:13px;color:#A89E93">컨디션</span>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-size:14px">
+              <div style="height:88px;border-radius:24px;background:#28231F;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#BFB4A8"><svg width="34" height="34" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="#3A332D"></circle><path d="M11 18q3 2 6 0M23 18q3 2 6 0M16 27q4-2 8 0" fill="none" stroke="#F3ECE4" stroke-width="2" stroke-linecap="round"></path></svg>지침</div>
+              <div style="height:88px;border-radius:24px;background:#3A2C1D;box-shadow:inset 0 0 0 1.5px #F5B76B;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-weight:700"><svg width="34" height="34" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="#F5B76B"></circle><circle cx="14" cy="18" r="2" fill="#1A1410"></circle><circle cx="26" cy="18" r="2" fill="#1A1410"></circle><path d="M17 26h6" stroke="#1A1410" stroke-width="2" stroke-linecap="round"></path></svg>보통</div>
+              <div style="height:88px;border-radius:24px;background:#28231F;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#BFB4A8"><svg width="34" height="34" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="#3A332D"></circle><path d="M11 19q3-4 6 0M23 19q3-4 6 0M15 24q5 5 10 0" fill="none" stroke="#F3ECE4" stroke-width="2" stroke-linecap="round"></path></svg>신남</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:13px;color:#A89E93">일 강도</span>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-size:14px;color:#BFB4A8">
+              <div style="height:52px;border-radius:26px;background:#28231F;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Instrument Serif';font-size:22px">1</span>가볍게</div>
+              <div style="height:52px;border-radius:26px;background:#3A2C1D;box-shadow:inset 0 0 0 1.5px #F5B76B;color:#F3ECE4;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Instrument Serif';font-size:22px;font-weight:400">2</span>보통</div>
+              <div style="height:52px;border-radius:26px;background:#28231F;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Instrument Serif';font-size:22px">3</span>빡빡</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:13px;color:#A89E93">한 줄 기록</span>
+            <textarea rows="2" placeholder="오늘 누구를 만났나요? 뭘 하며 쉬었나요?" style="resize:none;border:none;outline:none;background:#28231F;border-radius:20px;padding:14px 16px;font-size:15px;color:#F3ECE4"></textarea>
+          </div>
+          <div style="height:58px;border-radius:29px;background:#F5B76B;color:#1A1410;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700">마을에 남기기</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="3b" style="display:flex;flex-direction:column;gap:20px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#E9E7E3;color:#101012;font-size:13px;font-weight:700;padding:4px 10px;border-radius:99px">3b</span><span style="font-size:18px;font-weight:600">궤도</span></div>
+      <div style="width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;background:#0E1020;box-shadow:0 0 0 1px rgba(255,255,255,.06);font-family:'SUIT';color:#EEF0FF">
+        <div style="position:absolute;inset:0;color:#7F86B0"><image-slot id="village-2b" shape="rect" placeholder="마을 일러스트"></image-slot></div>
+        <div style="position:absolute;inset:0;background:rgba(6,7,16,.62);pointer-events:none"></div>
+        <div style="position:absolute;left:8px;right:8px;bottom:8px;background:#171A30;border-radius:40px;box-shadow:inset 0 0 0 1px #262A48;padding:12px 18px 26px;display:flex;flex-direction:column;gap:22px">
+          <div style="width:40px;height:5px;border-radius:3px;background:#2A2F52;align-self:center"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:22px;font-weight:800">오늘 기록</span><span style="font-family:'Orbit';font-size:12px;color:#A9BCFF">~ 00:30</span></div>
+          <div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:13px;font-weight:700;color:#9096B8">컨디션</span>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-size:14px">
+              <div style="height:88px;border-radius:26px;background:#1F2340;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#9096B8"><svg width="34" height="34" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="#2A2F52"></circle><path d="M11 18q3 2 6 0M23 18q3 2 6 0M16 27q4-2 8 0" fill="none" stroke="#EEF0FF" stroke-width="2" stroke-linecap="round"></path></svg>지침</div>
+              <div style="height:88px;border-radius:26px;background:#2B2448;box-shadow:inset 0 0 0 1.5px #FF7AA8,0 0 24px -6px rgba(255,122,168,.6);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-weight:800"><svg width="34" height="34" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="#FF7AA8"></circle><circle cx="14" cy="18" r="2" fill="#0E1020"></circle><circle cx="26" cy="18" r="2" fill="#0E1020"></circle><path d="M17 26h6" stroke="#0E1020" stroke-width="2" stroke-linecap="round"></path></svg>보통</div>
+              <div style="height:88px;border-radius:26px;background:#1F2340;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#9096B8"><svg width="34" height="34" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="#2A2F52"></circle><path d="M11 19q3-4 6 0M23 19q3-4 6 0M15 24q5 5 10 0" fill="none" stroke="#EEF0FF" stroke-width="2" stroke-linecap="round"></path></svg>신남</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:13px;font-weight:700;color:#9096B8">일 강도</span>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-size:14px;color:#9096B8">
+              <div style="height:52px;border-radius:26px;background:#1F2340;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Orbit';font-size:16px">1</span>가볍게</div>
+              <div style="height:52px;border-radius:26px;background:#232B52;box-shadow:inset 0 0 0 1.5px #7C9CFF,0 0 24px -6px rgba(124,156,255,.6);color:#EEF0FF;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Orbit';font-size:16px;font-weight:400">2</span>보통</div>
+              <div style="height:52px;border-radius:26px;background:#1F2340;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Orbit';font-size:16px">3</span>빡빡</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:13px;font-weight:700;color:#9096B8">한 줄 기록</span>
+            <textarea rows="2" placeholder="오늘 누구를 만났나요? 뭘 하며 쉬었나요?" style="resize:none;border:none;outline:none;background:#1F2340;border-radius:22px;padding:14px 16px;font-size:15px;color:#EEF0FF;font-family:'SUIT'"></textarea>
+          </div>
+          <div style="height:58px;border-radius:29px;background:#7C9CFF;color:#0E1020;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;box-shadow:0 10px 30px -8px rgba(124,156,255,.7)">마을에 남기기</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="3c" style="display:flex;flex-direction:column;gap:20px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#E9E7E3;color:#101012;font-size:13px;font-weight:700;padding:4px 10px;border-radius:99px">3c</span><span style="font-size:18px;font-weight:600">밤의 일기</span></div>
+      <div style="width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;background:#1A1A1C;box-shadow:0 0 0 1px rgba(255,255,255,.06);font-family:'Pretendard';color:#ECE9E3">
+        <div style="position:absolute;inset:0;color:#7E7C77"><image-slot id="village-2c" shape="rect" placeholder="마을 일러스트"></image-slot></div>
+        <div style="position:absolute;inset:0;background:rgba(10,10,11,.62);pointer-events:none"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;background:#232326;border-radius:32px 32px 0 0;padding:12px 22px 34px;display:flex;flex-direction:column;gap:22px">
+          <div style="width:36px;height:4px;border-radius:2px;background:#3A3A3E;align-self:center"></div>
+          <div style="display:flex;flex-direction:column;gap:4px"><span style="font-family:'Instrument Serif';font-style:italic;font-size:16px;color:#9C9A94">Monday, October 19</span><span style="font-family:'Noto Serif KR';font-size:24px;font-weight:600">오늘은 어땠나요</span></div>
+          <div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:13px;color:#9C9A94">컨디션</span>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-size:14px">
+              <div style="height:84px;border-radius:22px;box-shadow:inset 0 0 0 1px #3A3A3E;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#9C9A94"><svg width="32" height="32" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="none" stroke="#9C9A94" stroke-width="1.6"></circle><path d="M12 18q3 2 6 0M22 18q3 2 6 0M16 27q4-2 8 0" fill="none" stroke="#9C9A94" stroke-width="1.8" stroke-linecap="round"></path></svg>지침</div>
+              <div style="height:84px;border-radius:22px;background:#ECE9E3;color:#1A1A1C;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-weight:700"><svg width="32" height="32" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="none" stroke="#1A1A1C" stroke-width="1.6"></circle><circle cx="14.5" cy="18" r="1.8" fill="#1A1A1C"></circle><circle cx="25.5" cy="18" r="1.8" fill="#1A1A1C"></circle><path d="M17 26h6" stroke="#1A1A1C" stroke-width="1.8" stroke-linecap="round"></path></svg>보통</div>
+              <div style="height:84px;border-radius:22px;box-shadow:inset 0 0 0 1px #3A3A3E;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#9C9A94"><svg width="32" height="32" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="none" stroke="#9C9A94" stroke-width="1.6"></circle><path d="M12 19q3-4 6 0M22 19q3-4 6 0M15 24q5 5 10 0" fill="none" stroke="#9C9A94" stroke-width="1.8" stroke-linecap="round"></path></svg>신남</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:13px;color:#9C9A94">일 강도</span>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));font-size:14px;color:#9C9A94;box-shadow:inset 0 0 0 1px #3A3A3E;border-radius:26px;padding:4px">
+              <div style="height:44px;border-radius:22px;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Instrument Serif';font-size:22px">1</span>가볍게</div>
+              <div style="height:44px;border-radius:22px;background:#ECE9E3;color:#1A1A1C;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Instrument Serif';font-size:22px;font-weight:400">2</span>보통</div>
+              <div style="height:44px;border-radius:22px;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Instrument Serif';font-size:22px">3</span>빡빡</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:13px;color:#9C9A94">한 줄 기록</span>
+            <textarea rows="2" placeholder="오늘 누구를 만났나요? 뭘 하며 쉬었나요?" style="resize:none;outline:none;border:none;border-bottom:1px solid #3A3A3E;background:transparent;padding:8px 2px 12px;font-size:16px;color:#ECE9E3;font-family:'Noto Serif KR'"></textarea>
+          </div>
+          <div style="height:56px;border-radius:28px;background:#ECE9E3;color:#1A1A1C;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700">마을에 남기기</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="https://hangeul.pstatic.net/hangeul_static/css/nanum-square-round.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Fredoka:wght@500;600;700&family=Gaegu:wght@700&display=swap" rel="stylesheet">
+<style>html{background:#0D1130!important;min-height:100%}body{margin:0;min-height:100%;background:#0D1130;color:#FFFFFF;font-family:'NanumSquareRound',sans-serif;word-break:keep-all}a{color:#FFE14D;text-decoration:none}a:hover{color:#FF4FA0}textarea{font:inherit}textarea::placeholder{color:inherit;opacity:.55}
+*{scrollbar-width:thin;scrollbar-color:#4A5396 transparent}
+::-webkit-scrollbar{width:10px;height:10px;background:transparent}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#4A5396;border-radius:99px;border:3px solid transparent;background-clip:padding-box;min-height:40px}
+::-webkit-scrollbar-thumb:hover{background:#FFE14D;background-clip:padding-box}
+::-webkit-scrollbar-thumb:active{background:#FF4FA0;background-clip:padding-box}
+::-webkit-scrollbar-button,::-webkit-scrollbar-corner{display:none;background:transparent}</style>
+</helmet>
+
+<section style="background:#0D1130;padding:64px 72px 72px;display:flex;flex-direction:column;gap:56px;border-bottom:1px solid #232B60">
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="font-family:'Fredoka';font-size:14px;font-weight:600;letter-spacing:.12em;color:#A8EB5A">TURN 19 · 낮 마을</div>
+    <div style="font-family:'Bagel Fat One';font-size:40px;color:#FFE14D">해 뜬 솔빛 마을</div>
+    <div style="font-size:15px;color:#C9CEF5;max-width:760px;line-height:1.6">18a 기본 마을의 낮 버전입니다. 달과 별 대신 천천히 도는 해, 흰 구름, 밝은 풀밭과 흙길, 반딧불이 대신 나비가 날아다닙니다.</div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start">
+    <div id="19a" style="display:flex;flex-direction:column;gap:20px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#FFE14D;color:#10142E;font-family:'Fredoka';font-size:13px;font-weight:700;padding:3px 11px;border-radius:99px">19a</span><span style="font-size:18px;font-weight:800">낮 마을</span></div>
+      <div style="width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;isolation:isolate;background:#4FB4F5;box-shadow:0 0 0 1px #2B3370,0 30px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;color:#FFFFFF"><div style="position:absolute;inset:0;z-index:-1">{{ live.day }}</div>
+        <div style="height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-family:'Fredoka';font-size:16px;font-weight:600;color:#10142E"><span>9:41</span><span style="width:24px;height:11px;border-radius:4px;border:1.5px solid rgba(16,20,46,.5);display:flex;padding:1.5px;box-sizing:border-box"><span style="width:40%;background:#FF4FA0;border-radius:2px"></span></span></div>
+        <div style="flex:none;padding:2px 20px 12px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="display:flex;flex-direction:column;gap:2px"><span style="font-family:'Bagel Fat One';font-size:28px;line-height:1.15;color:#10142E">솔빛 마을</span></div>
+            <div style="background:#FF4FA0;color:#10142E;border-radius:20px;padding:7px 14px;font-family:'Bagel Fat One';font-size:20px;box-shadow:0 6px 16px rgba(255,79,160,.35)">Lv.7</div>
+          </div>
+          <div style="position:relative;height:26px;border-radius:13px;background:#2A3270;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:64%;border-radius:13px;background:#FFE14D"></div><div style="position:absolute;inset:0;display:flex;justify-content:flex-end;align-items:center;padding:0 12px;font-family:'Fredoka';font-size:12px;font-weight:600">1,280 / 2,000</div></div>
+        </div>
+        <div style="flex:none;margin:0 12px;background:rgba(35,43,96,.9);border-radius:22px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 8px 20px rgba(0,0,0,.2)">
+          <div style="position:relative;width:44px;height:44px;flex:none"><div style="width:44px;height:44px;border-radius:50%;background:#FFE14D;overflow:hidden;display:flex;justify-content:center"><div style="width:46px;height:51px;flex:none;margin-top:2px">{{ ijAv }}</div></div><div style="position:absolute;right:-4px;bottom:-4px;width:20px;height:20px;border-radius:50%;background:#FF4FA0;display:grid;place-items:center;color:#10142E;box-shadow:0 0 0 2px #232B60"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9h3l10-6v18L6 15H3z"></path></svg></div></div>
+          <div style="display:flex;flex-direction:column;gap:4px;min-width:0"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:800;color:#FFE14D">마을 방송</span><span style="font-family:'Fredoka';font-size:12px;font-weight:600;color:#8F96CC">12:30</span></div><span style="font-size:14px;font-weight:700;line-height:1.5;text-wrap:pretty">아아, 이장이유. 사파 여행 일주일 남았슈. 짐은 아직 안 쌌겄슈.</span></div>
+        </div>
+        <div style="flex:1 1 0;min-height:0"></div>
+        <a href="#14a" style="flex:none;margin:12px 16px 0;height:56px;border-radius:28px;background:#FF4FA0;color:#10142E;display:flex;align-items:center;justify-content:center;font-family:'Bagel Fat One';font-size:20px;box-shadow:0 5px 0 #B32A6E,0 12px 24px rgba(255,79,160,.3)">오늘 기록하기</a>
+        <div style="flex:none;margin:6px 12px 14px;height:64px;box-sizing:border-box;border-radius:32px;background:#232B60;box-shadow:inset 0 0 0 2px #333C7A,0 10px 24px rgba(0,0,0,.3);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;align-items:center;padding:0 6px;font-size:11px;font-weight:800">
+          <a href="#11b" style="height:52px;border-radius:26px;background:#FFE14D;color:#10142E;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;box-shadow:0 3px 0 #C9A800;text-decoration:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"></path><path d="M10 20v-5h4v5"></path></svg>마을</a>
+          <a href="#12a" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"></rect><path d="M9 3.5v17M12.5 8.5h3M12.5 12h3"></path></svg>장부</a>
+          <a href="#7c" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"></circle><path d="M3.5 19a5.5 5.5 0 0 1 11 0"></path><circle cx="17" cy="9" r="2.4"></circle><path d="M15.5 13.6A4.5 4.5 0 0 1 21 18"></path></svg>이웃</a>
+          <a href="#12c" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 10.5Q8 9.5 12 4q4 5.5 9.5 6.5"></path><path d="M5 10.5h14M7 10.5V20M17 10.5V20M4.5 20h15"></path></svg>쉼터</a>
+          <a href="#7d" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.5"></circle><path d="M5.5 20a6.5 6.5 0 0 1 13 0"></path></svg>나</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section style="background:#0D1130;padding:64px 72px 72px;display:flex;flex-direction:column;gap:56px;border-bottom:1px solid #232B60">
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="font-family:'Fredoka';font-size:14px;font-weight:600;letter-spacing:.12em;color:#A8EB5A">TURN 18 · 움직이는 메인</div>
+    <div style="font-family:'Bagel Fat One';font-size:40px;color:#FFE14D">솔이가 주인공인 마을</div>
+    <div style="font-size:15px;color:#C9CEF5;max-width:760px;line-height:1.6">16a–d 메인을 움직이는 화면으로 바꿨습니다. 친구들과 오두막·게시판을 빼고, 마을 장면을 화면 전체 배경으로 깔았습니다. 원경·나무·마당·밭이 층층이 채우고, 솔이는 가운데서 날마다 다르게 움직입니다. 솔이를 누르면 주민증(v10 17c)이 열립니다.</div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start">
+<div id="18a" style="display:flex;flex-direction:column;gap:20px;width:390px">
+        <div style="display:flex;align-items:center;gap:10px"><span style="background:#FFE14D;color:#10142E;font-family:'Fredoka';font-size:13px;font-weight:700;padding:3px 11px;border-radius:99px">18a</span><span style="font-size:18px;font-weight:800">기본 마을</span></div>
+        <div style="width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;isolation:isolate;background:#141A3E;box-shadow:0 0 0 1px #2B3370,0 30px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;color:#FFFFFF"><div style="position:absolute;inset:0;z-index:-1">{{ live.base }}</div>
+          <div style="height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-family:'Fredoka';font-size:16px;font-weight:600"><span>9:41</span><span style="width:24px;height:11px;border-radius:4px;border:1.5px solid rgba(255,255,255,.5);display:flex;padding:1.5px;box-sizing:border-box"><span style="width:40%;background:#FF4FA0;border-radius:2px"></span></span></div>
+          <div style="flex:none;padding:2px 20px 12px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="display:flex;flex-direction:column;gap:2px"><span style="font-family:'Bagel Fat One';font-size:28px;line-height:1.15;color:#FFE14D">솔빛 마을</span></div>
+              <div style="background:#FF4FA0;color:#10142E;border-radius:20px;padding:7px 14px;font-family:'Bagel Fat One';font-size:20px;box-shadow:0 6px 16px rgba(255,79,160,.35)">Lv.7</div>
+            </div>
+            <div style="position:relative;height:26px;border-radius:13px;background:#2A3270;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:64%;border-radius:13px;background:#FFE14D"></div><div style="position:absolute;inset:0;display:flex;justify-content:flex-end;align-items:center;padding:0 12px;font-family:'Fredoka';font-size:12px;font-weight:600">1,280 / 2,000</div></div>
+          </div>
+          <div style="flex:none;margin:0 12px;background:rgba(35,43,96,.9);border-radius:22px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 8px 20px rgba(0,0,0,.3)">
+            <div style="position:relative;width:44px;height:44px;flex:none"><div style="width:44px;height:44px;border-radius:50%;background:#FFE14D;overflow:hidden;display:flex;justify-content:center"><div style="width:46px;height:51px;flex:none;margin-top:2px">{{ ijAv }}</div></div><div style="position:absolute;right:-4px;bottom:-4px;width:20px;height:20px;border-radius:50%;background:#FF4FA0;display:grid;place-items:center;color:#10142E;box-shadow:0 0 0 2px #232B60"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9h3l10-6v18L6 15H3z"></path></svg></div></div>
+            <div style="display:flex;flex-direction:column;gap:4px;min-width:0"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:800;color:#FFE14D">마을 방송</span><span style="font-family:'Fredoka';font-size:12px;font-weight:600;color:#8F96CC">21:40</span></div><span style="font-size:14px;font-weight:700;line-height:1.5;text-wrap:pretty">아아, 이장이유. 사파 여행 일주일 남았슈. 짐은 아직 안 쌌겄슈.</span></div>
+          </div>
+          <div style="flex:1 1 0;min-height:0"></div>
+                    <a href="#14a" style="flex:none;margin:12px 16px 0;height:56px;border-radius:28px;background:#FF4FA0;color:#10142E;display:flex;align-items:center;justify-content:center;font-family:'Bagel Fat One';font-size:20px;box-shadow:0 5px 0 #B32A6E,0 12px 24px rgba(255,79,160,.3)">오늘 기록하기</a>
+          <div style="flex:none;margin:6px 12px 14px;height:64px;box-sizing:border-box;border-radius:32px;background:#232B60;box-shadow:inset 0 0 0 2px #333C7A,0 10px 24px rgba(0,0,0,.45);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;align-items:center;padding:0 6px;font-size:11px;font-weight:800">
+            <a href="#11b" style="height:52px;border-radius:26px;background:#FFE14D;color:#10142E;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;box-shadow:0 3px 0 #C9A800;text-decoration:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"></path><path d="M10 20v-5h4v5"></path></svg>마을</a>
+            <a href="#12a" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"></rect><path d="M9 3.5v17M12.5 8.5h3M12.5 12h3"></path></svg>장부</a>
+            <a href="#7c" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"></circle><path d="M3.5 19a5.5 5.5 0 0 1 11 0"></path><circle cx="17" cy="9" r="2.4"></circle><path d="M15.5 13.6A4.5 4.5 0 0 1 21 18"></path></svg>이웃</a>
+            <a href="#12c" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 10.5Q8 9.5 12 4q4 5.5 9.5 6.5"></path><path d="M5 10.5h14M7 10.5V20M17 10.5V20M4.5 20h15"></path></svg>쉼터</a>
+            <a href="#7d" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.5"></circle><path d="M5.5 20a6.5 6.5 0 0 1 13 0"></path></svg>나</a>
+          </div>
+        </div>
+      </div>
+<div id="18b" style="display:flex;flex-direction:column;gap:20px;width:390px">
+        <div style="display:flex;align-items:center;gap:10px"><span style="background:#FFE14D;color:#10142E;font-family:'Fredoka';font-size:13px;font-weight:700;padding:3px 11px;border-radius:99px">18b</span><span style="font-size:18px;font-weight:800">출근한 날</span></div>
+        <div style="width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;isolation:isolate;background:#141A3E;box-shadow:0 0 0 1px #2B3370,0 30px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;color:#FFFFFF"><div style="position:absolute;inset:0;z-index:-1">{{ live.work }}</div>
+          <div style="height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-family:'Fredoka';font-size:16px;font-weight:600"><span>9:41</span><span style="width:24px;height:11px;border-radius:4px;border:1.5px solid rgba(255,255,255,.5);display:flex;padding:1.5px;box-sizing:border-box"><span style="width:40%;background:#FF4FA0;border-radius:2px"></span></span></div>
+          <div style="flex:none;padding:2px 20px 12px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="display:flex;flex-direction:column;gap:2px"><span style="font-family:'Bagel Fat One';font-size:28px;line-height:1.15;color:#FFE14D">솔빛 마을</span></div>
+              <div style="background:#FF4FA0;color:#10142E;border-radius:20px;padding:7px 14px;font-family:'Bagel Fat One';font-size:20px;box-shadow:0 6px 16px rgba(255,79,160,.35)">Lv.7</div>
+            </div>
+            <div style="position:relative;height:26px;border-radius:13px;background:#2A3270;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:64%;border-radius:13px;background:#FFE14D"></div><div style="position:absolute;inset:0;display:flex;justify-content:flex-end;align-items:center;padding:0 12px;font-family:'Fredoka';font-size:12px;font-weight:600">1,280 / 2,000</div></div>
+          </div>
+          <div style="flex:none;margin:0 12px;background:rgba(35,43,96,.9);border-radius:22px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 8px 20px rgba(0,0,0,.3)">
+            <div style="position:relative;width:44px;height:44px;flex:none"><div style="width:44px;height:44px;border-radius:50%;background:#FFE14D;overflow:hidden;display:flex;justify-content:center"><div style="width:46px;height:51px;flex:none;margin-top:2px">{{ ijAv }}</div></div><div style="position:absolute;right:-4px;bottom:-4px;width:20px;height:20px;border-radius:50%;background:#FF4FA0;display:grid;place-items:center;color:#10142E;box-shadow:0 0 0 2px #232B60"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9h3l10-6v18L6 15H3z"></path></svg></div></div>
+            <div style="display:flex;flex-direction:column;gap:4px;min-width:0"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:800;color:#FFE14D">마을 방송</span><span style="font-family:'Fredoka';font-size:12px;font-weight:600;color:#8F96CC">08:10</span></div><span style="font-size:14px;font-weight:700;line-height:1.5;text-wrap:pretty">아아, 이장이유. 솔이 씨 출근했슈. 도시 쪽 하늘이 좀 탁혀유.</span></div>
+          </div>
+          <div style="flex:1 1 0;min-height:0"></div>
+                    <a href="#14a" style="flex:none;margin:12px 16px 0;height:56px;border-radius:28px;background:#FF4FA0;color:#10142E;display:flex;align-items:center;justify-content:center;font-family:'Bagel Fat One';font-size:20px;box-shadow:0 5px 0 #B32A6E,0 12px 24px rgba(255,79,160,.3)">오늘 기록하기</a>
+          <div style="flex:none;margin:6px 12px 14px;height:64px;box-sizing:border-box;border-radius:32px;background:#232B60;box-shadow:inset 0 0 0 2px #333C7A,0 10px 24px rgba(0,0,0,.45);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;align-items:center;padding:0 6px;font-size:11px;font-weight:800">
+            <a href="#11b" style="height:52px;border-radius:26px;background:#FFE14D;color:#10142E;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;box-shadow:0 3px 0 #C9A800;text-decoration:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"></path><path d="M10 20v-5h4v5"></path></svg>마을</a>
+            <a href="#12a" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"></rect><path d="M9 3.5v17M12.5 8.5h3M12.5 12h3"></path></svg>장부</a>
+            <a href="#7c" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"></circle><path d="M3.5 19a5.5 5.5 0 0 1 11 0"></path><circle cx="17" cy="9" r="2.4"></circle><path d="M15.5 13.6A4.5 4.5 0 0 1 21 18"></path></svg>이웃</a>
+            <a href="#12c" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 10.5Q8 9.5 12 4q4 5.5 9.5 6.5"></path><path d="M5 10.5h14M7 10.5V20M17 10.5V20M4.5 20h15"></path></svg>쉼터</a>
+            <a href="#7d" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.5"></circle><path d="M5.5 20a6.5 6.5 0 0 1 13 0"></path></svg>나</a>
+          </div>
+        </div>
+      </div>
+<div id="18c" style="display:flex;flex-direction:column;gap:20px;width:390px">
+        <div style="display:flex;align-items:center;gap:10px"><span style="background:#FFE14D;color:#10142E;font-family:'Fredoka';font-size:13px;font-weight:700;padding:3px 11px;border-radius:99px">18c</span><span style="font-size:18px;font-weight:800">여행 중</span></div>
+        <div style="width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;isolation:isolate;background:#141A3E;box-shadow:0 0 0 1px #2B3370,0 30px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;color:#FFFFFF"><div style="position:absolute;inset:0;z-index:-1">{{ live.trip }}</div>
+          <div style="height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-family:'Fredoka';font-size:16px;font-weight:600"><span>9:41</span><span style="width:24px;height:11px;border-radius:4px;border:1.5px solid rgba(255,255,255,.5);display:flex;padding:1.5px;box-sizing:border-box"><span style="width:40%;background:#FF4FA0;border-radius:2px"></span></span></div>
+          <div style="flex:none;padding:2px 20px 12px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="display:flex;flex-direction:column;gap:2px"><span style="font-family:'Bagel Fat One';font-size:28px;line-height:1.15;color:#FFE14D">솔빛 마을</span></div>
+              <div style="background:#FF4FA0;color:#10142E;border-radius:20px;padding:7px 14px;font-family:'Bagel Fat One';font-size:20px;box-shadow:0 6px 16px rgba(255,79,160,.35)">Lv.7</div>
+            </div>
+            <div style="position:relative;height:26px;border-radius:13px;background:#2A3270;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:64%;border-radius:13px;background:#FFE14D"></div><div style="position:absolute;inset:0;display:flex;justify-content:flex-end;align-items:center;padding:0 12px;font-family:'Fredoka';font-size:12px;font-weight:600">1,280 / 2,000</div></div>
+          </div>
+          <div style="flex:none;margin:0 12px;background:rgba(35,43,96,.9);border-radius:22px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 8px 20px rgba(0,0,0,.3)">
+            <div style="position:relative;width:44px;height:44px;flex:none"><div style="width:44px;height:44px;border-radius:50%;background:#FFE14D;overflow:hidden;display:flex;justify-content:center"><div style="width:46px;height:51px;flex:none;margin-top:2px">{{ ijAv }}</div></div><div style="position:absolute;right:-4px;bottom:-4px;width:20px;height:20px;border-radius:50%;background:#FF4FA0;display:grid;place-items:center;color:#10142E;box-shadow:0 0 0 2px #232B60"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9h3l10-6v18L6 15H3z"></path></svg></div></div>
+            <div style="display:flex;flex-direction:column;gap:4px;min-width:0"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:800;color:#FFE14D">마을 방송</span><span style="font-family:'Fredoka';font-size:12px;font-weight:600;color:#8F96CC">10:30</span></div><span style="font-size:14px;font-weight:700;line-height:1.5;text-wrap:pretty">아아, 이장이유. 솔이 씨 바다 보러 갔슈. 마을은 이장이 지켜유, 대충유.</span></div>
+          </div>
+          <div style="flex:1 1 0;min-height:0"></div>
+                    <a href="#14a" style="flex:none;margin:12px 16px 0;height:56px;border-radius:28px;background:#FF4FA0;color:#10142E;display:flex;align-items:center;justify-content:center;font-family:'Bagel Fat One';font-size:20px;box-shadow:0 5px 0 #B32A6E,0 12px 24px rgba(255,79,160,.3)">오늘 기록하기</a>
+          <div style="flex:none;margin:6px 12px 14px;height:64px;box-sizing:border-box;border-radius:32px;background:#232B60;box-shadow:inset 0 0 0 2px #333C7A,0 10px 24px rgba(0,0,0,.45);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;align-items:center;padding:0 6px;font-size:11px;font-weight:800">
+            <a href="#11b" style="height:52px;border-radius:26px;background:#FFE14D;color:#10142E;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;box-shadow:0 3px 0 #C9A800;text-decoration:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"></path><path d="M10 20v-5h4v5"></path></svg>마을</a>
+            <a href="#12a" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"></rect><path d="M9 3.5v17M12.5 8.5h3M12.5 12h3"></path></svg>장부</a>
+            <a href="#7c" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"></circle><path d="M3.5 19a5.5 5.5 0 0 1 11 0"></path><circle cx="17" cy="9" r="2.4"></circle><path d="M15.5 13.6A4.5 4.5 0 0 1 21 18"></path></svg>이웃</a>
+            <a href="#12c" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 10.5Q8 9.5 12 4q4 5.5 9.5 6.5"></path><path d="M5 10.5h14M7 10.5V20M17 10.5V20M4.5 20h15"></path></svg>쉼터</a>
+            <a href="#7d" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.5"></circle><path d="M5.5 20a6.5 6.5 0 0 1 13 0"></path></svg>나</a>
+          </div>
+        </div>
+      </div>
+<div id="18d" style="display:flex;flex-direction:column;gap:20px;width:390px">
+        <div style="display:flex;align-items:center;gap:10px"><span style="background:#FFE14D;color:#10142E;font-family:'Fredoka';font-size:13px;font-weight:700;padding:3px 11px;border-radius:99px">18d</span><span style="font-size:18px;font-weight:800">쉬는 날</span></div>
+        <div style="width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;isolation:isolate;background:#141A3E;box-shadow:0 0 0 1px #2B3370,0 30px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;color:#FFFFFF"><div style="position:absolute;inset:0;z-index:-1">{{ live.rest }}</div>
+          <div style="height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-family:'Fredoka';font-size:16px;font-weight:600"><span>9:41</span><span style="width:24px;height:11px;border-radius:4px;border:1.5px solid rgba(255,255,255,.5);display:flex;padding:1.5px;box-sizing:border-box"><span style="width:40%;background:#FF4FA0;border-radius:2px"></span></span></div>
+          <div style="flex:none;padding:2px 20px 12px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="display:flex;flex-direction:column;gap:2px"><span style="font-family:'Bagel Fat One';font-size:28px;line-height:1.15;color:#FFE14D">솔빛 마을</span></div>
+              <div style="background:#FF4FA0;color:#10142E;border-radius:20px;padding:7px 14px;font-family:'Bagel Fat One';font-size:20px;box-shadow:0 6px 16px rgba(255,79,160,.35)">Lv.7</div>
+            </div>
+            <div style="position:relative;height:26px;border-radius:13px;background:#2A3270;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:64%;border-radius:13px;background:#FFE14D"></div><div style="position:absolute;inset:0;display:flex;justify-content:flex-end;align-items:center;padding:0 12px;font-family:'Fredoka';font-size:12px;font-weight:600">1,280 / 2,000</div></div>
+          </div>
+          <div style="flex:none;margin:0 12px;background:rgba(35,43,96,.9);border-radius:22px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 8px 20px rgba(0,0,0,.3)">
+            <div style="position:relative;width:44px;height:44px;flex:none"><div style="width:44px;height:44px;border-radius:50%;background:#FFE14D;overflow:hidden;display:flex;justify-content:center"><div style="width:46px;height:51px;flex:none;margin-top:2px">{{ ijAv }}</div></div><div style="position:absolute;right:-4px;bottom:-4px;width:20px;height:20px;border-radius:50%;background:#FF4FA0;display:grid;place-items:center;color:#10142E;box-shadow:0 0 0 2px #232B60"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9h3l10-6v18L6 15H3z"></path></svg></div></div>
+            <div style="display:flex;flex-direction:column;gap:4px;min-width:0"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:800;color:#FFE14D">마을 방송</span><span style="font-family:'Fredoka';font-size:12px;font-weight:600;color:#8F96CC">11:00</span></div><span style="font-size:14px;font-weight:700;line-height:1.5;text-wrap:pretty">아아, 이장이유. 오늘은 쉬는 날이유. 이불 밖은 위험혀유.</span></div>
+          </div>
+          <div style="flex:1 1 0;min-height:0"></div>
+                    <a href="#14a" style="flex:none;margin:12px 16px 0;height:56px;border-radius:28px;background:#FF4FA0;color:#10142E;display:flex;align-items:center;justify-content:center;font-family:'Bagel Fat One';font-size:20px;box-shadow:0 5px 0 #B32A6E,0 12px 24px rgba(255,79,160,.3)">오늘 기록하기</a>
+          <div style="flex:none;margin:6px 12px 14px;height:64px;box-sizing:border-box;border-radius:32px;background:#232B60;box-shadow:inset 0 0 0 2px #333C7A,0 10px 24px rgba(0,0,0,.45);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;align-items:center;padding:0 6px;font-size:11px;font-weight:800">
+            <a href="#11b" style="height:52px;border-radius:26px;background:#FFE14D;color:#10142E;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;box-shadow:0 3px 0 #C9A800;text-decoration:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"></path><path d="M10 20v-5h4v5"></path></svg>마을</a>
+            <a href="#12a" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"></rect><path d="M9 3.5v17M12.5 8.5h3M12.5 12h3"></path></svg>장부</a>
+            <a href="#7c" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"></circle><path d="M3.5 19a5.5 5.5 0 0 1 11 0"></path><circle cx="17" cy="9" r="2.4"></circle><path d="M15.5 13.6A4.5 4.5 0 0 1 21 18"></path></svg>이웃</a>
+            <a href="#12c" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 10.5Q8 9.5 12 4q4 5.5 9.5 6.5"></path><path d="M5 10.5h14M7 10.5V20M17 10.5V20M4.5 20h15"></path></svg>쉼터</a>
+            <a href="#7d" style="height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8F96CC;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.5"></circle><path d="M5.5 20a6.5 6.5 0 0 1 13 0"></path></svg>나</a>
+          </div>
+        </div>
+      </div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  L = '#10142E';
+  CAT = {};
+    o(w) { return `stroke="${this.L}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`; }
+  wrap(inner) { return `<svg viewBox="0 0 200 220" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible">${inner}</svg>`; }
+  nest(inner, x, y, w) { return `<svg x="${x}" y="${y}" width="${w}" height="${(w * 1.1).toFixed(1)}" viewBox="0 0 200 220" overflow="visible">${inner}</svg>`; }
+  soliIn(m) {
+    const sp = m === 'surp', t = m === 'tired', h = m === 'happy' || sp, L = this.L, o = w => this.o(w);
+    const body = '#FFF6D6', foot = '#FFC98A';
+    const stemD = t ? 'M100 60 C100 48 94 42 84 40' : 'M100 60 C100 48 102 40 106 32';
+    const lv = t ? ['M86 41 C76 36 62 42 60 54 C72 56 84 50 86 41Z', 'M84 40 C86 30 80 22 70 20 C66 30 72 38 84 40Z']
+      : ['M104 40 C92 28 76 28 70 36 C80 46 94 48 104 40Z', 'M106 32 C116 18 132 16 140 22 C132 34 118 38 106 32Z'];
+    const flower = h && !sp ? [0, 1, 2, 3, 4].map(i => { const a = i * 1.2566; return `<circle cx="${(106 + Math.sin(a) * 6).toFixed(1)}" cy="${(28 - Math.cos(a) * 6).toFixed(1)}" r="5.2" fill="#FF4FA0" ${o(3)}/>`; }).join('') + `<circle cx="106" cy="28" r="3.6" fill="#FFE14D" ${o(2.4)}/>` : '';
+    const mit = (x, y, r) => `<ellipse cx="${x}" cy="${y}" rx="17" ry="21" transform="rotate(${r} ${x} ${y})" fill="${body}" ${o(6)}/>`;
+    const back = h ? mit(36, 94, -40) : t ? mit(34, 160, 10) : mit(32, 140, 20);
+    const front = h ? mit(164, 94, 40) : t ? mit(166, 160, -10) : mit(164, 140, -20);
+    const sk = `stroke="${L}" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none"`;
+    const eyes = sp ? `<circle cx="74" cy="130" r="12" fill="#FFFFFF" ${o(4)}/><circle cx="74" cy="131" r="4.5" fill="${L}"/><circle cx="126" cy="130" r="12" fill="#FFFFFF" ${o(4)}/><circle cx="126" cy="131" r="4.5" fill="${L}"/>` : t ? `<path d="M67 124 L81 138 M81 124 L67 138 M119 124 L133 138 M133 124 L119 138" ${sk}/>`
+      : h ? `<path d="M66 134 Q74 122 82 134 M118 134 Q126 122 134 134" ${sk}/>`
+      : `<path d="M64 127 H84 Q84 139 74 139 Q64 139 64 127Z" fill="${L}" ${o(3)}/><path d="M116 127 H136 Q136 139 126 139 Q116 139 116 127Z" fill="${L}" ${o(3)}/><path d="M62 121 L84 123 M116 123 L138 121" stroke="${L}" stroke-width="4" stroke-linecap="round"/>`;
+    const mouth = sp ? `<ellipse cx="100" cy="156" rx="7" ry="9" fill="#5A2A24" ${o(4.5)}/>` : t ? `<path d="M92 150 Q96 146 100 150 Q104 154 108 150" stroke="${L}" stroke-width="4.5" stroke-linecap="round" fill="none"/>`
+      : h ? `<path d="M90 142 Q100 144 110 142 Q109 157 100 157 Q91 157 90 142Z" fill="#5A2A24" ${o(4.5)}/>`
+      : `<path d="M93 146 H107" stroke="${L}" stroke-width="4.5" stroke-linecap="round"/>`;
+    const ghost = t ? `<g transform="translate(150 30)"><path d="M0 34 Q-2 6 16 4 Q34 6 32 34 L27 30 L22 35 L16 30 L10 35 L5 30 Z" fill="#FFFFFF" ${o(3.5)}/><circle cx="11" cy="17" r="2.2" fill="${L}"/><circle cx="21" cy="17" r="2.2" fill="${L}"/></g>` : '';
+    const spark = sp ? `<path d="M22 70 L8 58 M30 50 L22 32 M178 70 L192 58 M170 50 L178 32" stroke="#FFE14D" stroke-width="7" stroke-linecap="round"/>` : h ? `<path d="M30 60 l4 10 l10 4 l-10 4 l-4 10 l-4 -10 l-10 -4 l10 -4z" fill="#FFE14D" ${o(3)}/>` : '';
+    return `<ellipse cx="100" cy="208" rx="62" ry="8" fill="#000" opacity=".25"/><path d="M78 196 Q76 208 84 208 Q92 208 90 196Z M110 196 Q108 208 116 208 Q124 208 122 196Z" fill="${foot}" ${o(5)}/>${back}
+<path d="${stemD}" ${o(10)} fill="none"/><path d="${stemD}" stroke="#5FB04A" stroke-width="4" stroke-linecap="round" fill="none"/><path d="${lv[0]}" fill="#B6F35C" ${o(5)}/><path d="${lv[1]}" fill="#7FD24A" ${o(5)}/>${flower}
+<ellipse cx="100" cy="130" rx="72" ry="69" fill="${body}" ${o(6)}/>${front}
+<circle cx="56" cy="152" r="9" fill="#FF8E8E" opacity=".9"/><circle cx="144" cy="152" r="9" fill="#FF8E8E" opacity=".9"/>${eyes}${mouth}${ghost}${spark}`;
+  }
+  ijangIn(m) {
+    const L = this.L, o = w => this.o(w), body = '#FFD9A8';
+    const cast = m === 'cast', meh = m === 'meh', sm = m === 'smile';
+    const mit = (x, y, r) => `<ellipse cx="${x}" cy="${y}" rx="16" ry="20" transform="rotate(${r} ${x} ${y})" fill="${body}" ${o(6)}/>`;
+    const mega = (x, y, r, s) => `<g transform="translate(${x} ${y}) rotate(${r}) scale(${s})"><rect x="-10" y="-7" width="12" height="14" rx="3" fill="${L}"/><path d="M0 -9 L48 -26 Q56 0 48 26 L0 9Z" fill="#F4F6FB" ${o(5)}/><ellipse cx="49" cy="0" rx="7" ry="26" fill="#FF4FA0" ${o(5)}/><rect x="10" y="8" width="9" height="18" rx="3" fill="#FFE14D" ${o(4)}/></g>`;
+    const cup = (x, y) => `<g transform="translate(${x} ${y})"><path d="M0 0 H24 L21 32 Q12 35 3 32Z" fill="#FFFFFF" ${o(4.5)}/><path d="M1.6 11 H22.4 L21.6 21 H2.4Z" fill="#F0A93A"/><path d="M0 0 H24 L21 32 Q12 35 3 32Z" fill="none" ${o(4.5)}/><path d="M8 -6 Q4 -12 9 -18 M16 -6 Q12 -12 17 -18" stroke="#9AA3C8" stroke-width="3" stroke-linecap="round" fill="none"/></g>`;
+    let back, front;
+    if (cast) { back = cup(10, 128) + mit(28, 164, 10); front = mega(108, 152, -8, 1.05) + mit(126, 178, -10); }
+    else if (meh) { back = mit(34, 162, 10); front = cup(150, 106) + mit(164, 140, -30); }
+    else if (m === 'plain') { back = mit(34, 162, 10); front = mit(166, 162, -10); }
+    else { back = mega(30, 148, 100, .8) + mit(34, 158, 10); front = cup(146, 124) + mit(160, 160, -20); }
+    const lid = meh ? 130 : 127, dp = meh ? 7 : 12;
+    const eyes = [76, 124].map(x => `<path d="M${x - 9} ${lid} Q${x} ${lid + dp} ${x + 9} ${lid}Z" fill="${L}" ${o(2)}/><path d="M${x - 13} ${lid} H${x + 13}" stroke="${L}" stroke-width="5" stroke-linecap="round"/>`).join('')
+      + (meh ? `<path d="M66 143 Q76 147 86 143 M114 143 Q124 147 134 143" stroke="${L}" stroke-width="2.6" stroke-linecap="round" fill="none" opacity=".5"/>` : '');
+    const brows = meh ? 'M62 117 L88 118 M112 113 L138 107' : cast ? 'M62 110 L88 116 M112 116 L138 110' : sm ? 'M62 116 Q75 111 88 116 M112 116 Q125 111 138 116' : 'M62 114 L88 117 M112 117 L138 114';
+    const mouth = cast ? `<ellipse cx="96" cy="161" rx="6" ry="7" fill="#5A2A24" ${o(3.5)}/>`
+      : `<path d="${meh ? 'M88 163 Q100 155 112 161' : sm ? 'M91 158 Q100 166 109 158' : 'M90 161 Q100 158 110 161'}" stroke="${L}" stroke-width="4.5" stroke-linecap="round" fill="none"/>`;
+    const hat = this._ijHat ? this._ijHat : `<g ${meh ? 'transform="rotate(-9 100 86)"' : ''}><ellipse cx="100" cy="88" rx="88" ry="16" fill="#F7D98A" ${o(5)}/><path d="M58 88 Q56 42 100 40 Q144 42 142 88Z" fill="#F2CD6B" ${o(5)}/><path d="M57.5 76 Q100 84 142.5 76 L142 88 Q100 96 58 88Z" fill="#FF4FA0" ${o(4)}/><path d="M72 58 l6 4 M94 50 l6 4 M118 54 l6 4 M30 90 l6 3 M160 90 l6 -3" stroke="#C9A04A" stroke-width="3" stroke-linecap="round"/></g>`;
+    const waves = cast ? `<path d="M178 116 Q192 140 180 166 M192 104 Q210 140 194 178" stroke="#FFE14D" stroke-width="5" stroke-linecap="round" fill="none"/>` : '';
+    return `<ellipse cx="100" cy="210" rx="60" ry="8" fill="#000" opacity=".25"/>
+<ellipse cx="78" cy="206" rx="18" ry="7" fill="#5FD8FF" ${o(4.5)}/><ellipse cx="122" cy="206" rx="18" ry="7" fill="#5FD8FF" ${o(4.5)}/><path d="M68 204 Q78 194 88 204 M112 204 Q122 194 132 204" stroke="${L}" stroke-width="9" stroke-linecap="round" fill="none"/><path d="M68 204 Q78 194 88 204 M112 204 Q122 194 132 204" stroke="#FF4FA0" stroke-width="4" stroke-linecap="round" fill="none"/>
+${back}<ellipse cx="100" cy="136" rx="66" ry="64" fill="${body}" ${o(6)}/>
+<rect x="52" y="170" width="34" height="16" rx="5" fill="#FFFFFF" ${o(3)}/><text x="69" y="182" text-anchor="middle" font-family="NanumSquareRound,sans-serif" font-weight="800" font-size="10" fill="${L}">이장</text>
+<circle cx="58" cy="150" r="8" fill="#FF9E8E" opacity="${sm ? .95 : .45}"/><circle cx="142" cy="150" r="8" fill="#FF9E8E" opacity="${sm ? .95 : .45}"/>
+<path d="M84 150 Q92 144 100 149 Q108 144 116 150 Q108 155 100 151 Q92 155 84 150Z" fill="#6A4A3A" ${o(2.5)}/>
+${eyes}<path d="${brows}" stroke="${L}" stroke-width="5" stroke-linecap="round" fill="none"/>${mouth}${hat}${front}${waves}`;
+  }
+  cropIn(k) {
+    const L = this.L, o = w => this.o(w).replace(/stroke-width="[^"]+"/, `stroke-width="${w}"`);
+    if (k === 'sun') return `<path d="M24 30 V45" stroke="${L}" stroke-width="5" stroke-linecap="round"/><path d="M24 30 V45" stroke="#5FB04A" stroke-width="2" stroke-linecap="round"/><path d="M24 40 q-8 -1 -10 -8 q8 0 10 8z" fill="#7FD24A" ${o(2)}/>` + [...Array(10)].map((_, i) => { const a = i * Math.PI / 5; return `<circle cx="${(24 + Math.cos(a) * 11).toFixed(1)}" cy="${(19 + Math.sin(a) * 11).toFixed(1)}" r="5" fill="#FFE14D" ${o(2)}/>`; }).join('') + `<circle cx="24" cy="19" r="8" fill="#7A4A2A" ${o(2.4)}/><circle cx="21" cy="17" r="1.2" fill="#C98E5E"/><circle cx="26" cy="21" r="1.2" fill="#C98E5E"/>`;
+    if (k === 'straw') return `<path d="M10 18 Q24 10 38 18 Q39 33 24 43 Q9 33 10 18Z" fill="#FF4A5E" ${o(2.5)}/>` + [[17, 23], [24, 21], [31, 23], [20, 30], [28, 30], [24, 37]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="1.2" ry="1.7" fill="#FFE14D"/>`).join('') + `<path d="M13 16 L18 8 L24 13 L30 8 L35 16 Q24 21 13 16Z" fill="#7FD24A" ${o(2.2)}/>`;
+    if (k === 'coffee') return `<g transform="rotate(-20 17 27)"><ellipse cx="17" cy="27" rx="9" ry="12" fill="#7A4A2A" ${o(2.5)}/><path d="M17 16 Q13 27 17 38" stroke="#C98E5E" stroke-width="2.2" fill="none" stroke-linecap="round"/></g><g transform="rotate(18 32 22)"><ellipse cx="32" cy="22" rx="8" ry="11" fill="#8E5A34" ${o(2.5)}/><path d="M32 12 Q28 22 32 32" stroke="#C98E5E" stroke-width="2.2" fill="none" stroke-linecap="round"/></g>`;
+    if (k === 'mush') return `<path d="M17 25 H31 L30 41 Q24 44 18 41Z" fill="#FFF6D6" ${o(2.5)}/><path d="M5 27 Q6 7 24 7 Q42 7 43 27 Q24 31 5 27Z" fill="#FF6B5A" ${o(2.5)}/><circle cx="16" cy="17" r="3" fill="#FFFFFF"/><circle cx="29" cy="13" r="2.4" fill="#FFFFFF"/><circle cx="34" cy="21" r="2" fill="#FFFFFF"/>`;
+    return `<path d="M9 27 Q7 14 22 12 Q38 10 40 24 Q42 38 26 40 Q11 40 9 27Z" fill="#D9A866" ${o(2.5)}/><ellipse cx="18" cy="22" rx="1.8" ry="1.2" fill="#A8743A"/><ellipse cx="29" cy="19" rx="1.6" ry="1.1" fill="#A8743A"/><ellipse cx="26" cy="31" rx="1.8" ry="1.2" fill="#A8743A"/><path d="M14 30 q4 3 8 2" stroke="#F0CC8E" stroke-width="2" stroke-linecap="round" fill="none"/>`;
+  }
+  cropAt(k, x, y, s) { return `<svg x="${x}" y="${y}" width="${s}" height="${s}" viewBox="0 0 48 48" overflow="visible">${this.cropIn(k)}</svg>`; }
+  skinIn(acc, m) {
+    const L = this.L, o = w => this.o(w);
+    let s = this.soliIn(m || 'normal');
+    if (acc === 'pack') s = `<path d="M76 34 Q76 14 100 14 Q124 14 124 34" stroke="${L}" stroke-width="13" stroke-linecap="round" fill="none"/><path d="M76 34 Q76 14 100 14 Q124 14 124 34" stroke="#A8EB5A" stroke-width="6" stroke-linecap="round" fill="none"/><rect x="18" y="32" width="164" height="168" rx="46" fill="#FF8A5C" ${o(5)}/><path d="M24 84 Q100 58 176 84" stroke="${L}" stroke-width="4" fill="none"/><rect x="2" y="118" width="30" height="58" rx="12" fill="#FF6B5A" ${o(4.5)}/><rect x="168" y="118" width="30" height="58" rx="12" fill="#FF6B5A" ${o(4.5)}/>` + s;
+    if (acc === 'pj') s += `<path d="M40 104 Q42 48 94 40 Q126 34 144 20 Q152 52 160 104 Q130 80 100 80 Q70 80 40 104Z" fill="#C49BFF" ${o(5)}/><path d="M40 102 Q100 70 160 102" stroke="${L}" stroke-width="13" stroke-linecap="round" fill="none"/><path d="M40 102 Q100 70 160 102" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" fill="none"/><circle cx="145" cy="19" r="11" fill="#FFFFFF" ${o(4.5)}/><path d="M48 128 H34 M152 128 H166" ${o(5)}/><rect x="48" y="113" width="104" height="32" rx="16" fill="#5A63A8" ${o(5)}/><path d="M62 128 Q74 137 86 128 M114 128 Q126 137 138 128" stroke="#FFE14D" stroke-width="4" stroke-linecap="round" fill="none"/>`;
+    if (acc === 'rain') s += `<path d="M32 124 Q26 50 100 46 Q174 50 168 124 Q162 90 100 86 Q38 90 32 124Z" fill="#FFE14D" ${o(5)}/><path d="M60 64 Q76 54 92 52" stroke="#FFF6D6" stroke-width="5" stroke-linecap="round" fill="none"/><rect x="54" y="180" width="32" height="30" rx="9" fill="#FFC23C" ${o(5)}/><rect x="114" y="180" width="32" height="30" rx="9" fill="#FFC23C" ${o(5)}/><path d="M54 190 H86 M114 190 H146" stroke="${L}" stroke-width="3"/>`;
+    if (acc === 'phones') s += `<path d="M34 114 Q100 20 166 114" stroke="${L}" stroke-width="15" stroke-linecap="round" fill="none"/><path d="M34 114 Q100 20 166 114" stroke="#5FD8FF" stroke-width="8" stroke-linecap="round" fill="none"/><rect x="18" y="96" width="28" height="42" rx="13" fill="#FF4FA0" ${o(5)}/><rect x="154" y="96" width="28" height="42" rx="13" fill="#FF4FA0" ${o(5)}/><path d="M32 136 Q38 168 74 166" stroke="${L}" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="78" cy="166" r="7" fill="${L}"/>`;
+    if (acc === 'hat') s += `<ellipse cx="100" cy="68" rx="80" ry="14" fill="#F7D98A" ${o(5)}/><path d="M62 68 Q60 26 100 24 Q140 26 138 68Z" fill="#F2CD6B" ${o(5)}/><path d="M61.5 56 Q100 64 138.5 56 L138 68 Q100 76 62 68Z" fill="#FF4FA0" ${o(4)}/><path d="M76 40 l6 4 M100 32 l6 4 M120 38 l6 4" stroke="#C9A04A" stroke-width="3" stroke-linecap="round"/>`;
+    if (acc === 'band') s += `<path d="M38 100 Q100 34 162 100" stroke="${L}" stroke-width="13" fill="none" stroke-linecap="round"/><path d="M38 100 Q100 34 162 100" stroke="#FF4A5E" stroke-width="7" fill="none" stroke-linecap="round"/>` + this.cropAt('straw', 42, 46, 34) + this.cropAt('straw', 124, 46, 34);
+    if (acc === 'glasses') s += `<circle cx="73" cy="130" r="25" fill="none" ${o(6)}/><circle cx="127" cy="130" r="25" fill="none" ${o(6)}/><path d="M97 126 Q100 121 103 126 M48 126 L30 118 M152 126 L170 118" stroke="${L}" stroke-width="6" stroke-linecap="round" fill="none"/>`;
+    if (acc === 'ice') s += `<g transform="translate(4 50)"><rect x="158" y="72" width="10" height="26" rx="4" fill="#E8B070" ${o(3.5)}/><path d="M146 40 Q146 20 163 20 Q180 20 180 40 V76 Q180 82 174 82 H152 Q146 82 146 76Z" fill="#7FE0D0" ${o(5)}/><path d="M146 52 H180" stroke="${L}" stroke-width="3" /><path d="M146 40 Q146 20 163 20 Q180 20 180 40 V52 H146Z" fill="#FF8CC6" ${o(5)}/><circle cx="174" cy="24" r="7" fill="#1E2558"/><path d="M154 60 v12 M162 60 v8" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity=".8"/><path d="M178 82 q2 8 0 10" stroke="#7FE0D0" stroke-width="4" stroke-linecap="round" fill="none"/></g>`;
+    if (acc === 'net') s += `<g transform="translate(40 40)"><path d="M126 106 L138 -4" ${o(7)}/><path d="M126 106 L138 -4" stroke="#E8B070" stroke-width="3" stroke-linecap="round"/><path d="M114 -14 Q112 24 140 30 Q160 26 162 -10" fill="#FFFFFF" fill-opacity=".55" ${o(4)}/><path d="M124 -6 Q126 18 138 26 M138 -10 Q140 14 140 28 M150 -8 Q152 12 148 26 M116 4 Q138 10 160 4 M118 16 Q138 22 156 16" stroke="${L}" stroke-width="2" fill="none" opacity=".55"/><ellipse cx="138" cy="-12" rx="25" ry="9" fill="none" ${o(5)}/><ellipse cx="138" cy="-12" rx="25" ry="9" fill="none" stroke="#5FD8FF" stroke-width="2.5"/></g>`;
+    if (acc === 'apron') s += `<path d="M78 162 Q100 150 122 162" stroke="${L}" stroke-width="4" fill="none"/><path d="M64 164 H136 L132 196 Q100 204 68 196Z" fill="#8E5A34" ${o(5)}/><rect x="88" y="172" width="24" height="16" rx="4" fill="#B57A4E" ${o(3)}/>` + this.cropAt('coffee', 91, 168, 18);
+    if (acc === 'mush') s += `<path d="M162 142 L146 34" ${o(6)}/><path d="M162 142 L146 34" stroke="#FFF6D6" stroke-width="2.5" stroke-linecap="round"/><path d="M98 40 Q100 0 146 0 Q192 0 194 40 Q146 32 98 40Z" fill="#FF6B5A" ${o(5)}/><circle cx="124" cy="20" r="7" fill="#FFFFFF"/><circle cx="156" cy="12" r="5.5" fill="#FFFFFF"/><circle cx="174" cy="28" r="5" fill="#FFFFFF"/>`;
+    return s;
+  }
+  far16(v) {
+    const L = this.L, o = w => this.o(w);
+    const ridge = (d, c, w) => '<path d="' + d + '" fill="' + c + '" ' + o(w) + '/>';
+    const win = (x, y) => '<rect x="' + x + '" y="' + y + '" width="4" height="5" rx="1" fill="#FFE14D"/>';
+    let s = '';
+    if (v === 'day') {
+      s += ridge('M-4 250 V176 Q40 140 96 166 Q150 128 212 160 Q270 124 330 154 Q352 146 370 152 V250Z', '#8EC6EE', 2.4);
+      s += ridge('M-4 250 V206 Q70 184 140 200 Q220 180 290 198 Q340 188 370 196 V250Z', '#6FB86A', 2.4);
+    } else if (v === 'base') {
+      s += ridge('M-4 250 V176 Q40 140 96 166 Q150 128 212 160 Q270 124 330 154 Q352 146 370 152 V250Z', '#262B63', 2.4);
+      s += ridge('M-4 250 V206 Q70 184 140 200 Q220 180 290 198 Q340 188 370 196 V250Z', '#2C3470', 2.4);
+      s += [[60, 196], [176, 190], [300, 186]].map(([x, y]) => '<circle cx="' + x + '" cy="' + y + '" r="2.4" fill="#FFE14D"/>').join('');
+    } else if (v === 'work') {
+      s += '<path d="M150 250 Q260 150 370 170 V250Z" fill="#3A2F6E" opacity=".5"/>';
+      const B = [[150, 196, 26], [178, 158, 30], [210, 178, 22], [234, 132, 34], [270, 168, 26], [298, 146, 30], [330, 184, 22], [354, 160, 20]];
+      B.forEach(([x, y, w]) => { s += ridge('M' + x + ' 250 V' + y + ' H' + (x + w) + ' V250Z', '#262B63', 2.4); for (let yy = y + 10; yy < 236; yy += 14) for (let xx = x + 5; xx < x + w - 6; xx += 9) if ((xx * 7 + yy * 3) % 5 < 2) s += win(xx, yy); });
+      s += '<path d="M250 132 V116 M246 120 H254" stroke="' + L + '" stroke-width="2.4" stroke-linecap="round"/><circle cx="250" cy="114" r="2.6" fill="#FF5A4A"/>';
+      s += ridge('M-4 250 V214 Q50 202 120 210 Q140 212 150 216 V250Z', '#2C3470', 2.4);
+    } else if (v === 'trip') {
+      s += ridge('M-4 236 L60 150 L96 190 L150 120 L214 200 L258 158 L320 214 L370 190 V236Z', '#2A2F66', 2.4);
+      s += '<path d="M138 136 L150 120 L163 138 L156 134 L150 140 L144 134Z M50 163 L60 150 L70 164 L60 160Z M250 168 L258 158 L268 170 L258 166Z" fill="#E8ECFF"/>';
+      s += ridge('M-4 250 V222 H370 V250Z', '#2D5AA6', 2.4);
+      s += '<path d="M24 232 q10 -5 20 0 M120 238 q10 -5 20 0 M232 230 q10 -5 20 0 M318 240 q8 -4 16 0" stroke="#5FD8FF" stroke-width="2.5" stroke-linecap="round" fill="none"/>';
+      s += '<path d="M282 224 h28 l-5 7 h-18z" fill="#FFF6D6" ' + o(2) + '/><path d="M296 224 V204 L310 220 Z" fill="#FF4FA0" ' + o(2) + '/>';
+    } else {
+      s += ridge('M-4 250 V190 Q80 160 170 180 Q260 158 370 176 V250Z', '#29306A', 2.4);
+      const H = (x, y, c) => ridge('M' + x + ' ' + (y + 18) + ' V' + (y + 6) + ' H' + (x + 22) + ' V' + (y + 18) + 'Z', '#5A4A6E', 2) + ridge('M' + (x - 3) + ' ' + (y + 7) + ' L' + (x + 11) + ' ' + (y - 4) + ' L' + (x + 25) + ' ' + (y + 7) + 'Z', c, 2) + win(x + 9, y + 10) + '<path d="M' + (x + 18) + ' ' + (y - 2) + ' q-4 -6 0 -10 q4 -5 0 -10" stroke="#8F96CC" stroke-width="2" fill="none" stroke-linecap="round" opacity=".7"/>';
+      s += H(40, 168, '#FF8CC6') + H(126, 160, '#C49BFF') + H(214, 154, '#FF9A3C') + H(300, 160, '#A8EB5A');
+      s += ridge('M-4 250 V212 Q90 196 190 206 Q290 196 370 204 V250Z', '#2C3470', 2.4);
+    }
+    return s;
+  }
+  prop16(v) {
+    const L = this.L, o = w => this.o(w);
+    if (v === 'work') return '<ellipse cx="240" cy="256" rx="18" ry="3.5" fill="#000" opacity=".25"/><path d="M232 232 v-6 h16 v6" fill="none" ' + o(3) + '/><rect x="222" y="231" width="36" height="25" rx="5" fill="#7A5446" ' + o(2.6) + '/><path d="M222 242 H258" stroke="' + L + '" stroke-width="2"/><rect x="236" y="239" width="8" height="6" rx="1.5" fill="#FFE14D" ' + o(1.6) + '/>';
+    if (v === 'trip') return '<ellipse cx="240" cy="259" rx="18" ry="3.5" fill="#000" opacity=".25"/><path d="M232 212 v-8 h16 v8" fill="none" ' + o(3) + '/><rect x="224" y="211" width="32" height="44" rx="7" fill="#FF9A3C" ' + o(2.6) + '/><path d="M234 216 V250 M246 216 V250" stroke="#C96A1E" stroke-width="3" stroke-linecap="round"/><circle cx="231" cy="258" r="3" fill="#10142E"/><circle cx="249" cy="258" r="3" fill="#10142E"/><rect x="236" y="222" width="12" height="9" rx="2" fill="#5FD8FF" ' + o(1.6) + ' transform="rotate(-10 242 226)"/>';
+    if (v === 'rest') return '<path d="M146 226 Q150 214 164 216 Q183 210 202 216 Q218 214 222 228 L226 258 Q183 266 142 258Z" fill="#C49BFF" ' + o(2.6) + '/><path d="M150 236 Q183 230 220 238 M148 248 Q183 242 222 250" stroke="#A47CE6" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="252" cy="246" r="20" fill="#FF9A3C" opacity=".25"/><path d="M236 258 L268 248 M236 248 L268 258" stroke="' + L + '" stroke-width="7" stroke-linecap="round"/><path d="M236 258 L268 248 M236 248 L268 258" stroke="#8E5A38" stroke-width="4" stroke-linecap="round"/><path d="M252 224 C256 232 263 236 262 244 A10 10 0 0 1 242 244 C242 238 246 236 248 230 C250 234 251 236 252 224Z" fill="#FF9A3C" ' + o(2) + '/><path d="M252 236 C254 240 257 242 256 246 A4 4 0 0 1 248 246 C248 243 250 241 252 236Z" fill="#FFE14D"/>';
+    return '';
+  }
+  live18(v) {
+    const L = this.L, o = w => this.o(w), id = 'lv' + v;
+    const A = (at, vals, d, x) => '<animate attributeName="' + at + '" values="' + vals + '" dur="' + d + 's" repeatCount="indefinite" ' + (x || '') + '/>';
+    const T = (ty, vals, d, x) => '<animateTransform attributeName="transform" type="' + ty + '" values="' + vals + '" dur="' + d + 's" repeatCount="indefinite" ' + (x || '') + '/>';
+    const star = (x, y, r, d) => `<path d="M${x} ${y - r} Q${x} ${y} ${x + r} ${y} Q${x} ${y} ${x} ${y + r} Q${x} ${y} ${x - r} ${y} Q${x} ${y} ${x} ${y - r}Z" fill="#FFE14D">${A('opacity', '1;.2;1', d)}</path>`;
+    const cloud = (x, y, s, f, dx, d) => `<g><path transform="translate(${x} ${y}) scale(${s})" d="M-8 12 H38 A9 9 0 0 0 36 -4 A14 14 0 0 0 10 -10 A15 15 0 0 0 -8 12 Z" fill="${f}" stroke="${L}" stroke-width="${(2.6 / s).toFixed(2)}" stroke-linejoin="round"/>${T('translate', '0 0;' + dx + ' 0;0 0', d)}</g>`;
+    const sway = (inner, cx, cy, a, d) => `<g>${inner}${T('rotate', -a + ' ' + cx + ' ' + cy + ';' + a + ' ' + cx + ' ' + cy + ';' + -a + ' ' + cx + ' ' + cy, d)}</g>`;
+    const sky = { base: ['#141A44', '#2E2C74'], work: ['#120F2E', '#2A2350'], trip: ['#11204A', '#2A4C8C'], rest: ['#120F33', '#3D2A62'], day: ['#4FB4F5', '#C4ECFF'] }[v];
+    const D = v === 'day', bv = D ? 'base' : v;
+    let s = `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset=".42" stop-color="${sky[1]}"/></linearGradient><radialGradient id="${id}g"><stop offset="0" stop-color="#FFE14D" stop-opacity=".55"/><stop offset="1" stop-color="#FFE14D" stop-opacity="0"/></radialGradient><radialGradient id="${id}f"><stop offset="0" stop-color="#FF9A3C" stop-opacity=".5"/><stop offset="1" stop-color="#FF9A3C" stop-opacity="0"/></radialGradient></defs><rect width="390" height="844" fill="url(#${id})"/>`;
+    // 하늘
+    const ST = [[22, 64, 3], [70, 30, 2.6], [128, 92, 3], [190, 50, 2.4], [236, 110, 3], [300, 40, 2.6], [356, 96, 3], [40, 160, 2.6], [104, 250, 3.4], [168, 262, 2.6], [36, 272, 3], [226, 248, 2.4], [352, 186, 2.6], [150, 200, 2.2]];
+    if (v !== 'work' && !D) s += ST.map(([x, y, r], i) => star(x, y, r, (1.6 + (i % 5) * .5).toFixed(1))).join('');
+    if (D) s += `<circle cx="318" cy="286" r="56" fill="url(#${id}g)">${A('opacity', '1;.75;1', 4)}</circle><g transform="translate(318 286) scale(.85)"><g>${T('rotate', '0;360', 40)}${[0, 1, 2, 3, 4, 5, 6, 7].map(i => `<path d="M0 -38 V-48" transform="rotate(${i * 45})" stroke="${L}" stroke-width="6" stroke-linecap="round"/><path d="M0 -38 V-48" transform="rotate(${i * 45})" stroke="#FFE14D" stroke-width="2.6" stroke-linecap="round"/>`).join('')}</g><circle r="28" fill="#FFE14D" ${o(3)}/><path d="M-12 -12 q8 -6 16 -3" stroke="#FFF6D6" stroke-width="3" fill="none" stroke-linecap="round"/></g>`;
+    else s += `<circle cx="318" cy="262" r="46" fill="url(#${id}g)">${A('opacity', '1;.7;1', 4)}</circle><path d="M314 238 A24 24 0 1 0 342 274 A18 18 0 1 1 314 238Z" fill="#FFE14D" ${o(3)}/>`;
+    const cc = D ? ['#FFFFFF', '#EEF8FF'] : v === 'work' ? ['#3A3466', '#2E2A55'] : ['#4A4F9C', '#3A3F86'];
+    s += cloud(40, 252, 1.2, cc[0], 26, 22) + cloud(190, 278, .8, cc[1], -20, 18) + cloud(250, 120, .9, cc[1], 30, 26);
+    if (v === 'base' || v === 'rest') s += `<g opacity="0"><path d="M0 0 L-36 14" stroke="#FFF6D6" stroke-width="3" stroke-linecap="round"/><circle r="2.6" fill="#FFF6D6"/>${A('opacity', '0;0;1;0', 7, 'keyTimes="0;.8;.86;1"')}${T('translate', '300 200;300 200;220 232', 7, 'keyTimes="0;.8;1"')}</g>`;
+    // 원경
+    let far = this.far16(v);
+    if (v === 'work') far += [[240, 160], [250, 200], [304, 170], [184, 200], [276, 190], [158, 214]].map(([x, y], i) => `<rect x="${x}" y="${y}" width="4" height="5" rx="1" fill="#FFE14D">${A('opacity', i % 2 ? '1;1;0;1' : '0;1;1;0', (2.4 + i * .7).toFixed(1))}</rect>`).join('') + `<circle cx="250" cy="114" r="3.4" fill="#FF5A4A">${A('opacity', '1;.1;1', 1.4)}</circle>`;
+    if (v === 'trip') far += `<g>${T('translate', '0 0;0 -2.5;0 0', 2.6)}<path d="M282 224 h28 l-5 7 h-18z" fill="#FFF6D6" ${o(2)}/><path d="M296 224 V204 L310 220 Z" fill="#FF4FA0" ${o(2)}/></g><g>${T('translate', '0 0;-14 0;0 0', 5)}<path d="M30 238 q10 -5 20 0 M130 244 q10 -5 20 0 M200 236 q10 -5 20 0 M340 244 q8 -4 16 0" stroke="#5FD8FF" stroke-width="2.5" stroke-linecap="round" fill="none"/></g>`;
+    s += `<g transform="translate(0 168) scale(1.066)">${far}</g>`;
+    // 중경
+    const midC = { base: '#212C5C', work: '#1E2450', trip: '#2A2F66', rest: '#22285A', day: '#8ED062' }[v];
+    s += `<path d="M-4 446 C70 430 160 440 240 432 C300 426 350 434 394 430 V844 H-4Z" fill="${midC}" ${o(3)}/>`;
+    const tree = (x, y, sc, c, d) => `<g transform="translate(${x} ${y}) scale(${sc})">${sway('<path d="M0 0 V-16" stroke="' + L + '" stroke-width="7" stroke-linecap="round"/><path d="M0 0 V-16" stroke="#8E5A38" stroke-width="3" stroke-linecap="round"/><circle cx="0" cy="-30" r="17" fill="' + c + '" ' + o(3) + '/><circle cx="-11" cy="-22" r="10" fill="' + c + '" ' + o(3) + '/><circle cx="11" cy="-22" r="10" fill="' + c + '" ' + o(3) + '/><path d="M-6 -36 q5 -5 11 -3" stroke="#B6F35C" stroke-width="2.4" fill="none" stroke-linecap="round"/>', 0, 0, 2.5, d)}</g>`;
+    const pine = (x, y, sc, d) => `<g transform="translate(${x} ${y}) scale(${sc})">${sway('<path d="M0 0 V-10" stroke="' + L + '" stroke-width="6" stroke-linecap="round"/><path d="M-16 -8 L0 -30 L16 -8Z M-12 -22 L0 -44 L12 -22Z" fill="#2F6A4A" ' + o(3) + '/>', 0, 0, 2, d)}</g>`;
+    if (bv === 'base') {
+      s += tree(30, 446, 1, '#3E8A3A', 3.2) + tree(84, 440, .8, '#4FA83A', 2.8) + tree(318, 438, .9, '#3E8A3A', 3.6) + tree(366, 444, 1.1, '#4FA83A', 3);
+      s += `<path d="M-4 470 Q90 458 190 466 Q290 474 394 462 V490 Q290 500 190 492 Q90 486 -4 496Z" fill="#2D5AA6" ${o(3)}/><g>${T('translate', '0 0;-18 0;0 0', 4)}<path d="M40 480 q8 -4 16 0 M140 478 q8 -4 16 0 M236 484 q8 -4 16 0 M330 476 q8 -4 16 0" stroke="#5FD8FF" stroke-width="2.5" stroke-linecap="round" fill="none"/></g>`;
+    } else if (v === 'work') {
+      s += `<path d="M-4 462 H394 V492 H-4Z" fill="#2A2F55" ${o(3)}/><path d="M6 477 H394" stroke="#FFE14D" stroke-width="2.5" stroke-dasharray="14 12" opacity=".6"/>`;
+      [[50, 460], [200, 460], [350, 460]].forEach(([x, y], i) => { s += `<path d="M${x} ${y} V${y - 44} q0 -6 8 -6 h6" fill="none" stroke="${L}" stroke-width="5" stroke-linecap="round"/><path d="M${x} ${y} V${y - 44} q0 -6 8 -6 h6" fill="none" stroke="#6A6F9E" stroke-width="2" stroke-linecap="round"/><circle cx="${x + 16}" cy="${y - 48}" r="16" fill="url(#${id}g)">${A('opacity', i === 1 ? '1;.2;1;1;.3;1' : '1;.85;1', i === 1 ? 2.2 : 3)}</circle><rect x="${x + 11}" y="${y - 52}" width="10" height="6" rx="2" fill="#FFE14D" ${o(1.8)}/>`; });
+      s += tree(116, 448, .7, '#3E6A4A', 3.4) + tree(282, 446, .75, '#3E6A4A', 3);
+    } else if (v === 'trip') {
+      s += `<path d="M-4 452 C90 444 220 450 394 446 V496 H-4Z" fill="#7A5E6E" ${o(3)}/><path d="M30 470 q4 -3 8 0 M120 480 q4 -3 8 0 M260 468 q4 -3 8 0 M340 482 q4 -3 8 0" stroke="#A88A8E" stroke-width="2.4" stroke-linecap="round" fill="none"/>`;
+      s += `<path d="M58 486 L70 430" ${o(5)}/><path d="M58 486 L70 430" stroke="#FFF6D6" stroke-width="2" stroke-linecap="round"/><path d="M40 436 Q70 404 104 430 Q88 424 72 430 Q60 424 40 436Z" fill="#FF4FA0" ${o(3)}/><path d="M72 430 Q72 414 70 408" stroke="${L}" stroke-width="2"/>`;
+      s += `<g transform="translate(330 478)">${sway('<path d="M0 0 Q4 -30 -4 -58" stroke="' + L + '" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M0 0 Q4 -30 -4 -58" stroke="#B9825A" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M-4 -58 Q-30 -64 -38 -46 Q-20 -58 -4 -58 Q-24 -42 -26 -26 Q-12 -46 -4 -58 Q20 -70 34 -56 Q14 -60 -4 -58 Q18 -48 22 -30 Q4 -50 -4 -58Z" fill="#4FA83A" ' + o(2.5) + '/>', 0, 0, 3, 3.4)}</g>`;
+      const gull = (y, d, b) => `<g>${T('translate', '-40 ' + y + ';430 ' + (y - 30), d, 'begin="' + b + 's"')}<path d="M-10 0 Q-5 -7 0 0 Q5 -7 10 0" stroke="#FFF6D6" stroke-width="3" fill="none" stroke-linecap="round">${A('d', 'M-10 0 Q-5 -7 0 0 Q5 -7 10 0;M-10 -3 Q-5 2 0 0 Q5 2 10 -3;M-10 0 Q-5 -7 0 0 Q5 -7 10 0', .8)}</path></g>`;
+      s += gull(330, 14, 0) + gull(370, 19, -6);
+    } else {
+      s += pine(22, 450, 1.1, 3.4) + pine(64, 444, .85, 3) + pine(338, 442, .95, 3.2) + pine(374, 450, 1.2, 3.6);
+      s += `<path d="M110 452 L146 410 L182 452Z" fill="#FF9A3C" ${o(3)}/><path d="M146 410 L136 452 H156Z" fill="#B85A2A" ${o(2.5)}/><path d="M96 418 Q190 444 290 414" stroke="${L}" stroke-width="2" fill="none"/>`;
+      [[118, 424], [146, 431], [174, 435], [204, 435], [232, 430], [262, 421]].forEach(([x, y], i) => { s += `<circle cx="${x}" cy="${y + 5}" r="4.5" fill="${['#FFE14D', '#FF8CC6', '#A8EB5A'][i % 3]}" ${o(1.8)}>${A('opacity', '1;.35;1', (1.4 + (i % 3) * .5).toFixed(1))}</circle>`; });
+    }
+    // 마당
+    s += `<path d="M-4 506 C110 494 280 500 394 496 V844 H-4Z" fill="${D ? '#A6DC6E' : '#3E3966'}" ${o(3)}/><path d="M150 506 C140 560 220 590 206 640 H250 C266 590 196 556 214 504Z" fill="${D ? '#E8C98A' : '#4A4478'}"/>`;
+    const tuft = (x, y, d) => sway(`<path d="M${x - 7} ${y} l2 -10 l3 7 l2 -12 l3 12 l3 -8 l2 11z" fill="#3E7A3A" ${o(1.6)}/>`, x, y, 6, d);
+    s += [[20, 540], [64, 600], [118, 528], [300, 532], [352, 584], [372, 530], [96, 636], [320, 636]].map(([x, y], i) => tuft(x, y, (2 + i % 3 * .6).toFixed(1))).join('');
+    const flw = (x, y, col, d) => sway(`<path d="M${x} ${y} v-10" stroke="#3E8A3A" stroke-width="2.6" stroke-linecap="round"/>` + [0, 1, 2, 3, 4].map(i => { const a = i * 1.2566; return `<circle cx="${(x + Math.sin(a) * 4.4).toFixed(1)}" cy="${(y - 14 - Math.cos(a) * 4.4).toFixed(1)}" r="4" fill="${col}" ${o(1.6)}/>`; }).join('') + `<circle cx="${x}" cy="${y - 14}" r="2.6" fill="#FFE14D" ${o(1.4)}/>`, x, y, 8, d);
+    s += flw(40, 566, '#FF4FA0', 2.4) + flw(78, 556, '#C49BFF', 2.9) + flw(330, 560, '#FFE14D', 2.6) + flw(362, 606, '#FF4FA0', 3.1) + flw(28, 620, '#C49BFF', 2.7);
+    s += `<path d="M296 600 V570 M326 600 V566 M356 600 V570 M290 580 H362" stroke="${L}" stroke-width="6" stroke-linecap="round"/><path d="M296 600 V570 M326 600 V566 M356 600 V570 M290 580 H362" stroke="#B9825A" stroke-width="2.5" stroke-linecap="round"/>`;
+    // 솔이
+    const mood = v === 'work' ? 'tired' : bv === 'base' ? 'normal' : 'happy';
+    const bob = { day: ['0 0;0 -4;0 0;0 -16;0 0;0 0', 3, 'keyTimes="0;.2;.4;.5;.6;1"'], base: ['0 0;0 -4;0 0;0 -16;0 0;0 0', 3, 'keyTimes="0;.2;.4;.5;.6;1"'], work: ['0 0;0 3;0 0', 2.8], trip: ['0 0;0 -22;0 0;0 -14;0 0;0 0', 1.8, 'keyTimes="0;.15;.3;.42;.54;1"'], rest: ['0 0;0 2;0 0', 3.4] }[v];
+    s += `<g transform="translate(-54.6 265.8) scale(1.364)"><ellipse cx="183" cy="258" rx="40" ry="6" fill="#000" opacity=".28"/><g>${this.nest(this.skinIn('hat', mood), 128, 146, 110)}${T('translate', bob[0], bob[1], bob[2])}</g>${this.prop16(v)}`;
+    if (v === 'rest') s += `<circle cx="252" cy="244" r="40" fill="url(#${id}f)">${A('opacity', '1;.6;1;.8;1', 1.6)}</circle><g transform="translate(252 248)"><g>${T('scale', '1 1;1.1 .88;.92 1.12;1 1', .9)}<path d="M0 -24 C4 -16 11 -12 10 -4 A10 10 0 0 1 -10 -4 C-10 -10 -6 -12 -4 -18 C-2 -14 -1 -12 0 -24Z" fill="#FF9A3C" ${o(2)}/><path d="M0 -12 C2 -8 5 -6 4 -2 A4 4 0 0 1 -4 -2 C-4 -5 -2 -7 0 -12Z" fill="#FFE14D"/></g></g>` + [0, 1, 2].map(i => `<circle cx="252" cy="220" r="${4 + i}" fill="#8F96CC" opacity="0">${A('opacity', '0;.5;0', 3, 'begin="' + i + 's"')}${T('translate', '0 0;' + (i % 2 ? 6 : -6) + ' -40', 3, 'begin="' + i + 's"')}</circle>`).join('');
+    s += '</g>';
+    if (v === 'rest') s += [0, 1, 2].map(i => `<text x="250" y="470" font-family="'Bagel Fat One'" font-size="${14 + i * 3}" fill="#C9CEF5" opacity="0">z${A('opacity', '0;1;0', 3.6, 'begin="' + (i * 1.2) + 's"')}${T('translate', '0 0;16 -36', 3.6, 'begin="' + (i * 1.2) + 's"')}</text>`).join('');
+    if (v === 'trip') s += [[150, 470], [252, 462], [270, 520]].map(([x, y], i) => `<path d="M${x} ${y - 7} l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2z" fill="#FFE14D" opacity="0">${A('opacity', '0;1;0', 1.8, 'begin="' + (i * .6) + 's"')}</path>`).join('');
+    if (v === 'work') { let r = ''; for (let i = 0; i < 26; i++) { const x = (i * 53) % 400, y = (i * 97) % 840; r += `<path d="M${x} ${y} l-4 14" stroke="#8F96CC" stroke-width="2" stroke-linecap="round" opacity=".55"/>`; } s += `<g>${T('translate', '0 -120;-30 0', .9)}${r}<g transform="translate(0 -840)">${r}</g></g>`; }
+    if (v === 'base' || v === 'rest') s += [[60, 520, 5], [120, 580, 6.4], [280, 540, 5.6], [340, 520, 7], [210, 470, 6], [30, 600, 4.6]].map(([x, y, d], i) => `<circle cx="${x}" cy="${y}" r="3" fill="#E8FF7A"><animateMotion path="M0 0 C12 -10 24 6 14 18 C4 30 -14 16 -8 4 Z" dur="${d}s" repeatCount="indefinite"/>${A('opacity', '.2;1;.2', (1.4 + i * .3).toFixed(1))}</circle><circle cx="${x}" cy="${y}" r="8" fill="#E8FF7A" opacity=".18"><animateMotion path="M0 0 C12 -10 24 6 14 18 C4 30 -14 16 -8 4 Z" dur="${d}s" repeatCount="indefinite"/></circle>`).join('');
+    if (D) s += [[70, 520, 9, '#FF4FA0'], [300, 500, 11, '#FFFFFF'], [200, 590, 13, '#C49BFF']].map(([x, y, d, c], i) => `<g><animateMotion path="M0 0 C30 -24 60 10 40 30 C20 50 -30 30 -20 8 Z" dur="${d}s" repeatCount="indefinite"/><g transform="translate(${x} ${y})"><path d="M0 0 C-8 -10 -14 -2 -10 4 C-6 8 -2 4 0 0 C2 4 6 8 10 4 C14 -2 8 -10 0 0Z" fill="${c}" stroke="${L}" stroke-width="2" stroke-linejoin="round">${T('scale', '1 1;.25 1;1 1', (.35 + i * .05).toFixed(2))}</path></g></g>`).join('');
+    // 밭
+    s += `<path d="M-4 640 C120 634 270 638 394 634 V844 H-4Z" fill="${D ? '#7FBE52' : '#2E2A55'}" ${o(3)}/>`;
+    const W = 68, Y = 648, H = 52;
+    const leaf = (x, y, dx, dy, c) => `<path d="M${x} ${y} q${dx * .2} ${dy} ${dx} ${dy} q${-dx * .2} ${-dy} ${-dx} ${-dy}z" fill="${c}" ${o(2)}/>`;
+    for (let i = 0; i < 5; i++) {
+      const x = 13 + i * (W + 6), cx = x + W / 2, by = Y + 38;
+      s += `<rect x="${x}" y="${Y}" width="${W}" height="${H}" rx="12" fill="${D ? '#B07A4E' : '#5A3E5E'}" ${o(3)}/><path d="M${x + 10} ${Y + 44} H${x + W - 10}" stroke="${D ? '#8A5A36' : '#45304A'}" stroke-width="3" stroke-linecap="round"/>`;
+      if (i < 2) s += (D ? '' : `<circle cx="${cx}" cy="${Y + 14}" r="26" fill="url(#${id}g)" opacity=".7"/>`) + sway(leaf(cx, by, -20, -14, '#5FBF3A') + leaf(cx, by, 20, -14, '#5FBF3A') + leaf(cx, by, -4, -24, '#7FD24A') + this.cropAt('straw', cx - 25, Y + 4, 24) + this.cropAt('straw', cx + 1, Y + 6, 24) + this.cropAt('straw', cx - 12, Y - 10, 24), cx, by, 3, 2.2 + i * .4);
+      else if (i === 2) s += sway(`<path d="M${cx} ${by} V${Y + 14}" stroke="${L}" stroke-width="5" stroke-linecap="round"/><path d="M${cx} ${by} V${Y + 14}" stroke="#5FB04A" stroke-width="2" stroke-linecap="round"/><circle cx="${cx - 10}" cy="${Y + 18}" r="9" fill="#4FA83A" ${o(2.2)}/><circle cx="${cx + 10}" cy="${Y + 19}" r="8.5" fill="#5FBF3A" ${o(2.2)}/><circle cx="${cx}" cy="${Y + 9}" r="9.5" fill="#5FBF3A" ${o(2.2)}/>`, cx, by, 4, 2.6);
+      else if (i === 3) s += sway(`<path d="M${cx} ${by} V${by - 14}" stroke="${L}" stroke-width="4.5" stroke-linecap="round"/><path d="M${cx} ${by} V${by - 14}" stroke="#5FB04A" stroke-width="2" stroke-linecap="round"/>` + leaf(cx, by - 13, -11, -9, '#B6F35C') + leaf(cx, by - 13, 11, -9, '#B6F35C'), cx, by, 6, 2);
+      else s += `<path d="M${x + 14} ${Y + 20} H${x + W - 14} M${x + 18} ${Y + 32} H${x + W - 18}" stroke="${D ? '#8A5A36' : '#45304A'}" stroke-width="3" stroke-linecap="round"/>`;
+    }
+    s += '<a href="%EC%86%94%EB%B9%9B%20%EB%A7%88%EC%9D%84%20v10%20%EC%A3%BC%EB%AF%BC%EC%A6%9D.dc.html#17c"><rect x="120" y="450" width="150" height="185" fill="#000" fill-opacity="0" style="cursor:pointer"></rect></a>';
+    return `<svg viewBox="0 0 390 844" width="100%" height="100%" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" style="display:block;position:absolute;inset:0">${s}</svg>`;
+  }
+  renderVals() {
+    if (!this.c) {
+      const el = html => React.createElement('div', { style: { width: '100%', height: '100%' }, dangerouslySetInnerHTML: { __html: html } });
+      this.c = { ijAv: el(this.wrap(this.ijangIn('base'))), live: { base: el(this.live18('base')), work: el(this.live18('work')), trip: el(this.live18('trip')), rest: el(this.live18('rest')), day: el(this.live18('day')) } };
+    }
+    return this.c;
+  }
+}
+</script>
+</body>
+</html>
