@@ -20,11 +20,14 @@ export function tabOfPath(path: string): TabKey | null {
 /** 아침 첫 화면 "솔이 깨우기" 다음에 갈 곳. */
 export const AFTER_WAKE_HREF = '/morning/day' as const;
 
-/** "오늘 하루 고르기" 다음에 갈 곳. 복장 화면이 생기면 여기만 바꾼다. */
-export const AFTER_DAY_HREF = '/(tabs)' as const;
+/** "오늘 하루 고르기" 다음에 갈 곳: 복장 고르기. */
+export const AFTER_DAY_HREF = '/morning/outfit' as const;
+
+/** "복장 고르기" 다음에 갈 곳. 아침 흐름의 다음 화면(마을)이 생기면 여기만 바꾼다. */
+export const AFTER_OUTFIT_HREF = '/(tabs)' as const;
 
 /** 하단 바를 숨기는 전체 화면 */
-const FULLSCREEN_PATHS: readonly string[] = ['/wake', '/morning/day'];
+const FULLSCREEN_PATHS: readonly string[] = ['/wake', '/morning/day', '/morning/outfit'];
 
 export function hidesBottomBar(path: string): boolean {
   return FULLSCREEN_PATHS.includes(path);

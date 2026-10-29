@@ -1,4 +1,4 @@
-import { APP_MAX_WIDTH, contentWidth, MAIN_LAYOUT, mainLayout, morningDayLayout, SCENE_PCT, SCENE_RATIO, SCENE_VIEW, sceneHeight, sx, sy } from '../layout';
+import { APP_MAX_WIDTH, contentWidth, MAIN_LAYOUT, mainLayout, morningDayLayout, outfitLayout, SCENE_PCT, SCENE_RATIO, SCENE_VIEW, sceneHeight, sx, sy } from '../layout';
 
 const M = MAIN_LAYOUT;
 const W390 = contentWidth(390); // 358
@@ -177,6 +177,37 @@ describe('morningDayLayout (오늘 하루 고르기)', () => {
       const L = morningDayLayout(h, 20, 0);
       if (L.scroll) continue;
       const used = L.scene + L.dayCard + L.condCard + 50 + 68 + 12 + 16 + 30 + 14 + 30 + 14 + 56 + 6 + 28 + 6;
+      expect(used).toBeLessThanOrEqual(L.available);
+    }
+  });
+});
+
+describe('outfitLayout (복장 고르기)', () => {
+  it('키 큰 화면은 미리보기 250, 탭 · 칸 기본, 스크롤 없음', () => {
+    expect(outfitLayout(932, 59, 34)).toMatchObject({ step: 0, preview: 250, tab: 52, cell: 76, scroll: false });
+  });
+  it('보통 화면(852)도 기본 크기로 들어간다', () => {
+    const L = outfitLayout(852, 59, 34);
+    expect(L.step).toBe(0);
+    expect(L.preview).toBeGreaterThanOrEqual(210);
+    expect(L.scroll).toBe(false);
+  });
+  it('작은 화면은 탭 · 칸을 압축', () => {
+    const L = outfitLayout(667, 20, 0);
+    expect(L).toMatchObject({ step: 1, tab: 46, cell: 62, scroll: false });
+    expect(L.preview).toBeGreaterThanOrEqual(150);
+  });
+  it('아주 작으면 스크롤', () => {
+    expect(outfitLayout(520, 20, 0)).toMatchObject({ step: 2, preview: 150, scroll: true });
+  });
+  it('칸은 어느 단계에서도 터치 영역 44 이상', () => {
+    for (const h of [480, 560, 667, 740, 852, 932]) expect(outfitLayout(h, 20, 0).cell).toBeGreaterThanOrEqual(44);
+  });
+  it('들어가는 화면에서는 내용 높이가 사용 가능 높이를 넘지 않는다', () => {
+    for (const h of [640, 667, 700, 740, 780, 852, 932]) {
+      const L = outfitLayout(h, 20, 0);
+      if (L.scroll) continue;
+      const used = L.preview + L.tab + L.cell * 2 + 50 + 68 + 10 + 12 + 12 + 10 + 8 + 12 + 5 + 8 + 22 + 8 + 56 + 20;
       expect(used).toBeLessThanOrEqual(L.available);
     }
   });

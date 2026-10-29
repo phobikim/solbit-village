@@ -3,7 +3,11 @@
 import type { DayType, MorningCondition } from '../domain/morning';
 
 export const MORNING_TITLE = '아침 준비';
-export const MORNING_STEP_LABEL = '하루, 복장, 마을 중 1단계';
+/** 발자국 3칸 중 지금 몇 번째인지 (하루 → 복장 → 마을) */
+export const MORNING_STEP_LABEL = {
+  1: '하루, 복장, 마을 중 1단계',
+  2: '하루, 복장, 마을 중 2단계',
+} as const;
 
 /** 오늘 하루 고르기 화면 이장 방송 (일반 문구는 BROADCAST_PREFIX 없이 그대로) */
 export const DAY_PICK_BROADCAST = {

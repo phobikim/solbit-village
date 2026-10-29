@@ -215,3 +215,55 @@ export function morningDayLayout(visibleHeight: number, insetTop: number, insetB
   if (compact >= M.scene.min) return { step: 1, available, scene: compact, dayCard: M.dayCard.compact, condCard: M.condCard.compact, scroll: false };
   return { step: 2, available, scene: M.scene.min, dayCard: M.dayCard.compact, condCard: M.condCard.compact, scroll: true };
 }
+
+// ── 아침 흐름 3번째 화면 "복장 고르기(솔이네 옷장)" (디자인 26c~f) ───────────
+// 스크롤 없이 한 화면. 솔이 미리보기가 남는 높이를 받고(최대 250), 모자라면 슬롯 탭 · 아이템 칸을 줄인다. 그래도 모자라면 스크롤.
+
+export const OUTFIT_LAYOUT = {
+  header: 50,
+  broadcast: 68,
+  /** 방송 | 미리보기 */
+  gapPreview: 10,
+  preview: { max: 250, min: 150, /** 이 아래로 줄어들면 탭 · 칸을 압축 */ comfortable: 210 },
+  /** 미리보기 | 옷장 패널 */
+  gapPanel: 12,
+  /** 옷장 패널: 위 여백 + 옷걸이 봉 + 탭 막대(옷걸이 줄) */
+  panelTop: 12,
+  rod: 10,
+  tabStick: 8,
+  tab: { full: 52, compact: 46 },
+  /** 탭 | 아이템 격자. 칸 위 모서리의 체크 표시가 잘리지 않게 격자 위에 둔 여백을 포함 */
+  gapPager: 12,
+  pagerPad: 5,
+  cell: { full: 76, compact: 62 },
+  cellGap: 8,
+  dots: 22,
+  /** 점 | 이대로 가기 줄 */
+  gapAction: 8,
+  action: 56,
+  /** 아래 안전 영역에 더하는 여백 */
+  bottomPad: 20,
+} as const;
+
+export type OutfitLayout = {
+  /** 0 기본 · 1 탭 · 칸 압축 · 2 압축해도 모자라 스크롤 */
+  step: 0 | 1 | 2;
+  available: number;
+  preview: number;
+  tab: number;
+  cell: number;
+  scroll: boolean;
+};
+
+export function outfitLayout(visibleHeight: number, insetTop: number, insetBottom: number): OutfitLayout {
+  const L = OUTFIT_LAYOUT;
+  const available = Math.max(0, visibleHeight - insetTop - insetBottom);
+  const fixedOf = (tab: number, cell: number) =>
+    L.header + L.broadcast + L.gapPreview + L.gapPanel + L.panelTop + L.rod + L.tabStick + tab + L.gapPager + L.pagerPad + cell * 2 + L.cellGap + L.dots + L.gapAction + L.action + L.bottomPad;
+
+  const full = Math.min(L.preview.max, available - fixedOf(L.tab.full, L.cell.full));
+  if (full >= L.preview.comfortable) return { step: 0, available, preview: full, tab: L.tab.full, cell: L.cell.full, scroll: false };
+  const compact = Math.min(L.preview.max, available - fixedOf(L.tab.compact, L.cell.compact));
+  if (compact >= L.preview.min) return { step: 1, available, preview: compact, tab: L.tab.compact, cell: L.cell.compact, scroll: false };
+  return { step: 2, available, preview: L.preview.min, tab: L.tab.compact, cell: L.cell.compact, scroll: true };
+}

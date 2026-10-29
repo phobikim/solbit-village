@@ -16,6 +16,7 @@ import { meRange, useMeView } from '../../src/state/tabViews';
 import { Soli } from '../../src/ui/characters';
 import { Avatar } from '../../src/ui/components/Avatar';
 import { DEV_DAY_SUB, DEV_DAY_TITLE } from '../../src/copy/morning.ko';
+import { DEV_OUTFIT_SUB, DEV_OUTFIT_TITLE } from '../../src/copy/outfits.ko';
 import { DEV_WAKE_SUB, DEV_WAKE_TITLE } from '../../src/copy/settings.ko';
 import { DevTools } from '../../src/ui/components/DevTools';
 import { FEATURES } from '../../src/ui/features';
@@ -114,6 +115,7 @@ export default function MeScreen() {
           <>
           <MenuCard icon="settings" iconBg={colors.track} iconColor={colors.textMuted} title={DEV_WAKE_TITLE} subtitle={DEV_WAKE_SUB} onPress={() => router.push('/wake')} />
           <MenuCard icon="settings" iconBg={colors.track} iconColor={colors.textMuted} title={DEV_DAY_TITLE} subtitle={DEV_DAY_SUB} onPress={() => router.push('/morning/day')} />
+          <MenuCard icon="settings" iconBg={colors.track} iconColor={colors.textMuted} title={DEV_OUTFIT_TITLE} subtitle={DEV_OUTFIT_SUB} onPress={() => router.push('/morning/outfit')} />
           </>
         )}
         {__DEV__ && <DevTools />}

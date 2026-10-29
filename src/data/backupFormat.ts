@@ -1,5 +1,7 @@
 // 백업 JSON 형식 (SPEC 10·11장: 백업은 JSON 내보내기/가져오기). SQLite에 의존하지 않는 순수 모듈.
 
+import { isKnownItem, itemMeta } from '../domain/outfit';
+
 export const BACKUP_APP = 'solbit-village';
 
 /**
@@ -19,6 +21,8 @@ export const BACKUP_TABLES = {
   skin: ['id', 'owned', 'equipped'],
   place: ['id', 'name', 'duration', 'visited', 'memo', 'note', 'event_id', 'log_id', 'visited_date', 'nights', 'added_date', 'created_at'],
   rest_log: ['id', 'date', 'text', 'tags', 'size', 'created_at'],
+  outfit_owned: ['item_id', 'acquired_at', 'source'],
+  outfit_equipped: ['slot', 'item_id'],
 } as const;
 
 export type BackupTable = keyof typeof BACKUP_TABLES;
@@ -116,6 +120,15 @@ export function parseBackup(text: string, currentSchemaVersion: number): ParseRe
     }
     if (name === 'event' && o.schemaVersion < 6) {
       for (const r of clean) r.type = OLD_EVENT_TYPE[String(r.type)] ?? 'etc';
+    }
+    // 옷장: 이 앱이 모르는 옷 · 슬롯이 맞지 않는 옷은 가져오지 않는다
+    if (name === 'outfit_owned') {
+      tables[name] = clean.filter((r) => isKnownItem(String(r.item_id)));
+      continue;
+    }
+    if (name === 'outfit_equipped') {
+      tables[name] = clean.filter((r) => itemMeta(String(r.item_id))?.slot === r.slot);
+      continue;
     }
     if (name === 'skin' && o.schemaVersion < 7) {
       tables[name] = clean.filter((r) => !REMOVED_SKINS.includes(String(r.id)));

@@ -27,6 +27,8 @@ export const SETTING = {
   newsAlarmTime: 'news_alarm_time',
   /** 아침 흐름을 마친 날 (YYYY-MM-DD). 아직 쓰는 곳 없음 — 컨디션 이후 화면과 함께 만든다. 지금은 읽기만. */
   morningDoneDay: 'morning_done_day',
+  /** 처음 가진 옷을 넣어 뒀는지 '1'. 없으면 앱이 한 번 넣는다 (백업 가져오기로 지워지면 다시 넣는다) */
+  outfitSeeded: 'outfit_seeded',
   /** 쪽지 제안 기억 (JSON: 장소별 마지막 제안일 · 오늘의 쪽지) */
   restNote: 'rest_note',
 } as const;

@@ -29,6 +29,8 @@ app/                    expo-router 화면
   storage.tsx           수확 창고 (창고 / 교환소 탭)
   neighbor-new.tsx      이웃 등록
   morning-news.tsx      밤사이 마을 소식
+  wake.tsx              아침 흐름 1: 솔이 깨우기 (morningFlow 플래그 뒤)
+  morning/              아침 흐름 2·3: day.tsx 오늘 하루 고르기 · outfit.tsx 복장 고르기(솔이네 옷장)
 src/
   domain/               게임 규칙. 순수 TS, React/RN import 금지
     crops.ts            작물 결정 · 성장 단계 · 밭 5칸 · 자동 수확
@@ -42,11 +44,14 @@ src/
     events.ts           행사 D-day · 지나간 일
     broadcast.ts        상황 → 이장 방송 선택
     day.ts              "하루"의 경계 계산
+    morning.ts          아침 흐름 규칙 (깨우기 노출 · 하루 종류 · 컨디션 · 솔이 포즈 교대)
+    outfit.ts           솔이 옷장: 슬롯 6 · 아이템 25 · 입기/벗기 · 겹침 순서 (장식일 뿐, 다른 규칙과 무관)
   data/                 SQLite 스키마 · 마이그레이션 · repository
   state/                zustand 스토어
   ui/
     theme.ts            색 · 폰트 · 간격 토큰
     characters/         솔이 · 꾸역 이장 · 이웃 얼굴 SVG (디자인 파일에서 이식)
+      outfits/          옷 아이템 SVG 문자열 25개(28장, 슬롯별 파일) · 칸 썸네일 배치. 합성은 SoliOutfit.tsx
     components/         BroadcastLine, IndexCard, Chip, BottomSheet, FieldPlot …
   copy/broadcasts.ko.ts 이장 방송 문구 모음 (코드에 문구 하드코딩 금지)
   notifications/

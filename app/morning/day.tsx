@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Ellipse, Path, Rect } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 
 import {
   CONDITION_SECTION,
@@ -13,12 +13,11 @@ import {
   DAY_SECTION,
   MORNING_LATER,
   MORNING_NEXT,
-  MORNING_STEP_LABEL,
-  MORNING_TITLE,
 } from '../../src/copy/morning.ko';
 import { dayPickBroadcast } from '../../src/domain/morning';
 import { useMorning } from '../../src/state/morningStore';
 import { BroadcastLine } from '../../src/ui/components/BroadcastLine';
+import { MorningHeader } from '../../src/ui/components/MorningHeader';
 import { ConditionCards, DayCards } from '../../src/ui/components/MorningChoices';
 import { MorningScene } from '../../src/ui/components/MorningScene';
 import { APP_MAX_WIDTH, MORNING_DAY_LAYOUT, morningDayLayout } from '../../src/ui/layout';
@@ -57,10 +56,7 @@ export default function MorningDayScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.content, { minHeight: visibleHeight - insets.top, paddingBottom: insets.bottom + M.bottomPad }]}
       >
-        <View style={styles.header}>
-          <Text style={styles.title}>{MORNING_TITLE}</Text>
-          <Steps />
-        </View>
+        <MorningHeader step={1} />
 
         <BroadcastLine
           message={DAY_PICK_BROADCAST[dayPickBroadcast(condition)]}
@@ -114,51 +110,9 @@ function SectionLabel({ text }: { text: string }) {
   );
 }
 
-/** 발자국 3칸: 지금 1번째(연두로 채움) · 2번째(빈 칸) · 마지막은 핑크 깃발 */
-function Steps() {
-  return (
-    <View style={styles.steps} accessible accessibilityLabel={MORNING_STEP_LABEL}>
-      <View style={[styles.dot, { backgroundColor: colors.relation }]}>
-        <Foot color={colors.line} />
-      </View>
-      <Dashes />
-      <View style={[styles.dot, styles.dotOff]}>
-        <Foot color={colors.tabInactive} />
-      </View>
-      <Dashes />
-      <Svg width={24} height={30} viewBox="0 0 26 32">
-        <Rect x={3} y={2} width={2.6} height={29} rx={1.3} fill="#FFFFFF" />
-        <Path d="M5.6 3h17l-4 5 4 5h-17z" fill={colors.pink} />
-      </Svg>
-    </View>
-  );
-}
-
-function Foot({ color }: { color: string }) {
-  return (
-    <Svg width={16} height={16} viewBox="0 0 24 24" fill={color}>
-      <Ellipse cx={8} cy={15} rx={3} ry={4.5} />
-      <Ellipse cx={16} cy={9} rx={3} ry={4.5} />
-    </Svg>
-  );
-}
-
-function Dashes() {
-  return (
-    <Svg width={22} height={4} viewBox="0 0 22 4">
-      <Path d="M2 2H20" stroke={colors.disabled} strokeWidth={3} strokeDasharray="1 6" strokeLinecap="round" />
-    </Svg>
-  );
-}
-
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.night },
   content: { flexGrow: 1 },
-  header: { paddingTop: 2, paddingHorizontal: 20, paddingBottom: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  title: { fontFamily: fonts.title, fontSize: 28, lineHeight: 34, color: colors.yellow },
-  steps: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  dot: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
-  dotOff: { backgroundColor: colors.night, borderWidth: 2, borderColor: colors.disabled },
   scene: { marginTop: M.gapScene, marginHorizontal: 12 },
   block: { marginHorizontal: 12, gap: 8 },
   label: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 4, height: 22 },

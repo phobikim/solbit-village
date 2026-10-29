@@ -222,6 +222,21 @@ export const MIGRATIONS: readonly string[] = [
 
   ALTER TABLE place ADD COLUMN log_id TEXT;
   `,
+
+  // v12 — 솔이네 옷장 (아침 흐름 3번째 화면): 가진 옷 · 입고 있는 옷.
+  //       옷은 장식일 뿐이라 다른 테이블과 이어지지 않는다. 처음 가진 옷은 앱이 한 번 넣는다 (src/data/outfit.ts seedOwned).
+  `
+  CREATE TABLE outfit_owned (
+    item_id     TEXT PRIMARY KEY NOT NULL,             -- '{slot}-{name}' (예: head-straw)
+    acquired_at TEXT,                                  -- YYYY-MM-DD
+    source      TEXT                                   -- 'start' (처음부터) · 이후 옷 가게 등
+  );
+
+  CREATE TABLE outfit_equipped (
+    slot    TEXT PRIMARY KEY NOT NULL CHECK (slot IN ('head', 'face', 'body', 'back', 'hand', 'feet')),
+    item_id TEXT NOT NULL                              -- 슬롯마다 한 개
+  );
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;
