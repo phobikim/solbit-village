@@ -17,11 +17,14 @@ export function tabOfPath(path: string): TabKey | null {
   return null;
 }
 
-/** 아침 첫 화면 "솔이 깨우기" 다음에 갈 곳. 컨디션 화면이 생기면 여기만 바꾼다. */
-export const AFTER_WAKE_HREF = '/(tabs)' as const;
+/** 아침 첫 화면 "솔이 깨우기" 다음에 갈 곳. */
+export const AFTER_WAKE_HREF = '/morning/day' as const;
+
+/** "오늘 하루 고르기" 다음에 갈 곳. 복장 화면이 생기면 여기만 바꾼다. */
+export const AFTER_DAY_HREF = '/(tabs)' as const;
 
 /** 하단 바를 숨기는 전체 화면 */
-const FULLSCREEN_PATHS: readonly string[] = ['/wake'];
+const FULLSCREEN_PATHS: readonly string[] = ['/wake', '/morning/day'];
 
 export function hidesBottomBar(path: string): boolean {
   return FULLSCREEN_PATHS.includes(path);

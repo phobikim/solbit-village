@@ -1,4 +1,4 @@
-import { APP_MAX_WIDTH, contentWidth, MAIN_LAYOUT, mainLayout, SCENE_PCT, SCENE_RATIO, SCENE_VIEW, sceneHeight, sx, sy } from '../layout';
+import { APP_MAX_WIDTH, contentWidth, MAIN_LAYOUT, mainLayout, morningDayLayout, SCENE_PCT, SCENE_RATIO, SCENE_VIEW, sceneHeight, sx, sy } from '../layout';
 
 const M = MAIN_LAYOUT;
 const W390 = contentWidth(390); // 358
@@ -148,5 +148,36 @@ describe('메인 압축 단계', () => {
     expect(step(375, 667)).toBe(2);
     expect(step(390, 844)).toBe(0);
     expect(step(430, 932)).toBe(0);
+  });
+});
+
+describe('morningDayLayout (오늘 하루 고르기)', () => {
+  it('키 큰 화면은 장면 300, 카드 기본', () => {
+    const L = morningDayLayout(932, 59, 34);
+    expect(L).toMatchObject({ step: 0, scene: 300, dayCard: 88, condCard: 78, scroll: false });
+  });
+  it('보통 화면은 장면이 줄어들고 스크롤 없음', () => {
+    const L = morningDayLayout(852, 59, 34);
+    expect(L.scroll).toBe(false);
+    expect(L.scene).toBeGreaterThanOrEqual(180);
+    expect(L.scene).toBeLessThanOrEqual(300);
+  });
+  it('작은 화면은 카드를 압축', () => {
+    const L = morningDayLayout(700, 20, 0);
+    expect(L.step).toBe(1);
+    expect(L.dayCard).toBe(72);
+    expect(L.condCard).toBe(64);
+  });
+  it('아주 작으면 스크롤', () => {
+    const L = morningDayLayout(560, 20, 0);
+    expect(L).toMatchObject({ step: 2, scene: 180, scroll: true });
+  });
+  it('들어가는 화면에서는 내용 높이가 사용 가능 높이를 넘지 않는다', () => {
+    for (const h of [667, 700, 740, 780, 852, 932]) {
+      const L = morningDayLayout(h, 20, 0);
+      if (L.scroll) continue;
+      const used = L.scene + L.dayCard + L.condCard + 50 + 68 + 12 + 16 + 30 + 14 + 30 + 14 + 56 + 6 + 28 + 6;
+      expect(used).toBeLessThanOrEqual(L.available);
+    }
   });
 });

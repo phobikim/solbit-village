@@ -27,6 +27,7 @@ describe('하단 바 탭 (마을 · 장부 · 이웃 · 쉼터 · 나)', () => {
 describe('전체 화면', () => {
   it('/wake에서는 하단 바를 숨긴다', () => {
     expect(hidesBottomBar('/wake')).toBe(true);
+    expect(hidesBottomBar('/morning/day')).toBe(true);
     expect(hidesBottomBar('/')).toBe(false);
     expect(hidesBottomBar('/records')).toBe(false);
   });

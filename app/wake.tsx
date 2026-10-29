@@ -1,10 +1,10 @@
 // 아침 첫 화면 "솔이 깨우기" — 영상이 반복 재생되고 이장이 한마디, 버튼 하나. 기록·수치 UI 없음.
 // 노출 조건은 src/domain/morning.ts · src/ui/features.ts (morningFlow 플래그).
 
-import { router, useFocusEffect } from 'expo-router';
+import { router } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import { useCallback, useEffect, useState } from 'react';
-import { AppState, Image, StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Image, StyleSheet, View } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -15,6 +15,7 @@ import { BroadcastLine } from '../src/ui/components/BroadcastLine';
 import { PrimaryButton } from '../src/ui/components/PrimaryButton';
 import { AFTER_WAKE_HREF } from '../src/ui/navigation';
 import { colors } from '../src/ui/theme';
+import { useScreenActive } from '../src/ui/useScreenActive';
 
 const poster = require('../assets/morning/wake-poster.jpg');
 const loop = require('../assets/morning/wake-loop.mp4');
@@ -27,25 +28,14 @@ export default function WakeScreen() {
   const [now] = useState(() => new Date());
 
   // 화면 포커스 · 앱 활성 상태가 모두 참일 때만 재생
-  const [focused, setFocused] = useState(true);
-  useFocusEffect(
-    useCallback(() => {
-      setFocused(true);
-      return () => setFocused(false);
-    }, []),
-  );
-  const [appActive, setAppActive] = useState(AppState.currentState === 'active');
-  useEffect(() => {
-    const sub = AppState.addEventListener('change', (s) => setAppActive(s === 'active'));
-    return () => sub.remove();
-  }, []);
+  const screenActive = useScreenActive();
 
   // 모션 줄이기: 영상 원본을 불러오지도 않는다
   const player = useVideoPlayer(reduceMotion ? null : loop, (p) => {
     p.loop = true;
     p.muted = true;
   });
-  const shouldPlay = !reduceMotion && focused && appActive;
+  const shouldPlay = !reduceMotion && screenActive;
   useEffect(() => {
     if (reduceMotion) return;
     if (shouldPlay) player.play();

@@ -165,3 +165,53 @@ export function mainLayout(visibleHeight: number, insetTop: number, insetBottom:
     scroll: step === 4,
   };
 }
+
+// ── 아침 흐름 2번째 화면 "오늘 하루 고르기" (디자인 v4 25b~25e) ───────────
+// 스크롤 없이 한 화면. 장면 카드가 남는 높이를 받고(최대 300), 모자라면 카드 높이를 줄인다. 그래도 모자라면 스크롤.
+
+export const MORNING_DAY_LAYOUT = {
+  header: 50,
+  broadcast: 68,
+  /** 방송 | 장면 */
+  gapScene: 12,
+  scene: { max: 300, min: 180, /** 이 아래로 줄어들면 카드를 압축 */ comfortable: 220 },
+  /** 장면 | "오늘은" */
+  gapDays: 16,
+  /** 소제목 줄 + 소제목과 카드 사이 */
+  label: 30,
+  dayCard: { full: 88, compact: 72 },
+  /** "오늘은" 카드 | "몸은" */
+  gapConds: 14,
+  condCard: { full: 78, compact: 64 },
+  /** "몸은" 카드 | 다음 버튼 */
+  gapButton: 14,
+  button: 56,
+  /** 다음 버튼 | 나중에 할래유 */
+  gapLater: 6,
+  later: 28,
+  /** 아래 안전 영역에 더하는 여백 */
+  bottomPad: 6,
+} as const;
+
+export type MorningDayLayout = {
+  /** 0 기본 · 1 카드 압축 · 2 압축해도 모자라 스크롤 */
+  step: 0 | 1 | 2;
+  available: number;
+  scene: number;
+  dayCard: number;
+  condCard: number;
+  scroll: boolean;
+};
+
+export function morningDayLayout(visibleHeight: number, insetTop: number, insetBottom: number): MorningDayLayout {
+  const M = MORNING_DAY_LAYOUT;
+  const available = Math.max(0, visibleHeight - insetTop - insetBottom);
+  const fixedOf = (day: number, cond: number) =>
+    M.header + M.broadcast + M.gapScene + M.gapDays + M.label + day + M.gapConds + M.label + cond + M.gapButton + M.button + M.gapLater + M.later + M.bottomPad;
+
+  const full = Math.min(M.scene.max, available - fixedOf(M.dayCard.full, M.condCard.full));
+  if (full >= M.scene.comfortable) return { step: 0, available, scene: full, dayCard: M.dayCard.full, condCard: M.condCard.full, scroll: false };
+  const compact = Math.min(M.scene.max, available - fixedOf(M.dayCard.compact, M.condCard.compact));
+  if (compact >= M.scene.min) return { step: 1, available, scene: compact, dayCard: M.dayCard.compact, condCard: M.condCard.compact, scroll: false };
+  return { step: 2, available, scene: M.scene.min, dayCard: M.dayCard.compact, condCard: M.condCard.compact, scroll: true };
+}
