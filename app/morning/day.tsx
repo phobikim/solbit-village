@@ -1,6 +1,7 @@
-// 아침 흐름 2번째 화면 "오늘 하루 고르기" (디자인 v5 26a~c). 일하는 날 / 노는 날 중 하나를 고르고, 받을 보상(예정)을 카드에서 바로 보여 준다.
-// 값은 메모리(zustand)에만 둔다 — DB 저장 없음. 기록 입력 · 코인/기력 지급은 이 화면에 두지 않는다 (지급은 저녁 기록 저장 시, 별도 작업).
-// TODO([미정]): 지급은 저녁 기록 저장 시. 기력과 장작 상한 관계 확정 후 구현
+// 아침 흐름 2번째(마지막) 화면 "오늘 하루 고르기" (디자인 v5 26a~c). 일하는 날 / 노는 날 중 하나를 고르고, 받을 보상(예정)을 카드에서 바로 보여 준다.
+// 값은 메모리(zustand)에만 둔다 — DB 저장 없음. 기록 입력 · 코인/흥 지급은 이 화면에 두지 않는다 (지급은 저녁 기록 저장 시, 별도 작업).
+// [다음]도 [나중에 할래유]도 마을(메인)로 간다 (AFTER_DAY_HREF). 복장은 하단 옷장 탭에서 고른다.
+// TODO([미정]): 지급은 저녁 기록 저장 시. 흥과 장작 상한 관계 확정 후 구현
 
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -71,7 +72,7 @@ export default function MorningDayScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.content, { minHeight: visibleHeight - insets.top, paddingBottom: insets.bottom + M.bottomPad }]}
       >
-        <MorningHeader step={1} />
+        <MorningHeader />
 
         <BroadcastLine message={DAY_PICK_BROADCAST} time={`${pad(now.getHours())}:${pad(now.getMinutes())}`} />
 

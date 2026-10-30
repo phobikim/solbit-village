@@ -14,7 +14,7 @@ export const rewardProgressA11y = (level: number) => `마을 Lv.${level + 1}까�
 export const rewardRowLabel = (level: number) => `Lv.${level}`;
 
 export const REWARD_COIN_LABEL = '월급';
-export const REWARD_ENERGY_LABEL = '기력';
+export const REWARD_HEUNG_LABEL = '흥';
 export const REWARD_PAST = '지난 레벨';
 export const REWARD_CURRENT = '지금 레벨';
 export const REWARD_FUTURE = '아직 잠겨 있어요';
@@ -37,6 +37,6 @@ export const UNLOCK_NAME: Record<UnlockId, string> = {
 /** 표에 없는 레벨(Lv.13~)에서 해금 칸에 쓰는 문구 */
 export const UNLOCK_NONE = '새 소식을 기다려유';
 
-/** 보상표 줄 접근성 라벨: "Lv.7, 월급 160, 기력 +12, 우물, 지금 레벨" */
-export const rewardRowA11y = (level: number, salary: number, energy: number, unlock: string, status: string) =>
-  `Lv.${level}, ${REWARD_COIN_LABEL} ${salary}, ${REWARD_ENERGY_LABEL} +${energy}, ${unlock}, ${status}`;
+/** 보상표 줄 접근성 라벨: "Lv.7, 월급 160, 흥 +12, 우물, 지금 레벨" */
+export const rewardRowA11y = (level: number, salary: number, heung: number, unlock: string, status: string) =>
+  `Lv.${level}, ${REWARD_COIN_LABEL} ${salary}, ${REWARD_HEUNG_LABEL} +${heung}, ${unlock}, ${status}`;

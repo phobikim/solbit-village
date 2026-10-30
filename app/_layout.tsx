@@ -53,7 +53,6 @@ export default function RootLayout() {
             <Stack.Screen name="morning-news" options={{ presentation: 'transparentModal', animation: 'fade', contentStyle: { backgroundColor: 'transparent' } }} />
             <Stack.Screen name="wake" options={{ animation: 'fade', gestureEnabled: false }} />
             <Stack.Screen name="morning/day" options={{ animation: 'fade', gestureEnabled: false }} />
-            <Stack.Screen name="morning/outfit" options={{ animation: 'fade', gestureEnabled: false }} />
             <Stack.Screen name="settings" />
             <Stack.Screen name="neighbor-new" options={{ presentation: 'modal' }} />
             <Stack.Screen name="ledger/new" options={{ presentation: 'modal' }} />

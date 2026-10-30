@@ -10,7 +10,7 @@ import { SvgXml } from 'react-native-svg';
 
 import {
   REWARD_CURRENT,
-  REWARD_ENERGY_LABEL,
+  REWARD_HEUNG_LABEL,
   REWARD_FUTURE,
   REWARD_MILESTONE,
   REWARD_PAST,
@@ -25,7 +25,7 @@ import {
   UNLOCK_NONE,
 } from '../../copy/rewards.ko';
 import { rewardRow, rewardStatus, rewardTableLevels, type RewardRow, type RewardStatus } from '../../domain/rewards';
-import { ICON_COIN, ICON_ENERGY, ICON_TROPHY } from '../characters/rewardIcons';
+import { ICON_COIN, ICON_HEUNG, ICON_TROPHY } from '../characters/rewardIcons';
 import { APP_MAX_WIDTH } from '../layout';
 import { colors, fonts } from '../theme';
 import { CheckGlyph, CloseGlyph, LockGlyph, UnlockGlyph } from './unlockIcons';
@@ -212,7 +212,7 @@ function RewardList({ levels, currentLevel, bottomInset }: { levels: RewardRow[]
 }
 
 function rowLabel(row: RewardRow, status: RewardStatus): string {
-  return rewardRowA11y(row.level, row.salary, row.energy, row.unlock ? UNLOCK_NAME[row.unlock.id] : UNLOCK_NONE, STATUS_LABEL[status]);
+  return rewardRowA11y(row.level, row.salary, row.heung, row.unlock ? UNLOCK_NAME[row.unlock.id] : UNLOCK_NONE, STATUS_LABEL[status]);
 }
 
 /** 지금 레벨은 카드 바깥에 어두운 틈 + 노랑 테두리가 한 겹 더 둘린다 (시안: box-shadow 0 0 0 3px #1A2150, 0 0 0 6px #FFE14D) */
@@ -250,11 +250,11 @@ function Chips({ row, status, big }: { row: RewardRow; status: RewardStatus; big
         </View>
         <Text style={num}>{row.salary}</Text>
       </View>
-      <View style={chip} accessible accessibilityLabel={`${REWARD_ENERGY_LABEL} +${row.energy}`}>
+      <View style={chip} accessible accessibilityLabel={`${REWARD_HEUNG_LABEL} +${row.heung}`}>
         <View style={{ opacity: t.iconOp }}>
-          <SvgXml xml={ICON_ENERGY} width={icon} height={icon} />
+          <SvgXml xml={ICON_HEUNG} width={icon} height={icon} />
         </View>
-        <Text style={num}>+{row.energy}</Text>
+        <Text style={num}>+{row.heung}</Text>
       </View>
     </View>
   );

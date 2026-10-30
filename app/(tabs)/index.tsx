@@ -1,5 +1,5 @@
 // 7a 마을 (메인). 기록·밭·경험치를 SQLite에서 읽어 마을을 그린다.
-// 구성 순서: 헤더 → 방송 → 마을 장면(4:3 고정) → 지수 → 밭 띠 → 오늘 기록하기 → 탭 바.
+// 구성 순서: 재화 바(코인 · 흥) → 헤더 → 방송 → 마을 장면(4:3 고정) → 지수 → 밭 띠 → 오늘 기록하기 → 탭 바.
 // 장면 비율은 절대 바꾸지 않고, 높이가 모자라면 나머지를 압축한다. 그래도 안 들어가면 메인만 스크롤 (탭 바 고정).
 // 높이 규칙과 압축 단계는 src/ui/layout.ts (SPEC 11장).
 
@@ -17,9 +17,11 @@ import { needsMorningNews } from '../../src/state/newsView';
 import { usePlaces } from '../../src/state/places';
 import { useRecords } from '../../src/state/records';
 import { useRestLogs } from '../../src/state/restLogs';
+import { useWallet } from '../../src/state/wallet';
 import { useVillageView, villageRange } from '../../src/state/villageView';
 import { VillageScene } from '../../src/ui/characters';
 import { BroadcastLine } from '../../src/ui/components/BroadcastLine';
+import { CurrencyChips } from '../../src/ui/components/CurrencyChips';
 import { FieldStrip } from '../../src/ui/components/FieldStrip';
 import { IndexCard } from '../../src/ui/components/IndexCard';
 import { LevelBar } from '../../src/ui/components/LevelBar';
@@ -44,6 +46,7 @@ export default function VillageScreen() {
   const loadSkins = useSkins((s) => s.load);
   const loadPlaces = usePlaces((s) => s.load);
   const loadRestLogs = useRestLogs((s) => s.load);
+  const loadWallet = useWallet((s) => s.load);
   const [now, setNow] = useState(() => new Date());
   const v = useVillageView(today, now);
 
@@ -61,15 +64,19 @@ export default function VillageScreen() {
         .then((show) => show && router.push('/morning-news'))
         .catch((e) => console.warn('[news] check failed', e));
       const { from, to } = villageRange(today);
-      Promise.all([loadRange(from, to), loadFarm(), loadNeighbors(), loadLedger(), loadSkins(), loadPlaces(), loadRestLogs()]).catch((e) =>
+      Promise.all([loadRange(from, to), loadFarm(), loadNeighbors(), loadLedger(), loadSkins(), loadPlaces(), loadRestLogs(), loadWallet()]).catch((e) =>
         console.warn('[village] load failed', e),
       );
-    }, [today, loadRange, loadFarm, loadNeighbors, loadLedger, loadSkins, loadPlaces, loadRestLogs]),
+    }, [today, loadRange, loadFarm, loadNeighbors, loadLedger, loadSkins, loadPlaces, loadRestLogs, loadWallet]),
   );
 
   const body: ReactNode = (
     <>
-      <View style={[styles.header, { height: L.header }]}>
+      <View style={[styles.currency, { height: L.currency }]}>
+        <CurrencyChips />
+      </View>
+
+      <View style={[styles.header, { height: L.header, marginTop: L.currencyGap }]}>
         <View style={styles.titleRow}>
           <Text style={styles.title}>{VILLAGE_NAME}</Text>
           <View style={styles.levelBadge}>
@@ -133,6 +140,7 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.night },
   fill: { flex: 1 },
   scrollContent: { paddingBottom: 8 },
+  currency: { paddingHorizontal: SIDE + 4, justifyContent: 'center' },
   header: { paddingTop: 2, paddingHorizontal: SIDE + 4, justifyContent: 'space-between' },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   title: { fontFamily: fonts.title, fontSize: 26, lineHeight: 34, color: colors.yellow },

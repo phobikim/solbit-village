@@ -1,4 +1,4 @@
-// 하단 바 (design/ v5 TURN 7 개정): 떠 있는 알약 모양, 활성 탭은 노란 알약. 모든 탭은 아이콘 위 · 글자 아래 세로 정렬이고, 선택해도 가로로 바뀌지 않는다 (2026-10-26).
+// 하단 바 (design/ v5 TURN 7 개정 · 6탭: 마을 · 장부 · 이웃 · 쉼터 · 옷장 · 나, 디자인 TURN 27): 떠 있는 알약 모양, 활성 탭은 노란 알약. 모든 탭은 아이콘 위 · 글자 아래 세로 정렬이고, 선택해도 가로로 바뀌지 않는다 (2026-10-26).
 // 탭 화면뿐 아니라 하위 화면(장부 · 수확 창고 · 설정 …)에도 항상 떠 있다. 입력 시트 · 결과 카드는 위를 덮는다.
 
 import { router, usePathname } from 'expo-router';
@@ -11,13 +11,14 @@ import { tabIconSvg, type TabIcon } from '../characters/icons';
 import { hidesBottomBar, tabOfPath } from '../navigation';
 import { colors, fonts } from '../theme';
 
-type Tab = { key: TabIcon; label: string; href: '/' | '/records' | '/neighbors' | '/rest' | '/me' };
+type Tab = { key: TabIcon; label: string; href: '/' | '/records' | '/neighbors' | '/rest' | '/closet' | '/me' };
 
 const TABS: readonly Tab[] = [
   { key: 'village', label: '마을', href: '/' },
   { key: 'records', label: '장부', href: '/records' },
   { key: 'neighbors', label: '이웃', href: '/neighbors' },
   { key: 'rest', label: '쉼터', href: '/rest' },
+  { key: 'closet', label: '옷장', href: '/closet' },
   { key: 'me', label: '나', href: '/me' },
 ];
 

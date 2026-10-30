@@ -1,4 +1,4 @@
-// 아침 흐름 (솔이 깨우기 → 하루 고르기 → 복장 …)의 노출 규칙. 순수 TS.
+// 아침 흐름 (솔이 깨우기 → 하루 고르기 → 마을)의 노출 규칙. 순수 TS.
 
 import { isMiddayOrLater, today, type DayKey } from './day';
 
@@ -33,7 +33,7 @@ export function normalizeDayType(value: unknown): DayType | null {
 
 // TODO(미정, 사용자에게 물을 것 — 이번에는 구현하지 않는다):
 //  ① 하루 종류(일 · 놀기)를 저장하는 데이터 모델. 지금은 메모리에만 둔다.
-//  ② 월급 · 기력 지급 시점과 모델은 src/domain/rewards.ts 의 TODO 참고.
+//  ② 월급 · 흥 지급 시점과 모델은 src/domain/rewards.ts 의 TODO 참고.
 
 /** 솔이 포즈 이름. 그림은 src/ui/characters/soliPoses.ts */
 export type SoliPoseName = 'base' | 'walkA' | 'walkB' | 'balloonA' | 'balloonB';

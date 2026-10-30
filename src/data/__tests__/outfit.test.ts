@@ -3,8 +3,8 @@
  */
 // 옷장 테이블(마이그레이션 v12)과 백업 왕복을 진짜 SQLite(node:sqlite, 메모리 DB)에서 돌려 본다.
 
-import { STARTS_OWNED, sanitizeEquipped } from '../../domain/outfit';
-import { BACKUP_TABLES, buildBackup, parseBackup, type BackupTable, type Row } from '../backupFormat';
+import { OUTFIT_ITEMS, sanitizeEquipped } from '../../domain/outfit';
+import { BACKUP_TABLES, buildBackup, ENSURE_ROWS_SQL, parseBackup, type BackupTable, type Row } from '../backupFormat';
 import { MIGRATIONS, SCHEMA_VERSION } from '../migrations';
 
 type Db = {
@@ -43,6 +43,7 @@ function importAll(db: Db, text: string): void {
       db.prepare(`INSERT OR REPLACE INTO ${name} (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(', ')})`).run(...cols.map((c) => row[c]));
     }
   }
+  for (const sql of ENSURE_ROWS_SQL) db.exec(sql);
 }
 
 maybe('옷장 테이블 (스키마 v12)', () => {
@@ -72,7 +73,7 @@ maybe('옷장 백업 왕복', () => {
   function dressed(): Db {
     const db = open();
     const ins = db.prepare("INSERT INTO outfit_owned (item_id, acquired_at, source) VALUES (?, '2026-10-29', 'start')");
-    for (const id of STARTS_OWNED) ins.run(id);
+    for (const it of OUTFIT_ITEMS) ins.run(it.id);
     const eq = db.prepare('INSERT INTO outfit_equipped (slot, item_id) VALUES (?, ?)');
     eq.run('head', 'head-wizard');
     eq.run('body', 'body-hoodie');
@@ -94,7 +95,7 @@ maybe('옷장 백업 왕복', () => {
     importAll(fresh, json);
 
     expect(readEquipped(fresh)).toEqual({ head: 'head-wizard', body: 'body-hoodie', back: 'back-cape' });
-    expect(fresh.prepare('SELECT COUNT(*) AS n FROM outfit_owned').all()[0].n).toBe(25);
+    expect(fresh.prepare('SELECT COUNT(*) AS n FROM outfit_owned').all()[0].n).toBe(OUTFIT_ITEMS.length);
   });
 
   it('가져오면 지금 입은 옷은 백업의 옷으로 바뀐다', () => {

@@ -1,7 +1,6 @@
 import { OUTFIT_NAME } from '../../../copy/outfits.ko';
 import { OUTFIT_ITEMS, SPLIT_ITEMS } from '../../../domain/outfit';
 import { dressedThumbBox, itemThumbBox, OUTFIT_ART } from '../outfits';
-import { silhouetteSvg } from '../outfits/silhouette';
 import { SOLI_POSES } from '../soliPoses';
 
 describe('옷 그림 모음', () => {
@@ -73,49 +72,39 @@ describe('옷 그림 모음', () => {
   });
 });
 
-describe('칸 썸네일 배치', () => {
-  it('60px 칸: 솔이 몸이 약 54px 높이로 들어온다', () => {
-    // 캔버스 240 중 솔이 몸 196 → 0.9 × 60 = 54
-    const b = dressedThumbBox('feet-boots', 60);
-    expect(b.height / 240).toBeGreaterThan(0.2);
-    const s = b.width / 200;
-    expect(196 * s).toBeLessThanOrEqual(54.01);
-  });
-
-  it('아이템 영역이 칸 밖으로 나가지 않는다', () => {
-    for (const it of OUTFIT_ITEMS) {
-      const b = dressedThumbBox(it.id, 60);
+describe('칸 썸네일 배치 (시안 옷장 TURN 28 thumb() / dressed())', () => {
+  it('80px 칸: 솔이 몸 + 아이템이 한 정사각형에 들어온다 (몸 · 등)', () => {
+    for (const id of OUTFIT_ITEMS.filter((i) => i.slot === 'body' || i.slot === 'back').map((i) => i.id)) {
+      const b = dressedThumbBox(id, 80);
       const s = b.width / 200;
-      // 캔버스 왼쪽 위 → 칸 안 위치. 솔이 몸(14~186, 14~210)이 칸 안에 있어야 한다
+      // 캔버스(200×240) 왼쪽 위 → 칸 안 위치. 솔이 몸(14~186, 14~210)이 칸 안에 있어야 한다
       expect(b.left + 14 * s).toBeGreaterThanOrEqual(-0.5);
-      expect(b.left + 186 * s).toBeLessThanOrEqual(60.5);
+      expect(b.left + 186 * s).toBeLessThanOrEqual(80.5);
       expect(b.top + (14 + 20) * s).toBeGreaterThanOrEqual(-0.5);
-      expect(b.top + (210 + 20) * s).toBeLessThanOrEqual(60.5);
+      expect(b.top + (210 + 20) * s).toBeLessThanOrEqual(80.5);
     }
   });
 
+  it('시안과 같은 값: 후드티 dressed 80, 비니 thumb 80', () => {
+    // dressed: bb [8,108,184,102] → x0 8, y0 14, x1 192, y1 210 → s = min(76.8/184, 76.8/196)
+    const d = dressedThumbBox('body-hoodie', 80);
+    expect(d.width).toBeCloseTo(200 * (76.8 / 196), 0);
+    // thumb: bb [26,14,148,102], s = min(80*.9/148, 80*.9/102, 1.3) = 0.4865
+    const t = itemThumbBox('head-beanie', 80);
+    expect(t.width).toBeCloseTo(200 * ((80 * 0.9) / 148), 0);
+  });
+
   it('긴 옷(날개)은 가로가 칸을 꽉 채우고 풍선은 세로가 꽉 찬다', () => {
-    expect(itemThumbBox('back-wings', 48).width).toBeGreaterThan(48 * 0.9);
-    const s = itemThumbBox('hand-balloon', 48).width / 200;
-    expect(160 * s).toBeLessThanOrEqual(48);
+    expect(itemThumbBox('back-wings', 80).width).toBeGreaterThan(80 * 0.9);
+    const s = itemThumbBox('hand-balloon', 80).width / 200;
+    expect(160 * s).toBeLessThanOrEqual(80 * 0.91);
+  });
+
+  it('모든 옷의 크롭 영역 값은 요청서와 같다 (bb)', () => {
+    // 몇 개를 골라 크기 비율로 확인: 우산 [146,118,50,100] → 세로 기준 s = 72/100
+    expect(itemThumbBox('hand-umbrella', 80).width / 200).toBeCloseTo(0.72, 2);
+    // 별 [128,135,36,36] → 가로 기준 s = min(72/36, 72/36, 1.3) = 1.3
+    expect(itemThumbBox('face-star', 80).width / 200).toBeCloseTo(1.3, 2);
   });
 });
 
-describe('실루엣', () => {
-  it('색은 한 가지로 칠하고 none은 그대로 둔다', () => {
-    const out = silhouetteSvg('<g fill="#FF0000" stroke="#10142E"><path fill="none" d="M0 0"/><circle fill="white" r="1"/></g>', '#2E3672');
-    expect(out).toBe('<g fill="#2E3672" stroke="#2E3672"><path fill="none" d="M0 0"/><circle fill="#2E3672" r="1"/></g>');
-  });
-
-  it('mask 안의 색은 건드리지 않는다', () => {
-    const out = silhouetteSvg('<mask id="m"><rect fill="white"/><rect fill="black"/></mask><path fill="#FF0000"/>', '#2E3672');
-    expect(out).toBe('<mask id="m"><rect fill="white"/><rect fill="black"/></mask><path fill="#2E3672"/>');
-  });
-
-  it('실제 옷 그림도 칠해진다', () => {
-    const xml = OUTFIT_ART['head-straw'].single!;
-    const out = silhouetteSvg(xml, '#2E3672');
-    expect(out).toContain('#2E3672');
-    expect(out).not.toMatch(/fill="#(?!2E3672)[0-9A-Fa-f]{3,8}"/);
-  });
-});

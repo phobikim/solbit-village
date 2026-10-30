@@ -3,18 +3,19 @@ import {
   SLOTS,
   SPLIT_ITEMS,
   STARTS_OWNED,
-  clearAll,
   equip,
   isKnownItem,
   isOwned,
+  itemMeta,
   itemsOfSlot,
   outfitLayers,
   sanitizeEquipped,
+  toggleWear,
   unequip,
   type Equipped,
 } from '../outfit';
 
-const ALL = new Set(STARTS_OWNED);
+const ALL = new Set(OUTFIT_ITEMS.map((i) => i.id));
 
 describe('옷장 카탈로그', () => {
   it('아이템 25개, 슬롯별 5·3·6·4·4·3', () => {
@@ -28,18 +29,19 @@ describe('옷장 카탈로그', () => {
     for (const i of OUTFIT_ITEMS) expect(i.id.startsWith(`${i.slot}-`)).toBe(true);
   });
 
-  it('표시 순서는 시안과 같다', () => {
-    expect(itemsOfSlot('head').map((i) => i.id)).toEqual(['head-headphones', 'head-straw', 'head-beanie', 'head-wizard', 'head-catears']);
-    expect(itemsOfSlot('body').map((i) => i.id)).toEqual(['body-scarf', 'body-overall', 'body-raincoat', 'body-sweater', 'body-hoodie', 'body-plaid']);
-    expect(itemsOfSlot('feet').map((i) => i.id)).toEqual(['feet-boots', 'feet-sneakers', 'feet-slippers']);
+  it('표시 순서는 시안(옷장 TURN 28)과 같다', () => {
+    expect(itemsOfSlot('head').map((i) => i.id)).toEqual(['head-beanie', 'head-catears', 'head-wizard', 'head-straw', 'head-headphones']);
+    expect(itemsOfSlot('body').map((i) => i.id)).toEqual(['body-hoodie', 'body-plaid', 'body-sweater', 'body-scarf', 'body-raincoat', 'body-overall']);
+    expect(itemsOfSlot('feet').map((i) => i.id)).toEqual(['feet-slippers', 'feet-sneakers', 'feet-boots']);
   });
 
   it('앞뒤가 갈리는 것은 후드티 · 망토 · 크로스백', () => {
     expect([...SPLIT_ITEMS].sort()).toEqual(['back-cape', 'back-crossbag', 'body-hoodie']);
   });
 
-  it('지금은 25개 전부 처음부터 가지고 있다', () => {
-    expect(STARTS_OWNED).toHaveLength(25);
+  it('처음부터 가진 옷은 6벌 (비니 · 안경 · 후드티 · 보따리 · 커피 · 슬리퍼), 슬롯마다 한 벌', () => {
+    expect([...STARTS_OWNED].sort()).toEqual(['back-bundle', 'body-hoodie', 'face-glasses', 'feet-slippers', 'hand-coffee', 'head-beanie']);
+    expect(new Set(STARTS_OWNED.map((id) => itemMeta(id)?.slot)).size).toBe(6);
   });
 });
 
@@ -72,8 +74,15 @@ describe('입기 · 벗기', () => {
     expect(unequip({ body: 'body-scarf' }, 'head')).toEqual({ body: 'body-scarf' });
   });
 
-  it('전부 벗기', () => {
-    expect(clearAll()).toEqual({});
+  it('눌러서 입기/벗기: 입은 옷을 다시 누르면 벗고, 같은 슬롯의 다른 옷을 누르면 바뀐다', () => {
+    const a = toggleWear({}, 'head-beanie', ALL);
+    expect(a).toEqual({ head: 'head-beanie' });
+    expect(toggleWear(a, 'head-straw', ALL)).toEqual({ head: 'head-straw' });
+    expect(toggleWear(a, 'head-beanie', ALL)).toEqual({});
+  });
+
+  it('가지고 있지 않은 옷은 눌러도 입혀지지 않는다', () => {
+    expect(toggleWear({}, 'head-wizard', new Set(STARTS_OWNED))).toEqual({});
   });
 
   it('모르는 id는 무시한다', () => {

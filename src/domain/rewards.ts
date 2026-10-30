@@ -3,19 +3,19 @@
 
 import { unlockForLevel, type UnlockInfo } from './villageUnlocks';
 
-// TODO([미정]): 아래 숫자는 임시값. 확정 전까지 상수로만 둔다.
+// TODO([미정]): 마을 레벨 곡선 확정 후 재검토. 아래 숫자는 임시 가안이다 ([제안] — 사용자 확정 전).
 /** 월급: Lv.1 기준 금액 */
 export const SALARY_BASE = 100;
 /** 월급: 레벨이 하나 오를 때마다 늘어나는 금액 */
 export const SALARY_PER_LEVEL = 10;
-/** 놀기 기력: Lv.1 기준 */
-export const PLAY_ENERGY_BASE = 10;
-/** 놀기 기력: 레벨 PLAY_ENERGY_STEP_EVERY 마다 늘어나는 양 */
-export const PLAY_ENERGY_STEP = 2;
-export const PLAY_ENERGY_STEP_EVERY = 5;
+/** 놀기 흥: Lv.1 기준 */
+export const PLAY_HEUNG_BASE = 10;
+/** 놀기 흥: 레벨 PLAY_HEUNG_STEP_EVERY 마다 늘어나는 양 */
+export const PLAY_HEUNG_STEP = 2;
+export const PLAY_HEUNG_STEP_EVERY = 5;
 
-// TODO([미정]): 지급은 저녁 기록 저장 시. 기력과 장작 상한 관계 확정 후 구현
-// (코인 잔액 모델, 기력 = 쉼 지수 연결, 놀기 기력과 장작 상한(35)의 관계가 모두 아직 정해지지 않았다. 이번에는 화면 표시만.)
+// TODO([미정]): 지급은 저녁 기록 저장 시. 흥과 장작 상한 관계 확정 후 구현
+// (지급 시점, 흥 = 쉼 지수 연결, 놀기 흥과 장작 상한(35)의 관계가 아직 정해지지 않았다. 잔액 저장소는 있다: src/data/wallet.ts)
 
 /** 특별 보상으로 크게 보여 주는 레벨 */
 export const MILESTONE_LEVELS: readonly number[] = [5, 10];
@@ -31,15 +31,15 @@ export function salaryForLevel(level: number): number {
   return SALARY_BASE + (clampLevel(level) - 1) * SALARY_PER_LEVEL;
 }
 
-/** 노는 날 기력 = BASE + floor((레벨 − 1) / EVERY) × STEP. 상한 없음. */
-export function playEnergyForLevel(level: number): number {
-  return PLAY_ENERGY_BASE + Math.floor((clampLevel(level) - 1) / PLAY_ENERGY_STEP_EVERY) * PLAY_ENERGY_STEP;
+/** 노는 날 흥 = BASE + floor(레벨 / EVERY) × STEP. 상한 없음. (Lv1~4 10, Lv5~9 12, Lv10~14 14) */
+export function playHeungForLevel(level: number): number {
+  return PLAY_HEUNG_BASE + Math.floor(clampLevel(level) / PLAY_HEUNG_STEP_EVERY) * PLAY_HEUNG_STEP;
 }
 
 export type RewardRow = {
   level: number;
   salary: number;
-  energy: number;
+  heung: number;
   unlock: UnlockInfo | null;
   milestone: boolean;
 };
@@ -49,7 +49,7 @@ export function rewardRow(level: number): RewardRow {
   return {
     level: lv,
     salary: salaryForLevel(lv),
-    energy: playEnergyForLevel(lv),
+    heung: playHeungForLevel(lv),
     unlock: unlockForLevel(lv),
     milestone: MILESTONE_LEVELS.includes(lv),
   };

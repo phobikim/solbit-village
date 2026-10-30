@@ -45,7 +45,7 @@ export function indexIconSvg(k: IndexKind, col: string, bg: string): string {
   return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="${col}">${b}</svg>`;
 }
 
-export type TabIcon = 'village' | 'records' | 'neighbors' | 'rest' | 'me';
+export type TabIcon = 'village' | 'records' | 'neighbors' | 'rest' | 'closet' | 'me';
 
 /** 하단 탭 아이콘 (선 아이콘) */
 export function tabIconSvg(k: TabIcon, col: string, strokeWidth = 2.4): string {
@@ -58,7 +58,9 @@ export function tabIconSvg(k: TabIcon, col: string, strokeWidth = 2.4): string {
           ? `<circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 13.6A4.5 4.5 0 0 1 21 18"/>`
           : k === 'rest'
             ? `<path d="M2.5 10.5Q8 9.5 12 4q4 5.5 9.5 6.5"/><path d="M5 10.5h14M7 10.5V20M17 10.5V20M4.5 20h15"/>`
-            : `<circle cx="12" cy="9" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/>`;
+            : k === 'closet'
+              ? `<path d="M9.8 6.2a2.2 2.2 0 1 1 3.3 1.9c-.7.4-1.1 1-1.1 1.8v.6"/><path d="M12 10.5l-8.4 6.1a1.4 1.4 0 0 0 .8 2.5h15.2a1.4 1.4 0 0 0 .8-2.5z"/>`
+              : `<circle cx="12" cy="9" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/>`;
   return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${col}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${b}</svg>`;
 }
 

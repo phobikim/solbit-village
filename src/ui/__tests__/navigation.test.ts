@@ -1,11 +1,12 @@
 import { hidesBottomBar, tabOfPath } from '../navigation';
 
-describe('하단 바 탭 (마을 · 장부 · 이웃 · 쉼터 · 나)', () => {
+describe('하단 바 탭 (마을 · 장부 · 이웃 · 쉼터 · 옷장 · 나)', () => {
   it('탭 화면', () => {
     expect(tabOfPath('/')).toBe('village');
     expect(tabOfPath('/records')).toBe('records');
     expect(tabOfPath('/neighbors')).toBe('neighbors');
     expect(tabOfPath('/rest')).toBe('rest');
+    expect(tabOfPath('/closet')).toBe('closet');
     expect(tabOfPath('/me')).toBe('me');
   });
   it('하위 화면', () => {
@@ -28,7 +29,7 @@ describe('전체 화면', () => {
   it('/wake에서는 하단 바를 숨긴다', () => {
     expect(hidesBottomBar('/wake')).toBe(true);
     expect(hidesBottomBar('/morning/day')).toBe(true);
-    expect(hidesBottomBar('/morning/outfit')).toBe(true);
+    expect(hidesBottomBar('/morning/outfit')).toBe(false);
     expect(hidesBottomBar('/')).toBe(false);
     expect(hidesBottomBar('/records')).toBe(false);
   });

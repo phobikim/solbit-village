@@ -3,7 +3,7 @@
 import { useEffect, useMemo } from 'react';
 
 import type { DayType } from '../domain/morning';
-import { playEnergyForLevel, progressRatio, salaryForLevel } from '../domain/rewards';
+import { playHeungForLevel, progressRatio, salaryForLevel } from '../domain/rewards';
 import { levelFromXp } from '../domain/village';
 import { useFarm } from './farm';
 
@@ -28,7 +28,7 @@ export function useMorningVillage(): MorningVillage {
     return {
       level: p.level,
       progress: progressRatio(p.into, p.needed),
-      rewards: { work: salaryForLevel(p.level), play: playEnergyForLevel(p.level) },
+      rewards: { work: salaryForLevel(p.level), play: playHeungForLevel(p.level) },
     };
   }, [totalXp]);
 }

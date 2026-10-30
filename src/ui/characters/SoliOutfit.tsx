@@ -7,7 +7,6 @@ import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { outfitLayers, type Equipped } from '../../domain/outfit';
 import { CachedSvg } from './CachedSvg';
 import { OUTFIT_ART, type CanvasBox } from './outfits';
-import { silhouetteSvg } from './outfits/silhouette';
 import { SOLI_POSES, SOLI_POSE_VIEWBOX } from './soliPoses';
 
 type Props = {
@@ -17,14 +16,14 @@ type Props = {
    * 바깥 View가 overflow를 자르게 하면 썸네일처럼 일부만 보여 줄 수 있다.
    */
   box: CanvasBox | { width: number };
-  /** true면 솔이 없이 입은 옷만 한 색 실루엣으로 (아직 없는 옷) */
-  silhouette?: string;
+  /** true면 솔이 없이 입은 옷만 그린다 (옷 가게 칸의 옷만 크롭) */
+  itemsOnly?: boolean;
   style?: StyleProp<ViewStyle>;
 };
 
 const RATIO = SOLI_POSE_VIEWBOX.height / SOLI_POSE_VIEWBOX.width;
 
-export const SoliOutfit = memo(function SoliOutfit({ equipped, box, silhouette, style }: Props) {
+export const SoliOutfit = memo(function SoliOutfit({ equipped, box, itemsOnly, style }: Props) {
   const width = box.width;
   const height = 'height' in box ? box.height : width * RATIO;
   const left = 'left' in box ? box.left : 0;
@@ -39,16 +38,16 @@ export const SoliOutfit = memo(function SoliOutfit({ equipped, box, silhouette, 
     const out: { key: string; xml: string }[] = [];
     for (const l of outfitLayers(equipped)) {
       if (l.kind === 'soli') {
-        if (!silhouette) out.push({ key: 'soli', xml: SOLI_POSES.base });
+        if (!itemsOnly) out.push({ key: 'soli', xml: SOLI_POSES.base });
         continue;
       }
       const xml = OUTFIT_ART[l.id]?.[l.part];
-      if (xml) out.push({ key: `${l.id}:${l.part}`, xml: silhouette ? silhouetteSvg(xml, silhouette) : xml });
+      if (xml) out.push({ key: `${l.id}:${l.part}`, xml });
     }
     return out;
     // equipped 대신 key를 본다 (같은 내용의 새 객체로는 다시 계산하지 않음)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, silhouette]);
+  }, [key, itemsOnly]);
 
   return (
     <View style={[styles.root, style]} pointerEvents="none">

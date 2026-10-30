@@ -3,15 +3,21 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { devAddCrops, devFillDue, devFillRipe, seedSampleNeighbors } from '../../data/devSeed';
+import { devAddCoins, devAddCrops, devAddHeung, devFillDue, devFillRipe, devZeroWallet, seedSampleNeighbors } from '../../data/devSeed';
+import { devResetOwnedToStart } from '../../data/outfit';
 import { today as getToday } from '../../domain/day';
 import { useFarm } from '../../state/farm';
 import { useNeighbors } from '../../state/neighbors';
+import { useOutfit } from '../../state/outfit';
+import { useWallet } from '../../state/wallet';
+import { DEV_WALLET_TITLE } from '../../copy/wallet.ko';
 import { colors, fonts } from '../theme';
 
 export function DevTools() {
   const loadFarm = useFarm((s) => s.load);
   const loadNeighbors = useNeighbors((s) => s.load);
+  const loadWallet = useWallet((s) => s.load);
+  const loadOutfit = useOutfit((s) => s.load);
   const [done, setDone] = useState<string | null>(null);
 
   if (!__DEV__) return null;
@@ -19,7 +25,7 @@ export function DevTools() {
   const run = (label: string, task: () => Promise<void>) => async () => {
     try {
       await task();
-      await Promise.all([loadFarm(), loadNeighbors()]);
+      await Promise.all([loadFarm(), loadNeighbors(), loadWallet(), loadOutfit()]);
       setDone(`${label} 완료`);
     } catch (e) {
       console.warn('[dev]', e);
@@ -42,6 +48,21 @@ export function DevTools() {
         </Pressable>
         <Pressable style={styles.btn} onPress={run('샘플 이웃 넣기', seedSampleNeighbors)}>
           <Text style={styles.btnText}>샘플 이웃 넣기</Text>
+        </Pressable>
+      </View>
+      <Text style={styles.title}>{DEV_WALLET_TITLE}</Text>
+      <View style={styles.row}>
+        <Pressable style={styles.btn} onPress={run('코인 +100', () => devAddCoins(100))}>
+          <Text style={styles.btnText}>코인 +100</Text>
+        </Pressable>
+        <Pressable style={styles.btn} onPress={run('흥 +10', () => devAddHeung(10))}>
+          <Text style={styles.btnText}>흥 +10</Text>
+        </Pressable>
+        <Pressable style={styles.btn} onPress={run('코인·흥 0으로', devZeroWallet)}>
+          <Text style={styles.btnText}>코인·흥 0으로</Text>
+        </Pressable>
+        <Pressable style={styles.btn} onPress={run('시작 6벌로 되돌리기', () => devResetOwnedToStart())}>
+          <Text style={styles.btnText}>보유 옷을 시작 6벌로 되돌리기</Text>
         </Pressable>
       </View>
       {done && <Text style={styles.done}>{done}</Text>}

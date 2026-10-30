@@ -1,6 +1,6 @@
 // 백업 내보내기 / 가져오기 (SQLite ↔ JSON 문자열). 파일 저장·공유는 화면 쪽에서 플랫폼별로 한다.
 
-import { buildBackup, BACKUP_TABLES, parseBackup, type BackupTable, type ParseResult, type Row } from './backupFormat';
+import { buildBackup, BACKUP_TABLES, ENSURE_ROWS_SQL, parseBackup, type BackupTable, type ParseResult, type Row } from './backupFormat';
 import { getDb, writeTx } from './db';
 import { SCHEMA_VERSION } from './migrations';
 
@@ -42,8 +42,8 @@ export async function restoreBackup(text: string): Promise<ParseResult> {
         );
       }
     }
-    // 수확 통계 행은 항상 하나 있어야 한다
-    await db.runAsync('INSERT OR IGNORE INTO harvest_stat (id, total_harvested) VALUES (1, 0)');
+    // 수확 통계 · 재화 행은 항상 하나 있어야 한다
+    for (const sql of ENSURE_ROWS_SQL) await db.runAsync(sql);
   });
   return parsed;
 }

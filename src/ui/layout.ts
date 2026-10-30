@@ -1,13 +1,17 @@
 // 메인 화면(7a) 레이아웃 — 고정 규칙. 이 파일은 RN을 import하지 않는다 (순수 계산 + 상수 → 단위 테스트).
 //
-// 구성 순서: 헤더 → 방송 → 마을 장면 → 지수 → 밭 띠 → 오늘 기록하기 → 탭 바
+// 구성 순서: 재화 바(코인 · 흥) → 헤더(마을 이름 + Lv + 성장 바) → 방송 → 마을 장면 → 지수 → 밭 띠 → 오늘 기록하기 → 탭 바
 // 마을 장면은 4:3 고정 (너비 = 콘텐츠 영역 전체, 높이 = 너비 × 3/4). 장면 비율은 절대 바꾸지 않고,
 // 높이가 모자라면 나머지 요소를 압축한다. 그래도 안 들어가면 메인만 스크롤 (탭 바 고정).
 
 // ── 요소 높이 (pt) — 기본 / 압축 ─────────────────────────────────────────
 
 export const MAIN_LAYOUT = {
-  /** 헤더: 마을 이름 + Lv 한 줄 + 성장 바 (부제 없음) */
+  /** 재화 바: 코인 · 흥 칩 한 줄 (헤더 위). 압축하지 않는다 */
+  currency: 36,
+  /** 재화 바 | 헤더 간격. 압축하지 않는다 */
+  currencyGap: 10,
+  /** 헤더: 마을 이름 + Lv 한 줄 + 성장 바 (부제 없음). 재화 바는 따로 위에 있다 */
   header: 64,
   /** 방송: 2줄 / 1줄 말줄임 (탭하면 펼침) */
   broadcast: { full: 68, compact: 44 },
@@ -90,6 +94,8 @@ export type MainLayout = {
   step: CompactStep;
   /** 사용 가능 높이: 보이는 높이 − 위 안전 영역 − (탭 바 + 아래 안전 영역) */
   available: number;
+  currency: number;
+  currencyGap: number;
   header: number;
   broadcast: number;
   broadcastLines: 1 | 2;
@@ -128,7 +134,7 @@ const STEPS: readonly Pick[] = [
   { broadcast: M.broadcast.compact, lines: 1, indices: M.indices.strip, variant: 'strip', field: M.field.compact, labels: false, cta: M.cta.compact, gap: M.gap.compact },
 ];
 
-const fixedOf = (p: Pick) => M.header + p.broadcast + p.indices + p.field + p.cta + p.gap * M.gapCount;
+const fixedOf = (p: Pick) => M.currency + M.currencyGap + M.header + p.broadcast + p.indices + p.field + p.cta + p.gap * M.gapCount;
 
 /**
  * 보이는 높이 · 안전 영역 · 콘텐츠 너비로 메인 레이아웃을 정한다.
@@ -150,6 +156,8 @@ export function mainLayout(visibleHeight: number, insetTop: number, insetBottom:
   return {
     step,
     available,
+    currency: M.currency,
+    currencyGap: M.currencyGap,
     header: M.header,
     broadcast: chosen.broadcast,
     broadcastLines: chosen.lines,
@@ -216,54 +224,24 @@ export function morningDayLayout(visibleHeight: number, insetTop: number, insetB
   return { step: 2, available, scene: M.scene.min, dayCard: M.dayCard.compact, scroll: true };
 }
 
-// ── 아침 흐름 3번째 화면 "복장 고르기(솔이네 옷장)" (디자인 26c~f) ───────────
-// 스크롤 없이 한 화면. 솔이 미리보기가 남는 높이를 받고(최대 250), 모자라면 슬롯 탭 · 아이템 칸을 줄인다. 그래도 모자라면 스크롤.
+// ── 옷장 탭 (디자인 TURN 28). 위에서 아래로: 상태바 → 헤더 → 미리보기 → 세그먼트 → 슬롯 탭 → 그리드 → 탭 바 ──
+// 미리보기는 284 고정이다. 남는 높이는 그리드가 받고, 그리드는 안에서 스크롤한다.
 
-export const OUTFIT_LAYOUT = {
-  header: 50,
-  broadcast: 68,
-  /** 방송 | 미리보기 */
-  gapPreview: 10,
-  preview: { max: 250, min: 150, /** 이 아래로 줄어들면 탭 · 칸을 압축 */ comfortable: 210 },
-  /** 미리보기 | 옷장 패널 */
-  gapPanel: 12,
-  /** 옷장 패널: 위 여백 + 옷걸이 봉 + 탭 막대(옷걸이 줄) */
-  panelTop: 12,
-  rod: 10,
-  tabStick: 8,
-  tab: { full: 52, compact: 46 },
-  /** 탭 | 아이템 격자. 칸 위 모서리의 체크 표시가 잘리지 않게 격자 위에 둔 여백을 포함 */
-  gapPager: 12,
-  pagerPad: 5,
-  cell: { full: 76, compact: 62 },
-  cellGap: 8,
-  dots: 22,
-  /** 점 | 이대로 가기 줄 */
-  gapAction: 8,
-  action: 56,
-  /** 아래 안전 영역에 더하는 여백 */
-  bottomPad: 20,
+export const CLOSET_LAYOUT = {
+  /** 헤더: 재화 칩 2개(왼쪽) + 제목(오른쪽). 위 2 · 아래 10 여백 포함 */
+  header: { height: 36, top: 2, bottom: 10 },
+  /** 미리보기 카드 (좌우 12) */
+  preview: { height: 284, radius: 28, side: 12 },
+  /** 내 옷장 | 옷 가게 세그먼트 */
+  segment: { height: 44, top: 12, side: 12 },
+  /** 슬롯 탭 줄 */
+  tabs: { height: 36, top: 10, side: 12, gap: 6 },
+  /** 그리드: 3열, 위 14 · 좌우 12, 칸 사이 가로 10 · 세로 12. 아래 16 (입어 보는 중에는 큰 사기 버튼에 가리지 않게 84) */
+  grid: { cols: 3, top: 14, side: 12, gapX: 10, gapY: 12, bottom: 16, bottomWithBuy: 84 },
+  /** 칸 안 썸네일 상자 */
+  thumb: 80,
+  /** 큰 사기 버튼: 탭 바 바로 위에 붙는다 */
+  buy: { height: 56, side: 16, bottom: 10 },
+  /** 구매 확인 시트 안 미리보기 */
+  sheetPreview: 210,
 } as const;
-
-export type OutfitLayout = {
-  /** 0 기본 · 1 탭 · 칸 압축 · 2 압축해도 모자라 스크롤 */
-  step: 0 | 1 | 2;
-  available: number;
-  preview: number;
-  tab: number;
-  cell: number;
-  scroll: boolean;
-};
-
-export function outfitLayout(visibleHeight: number, insetTop: number, insetBottom: number): OutfitLayout {
-  const L = OUTFIT_LAYOUT;
-  const available = Math.max(0, visibleHeight - insetTop - insetBottom);
-  const fixedOf = (tab: number, cell: number) =>
-    L.header + L.broadcast + L.gapPreview + L.gapPanel + L.panelTop + L.rod + L.tabStick + tab + L.gapPager + L.pagerPad + cell * 2 + L.cellGap + L.dots + L.gapAction + L.action + L.bottomPad;
-
-  const full = Math.min(L.preview.max, available - fixedOf(L.tab.full, L.cell.full));
-  if (full >= L.preview.comfortable) return { step: 0, available, preview: full, tab: L.tab.full, cell: L.cell.full, scroll: false };
-  const compact = Math.min(L.preview.max, available - fixedOf(L.tab.compact, L.cell.compact));
-  if (compact >= L.preview.min) return { step: 1, available, preview: compact, tab: L.tab.compact, cell: L.cell.compact, scroll: false };
-  return { step: 2, available, preview: L.preview.min, tab: L.tab.compact, cell: L.cell.compact, scroll: true };
-}

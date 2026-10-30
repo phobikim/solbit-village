@@ -6,7 +6,7 @@ import Svg, { Path, SvgXml } from 'react-native-svg';
 
 import { dayCardA11y, DAY_LABEL, DAY_REWARD_LABEL, rewardValue } from '../../copy/morning.ko';
 import { DAY_TYPES, type DayType } from '../../domain/morning';
-import { ICON_COIN, ICON_ENERGY } from '../characters/rewardIcons';
+import { ICON_COIN, ICON_HEUNG } from '../characters/rewardIcons';
 import { colors, fonts } from '../theme';
 
 const INK = colors.line;
@@ -20,7 +20,7 @@ const DAY_ICON: Record<DayType, { chip: string; paths: readonly string[]; reward
   play: {
     chip: colors.relation,
     paths: ['M12 2.5c3.6 0 6 2.8 6 6.4 0 4.2-3 7.6-6 7.6s-6-3.4-6-7.6c0-3.6 2.4-6.4 6-6.4z', 'M11 16.5h2l-1 1.5z', 'M12 18c-1.6 1.4 1.6 2.2 0 3.6'],
-    reward: ICON_ENERGY,
+    reward: ICON_HEUNG,
   },
 };
 

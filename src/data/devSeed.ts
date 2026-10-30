@@ -6,6 +6,7 @@ import { addDays, type DayKey } from '../domain/day';
 import type { CropKind } from '../domain/types';
 import { writeTx } from './db';
 import { insertNeighbor, newNeighborId, type Neighbor } from './neighbors';
+import { addToWalletDb, setWalletDb } from './wallet';
 
 const SAMPLES: Omit<Neighbor, 'id' | 'createdAt'>[] = [
   { name: '서연', face: 1, color: 4, relation: 'coworker', frequency: 'often' },
@@ -77,3 +78,9 @@ export function devAddCrops(n = 10): Promise<void> {
     }
   });
 }
+
+// ── 재화 확인용 (개발 모드 전용). 지급 로직이 아직 없어서 옷 가게를 시험하려면 이걸로 채운다 ─────
+
+export const devAddCoins = (n: number) => addToWalletDb({ coin: n }).then(() => undefined);
+export const devAddHeung = (n: number) => addToWalletDb({ heung: n }).then(() => undefined);
+export const devZeroWallet = () => setWalletDb({ coin: 0, heung: 0 }).then(() => undefined);

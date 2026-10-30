@@ -3,11 +3,8 @@
 import type { DayType } from '../domain/morning';
 
 export const MORNING_TITLE = '아침 준비';
-/** 발자국 3칸 중 지금 몇 번째인지 (하루 → 복장 → 마을) */
-export const MORNING_STEP_LABEL = {
-  1: '하루, 복장, 마을 중 1단계',
-  2: '하루, 복장, 마을 중 2단계',
-} as const;
+/** 발자국 2칸 + 깃발 (하루 → 마을). 하루 고르기가 1단계 */
+export const MORNING_STEP_LABEL = '하루, 마을 중 1단계';
 
 /** 오늘 하루 고르기 화면 이장 방송 (질문 한 가지뿐 — 컨디션은 묻지 않는다) */
 export const DAY_PICK_BROADCAST = '오늘은 일하는 날이유, 노는 날이유?';
@@ -24,7 +21,7 @@ export const DAY_LABEL: Record<DayType, string> = {
 /** 선택 카드 보상 줄: 라벨 + 앞에 + 붙인 숫자 */
 export const DAY_REWARD_LABEL: Record<DayType, string> = {
   work: '월급',
-  play: '기력',
+  play: '흥',
 };
 export const rewardValue = (n: number) => `+${n}`;
 /** 카드 접근성 라벨: "일, 월급 +160" */
@@ -38,4 +35,4 @@ export const MORNING_LATER = '나중에 할래유';
 export const SOLI_ALT = '솔이';
 
 export const DEV_DAY_TITLE = '개발자 · 오늘 하루 고르기';
-export const DEV_DAY_SUB = '아침 두 번째 화면 확인용';
+export const DEV_DAY_SUB = '깨우기 → 하루 고르기 → 마을 확인용';

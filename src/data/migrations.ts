@@ -237,6 +237,16 @@ export const MIGRATIONS: readonly string[] = [
     item_id TEXT NOT NULL                              -- 슬롯마다 한 개
   );
   `,
+  // v13 — 재화(코인 · 흥): 잔액 한 줄. 지급 로직은 아직 없다 (개발자 항목으로만 채운다).
+  //       처음 가진 옷은 6벌로 줄었지만 이미 가진 옷은 지우지 않는다 (보유는 줄지 않는다).
+  `
+  CREATE TABLE wallet (
+    id    INTEGER PRIMARY KEY CHECK (id = 1),
+    coin  INTEGER NOT NULL DEFAULT 0 CHECK (coin >= 0),   -- 옷 가게에서 쓴다. 음수가 될 수 없다
+    heung INTEGER NOT NULL DEFAULT 0 CHECK (heung >= 0)
+  );
+  INSERT INTO wallet (id, coin, heung) VALUES (1, 0, 0);
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

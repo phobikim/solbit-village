@@ -1,12 +1,15 @@
-import { APP_MAX_WIDTH, contentWidth, MAIN_LAYOUT, mainLayout, morningDayLayout, outfitLayout, SCENE_PCT, SCENE_RATIO, SCENE_VIEW, sceneHeight, sx, sy } from '../layout';
+import { APP_MAX_WIDTH, contentWidth, MAIN_LAYOUT, mainLayout, morningDayLayout, SCENE_PCT, SCENE_RATIO, SCENE_VIEW, sceneHeight, sx, sy } from '../layout';
 
 const M = MAIN_LAYOUT;
 const W390 = contentWidth(390); // 358
 const W375 = contentWidth(375); // 343
 const W430 = contentWidth(430); // 398
 
-/** 보이는 높이 = 사용 가능 높이 + 탭 바 (안전 영역 0) */
-const visible = (available: number) => available + M.tabBar;
+/** 재화 바(36) + 간격(10): 압축하지 않는 줄. 단계 경계 숫자는 "재화 바를 뺀 나머지 내용" 기준이다 */
+const CURRENCY = M.currency + M.currencyGap;
+
+/** 보이는 높이 = (재화 바를 뺀 내용이 쓸 높이) + 재화 바 + 탭 바 (안전 영역 0) */
+const visible = (available: number) => available + CURRENCY + M.tabBar;
 
 describe('마을 장면 4:3 고정', () => {
   it('너비 = 콘텐츠 영역 전체(좌우 16), 높이 = 너비 × 3/4', () => {
@@ -71,10 +74,15 @@ describe('장면 안 % 좌표 (SPEC 11장)', () => {
 
 describe('메인 압축 단계', () => {
   const fixed = (l: ReturnType<typeof mainLayout>) =>
-    l.header + l.broadcast + l.indices + l.field + l.cta + l.gap * M.gapCount;
+    l.currency + l.currencyGap + l.header + l.broadcast + l.indices + l.field + l.cta + l.gap * M.gapCount;
 
-  it('헤더는 64 고정 (부제 없음)', () => {
-    for (let h = 400; h <= 1000; h += 40) expect(mainLayout(h, 20, 0, W390).header).toBe(64);
+  it('헤더는 64 고정 (부제 없음), 재화 바는 36 + 간격 10 고정 (어느 단계에서도 압축하지 않는다)', () => {
+    for (let h = 400; h <= 1000; h += 40) {
+      const l = mainLayout(h, 20, 0, W390);
+      expect(l.header).toBe(64);
+      expect(l.currency).toBe(36);
+      expect(l.currencyGap).toBe(10);
+    }
   });
 
   it('0단계(기본): 지수 96 · 방송 2줄 · 밭 띠 72(글자 있음) · 기록 56 · 간격 10', () => {
@@ -111,7 +119,7 @@ describe('메인 압축 단계', () => {
     expect({ ...l, step: 3, available: 0, scroll: false }).toEqual({ ...three, available: 0 });
     expect(l.content).toBeGreaterThan(l.available);
     expect(MAIN_LAYOUT.tabBar).toBe(76);
-    expect(l.available).toBe(560); // 탭 바(76)는 사용 가능 높이에서 이미 뺐다
+    expect(l.available).toBe(560 + CURRENCY); // 탭 바(76)는 사용 가능 높이에서 이미 뺐다
   });
 
   it('고정 합 + 장면 = 콘텐츠 높이, 4단계 전에는 사용 가능 높이 안에 들어간다', () => {
@@ -144,8 +152,10 @@ describe('메인 압축 단계', () => {
   it('요청한 다섯 크기(웹, 안전 영역 0)의 단계', () => {
     const step = (w: number, h: number) => mainLayout(h, 0, 0, contentWidth(w)).step;
     expect(step(375, 560)).toBe(4);
-    expect(step(390, 660)).toBe(2);
-    expect(step(375, 667)).toBe(2);
+    // 재화 바(36 + 10)가 들어와 작은 화면은 한 단계씩 더 올라간다 (SPEC 11장 표)
+    expect(step(390, 660)).toBe(4);
+    expect(step(375, 667)).toBe(4);
+    expect(step(390, 760)).toBe(2);
     expect(step(390, 844)).toBe(0);
     expect(step(430, 932)).toBe(0);
   });
@@ -177,37 +187,6 @@ describe('morningDayLayout (오늘 하루 고르기)', () => {
       const L = morningDayLayout(h, 20, 0);
       if (L.scroll) continue;
       const used = L.scene + L.dayCard + 50 + 68 + 12 + 14 + 30 + 8 + 52 + 12 + 56 + 6 + 28 + 6;
-      expect(used).toBeLessThanOrEqual(L.available);
-    }
-  });
-});
-
-describe('outfitLayout (복장 고르기)', () => {
-  it('키 큰 화면은 미리보기 250, 탭 · 칸 기본, 스크롤 없음', () => {
-    expect(outfitLayout(932, 59, 34)).toMatchObject({ step: 0, preview: 250, tab: 52, cell: 76, scroll: false });
-  });
-  it('보통 화면(852)도 기본 크기로 들어간다', () => {
-    const L = outfitLayout(852, 59, 34);
-    expect(L.step).toBe(0);
-    expect(L.preview).toBeGreaterThanOrEqual(210);
-    expect(L.scroll).toBe(false);
-  });
-  it('작은 화면은 탭 · 칸을 압축', () => {
-    const L = outfitLayout(667, 20, 0);
-    expect(L).toMatchObject({ step: 1, tab: 46, cell: 62, scroll: false });
-    expect(L.preview).toBeGreaterThanOrEqual(150);
-  });
-  it('아주 작으면 스크롤', () => {
-    expect(outfitLayout(520, 20, 0)).toMatchObject({ step: 2, preview: 150, scroll: true });
-  });
-  it('칸은 어느 단계에서도 터치 영역 44 이상', () => {
-    for (const h of [480, 560, 667, 740, 852, 932]) expect(outfitLayout(h, 20, 0).cell).toBeGreaterThanOrEqual(44);
-  });
-  it('들어가는 화면에서는 내용 높이가 사용 가능 높이를 넘지 않는다', () => {
-    for (const h of [640, 667, 700, 740, 780, 852, 932]) {
-      const L = outfitLayout(h, 20, 0);
-      if (L.scroll) continue;
-      const used = L.preview + L.tab + L.cell * 2 + 50 + 68 + 10 + 12 + 12 + 10 + 8 + 12 + 5 + 8 + 22 + 8 + 56 + 20;
       expect(used).toBeLessThanOrEqual(L.available);
     }
   });

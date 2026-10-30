@@ -1,6 +1,6 @@
 // 솔이네 옷장 규칙. 순수 TS (React/RN import 금지).
 // 옷은 장식일 뿐이다 — 지수 · 레벨 · 작물 · 월급 어떤 규칙에도 영향을 주지 않는다 (CLAUDE.md 규칙 2).
-// 한 슬롯에 한 개만 입는다. 지금은 기본 포즈에서만 입힌다.
+// 한 슬롯에 한 개만 입는다. 지금은 기본 포즈에서만 입힌다. 옷 가게 · 가격은 shop.ts.
 
 export type Slot = 'head' | 'face' | 'body' | 'back' | 'hand' | 'feet';
 
@@ -14,33 +14,33 @@ export const SLOTS: readonly Slot[] = ['head', 'face', 'body', 'back', 'hand', '
 
 const item = (slot: Slot, name: string): OutfitItemMeta => ({ id: `${slot}-${name}`, slot });
 
-/** 카탈로그 25개. 표시 순서는 시안과 같다 (슬롯별 위에서 아래로). SVG 문자열은 ui/characters/outfits에 있다. */
+/** 카탈로그 25개. 표시 순서는 시안(옷장 TURN 28)과 같다 (슬롯별 위에서 아래로). SVG 문자열은 ui/characters/outfits에 있다. */
 export const OUTFIT_ITEMS: readonly OutfitItemMeta[] = [
-  item('head', 'headphones'),
-  item('head', 'straw'),
   item('head', 'beanie'),
-  item('head', 'wizard'),
   item('head', 'catears'),
+  item('head', 'wizard'),
+  item('head', 'straw'),
+  item('head', 'headphones'),
   item('face', 'glasses'),
   item('face', 'heart'),
   item('face', 'star'),
-  item('body', 'scarf'),
-  item('body', 'overall'),
-  item('body', 'raincoat'),
-  item('body', 'sweater'),
   item('body', 'hoodie'),
   item('body', 'plaid'),
-  item('back', 'wings'),
-  item('back', 'cape'),
-  item('back', 'crossbag'),
+  item('body', 'sweater'),
+  item('body', 'scarf'),
+  item('body', 'raincoat'),
+  item('body', 'overall'),
   item('back', 'bundle'),
-  item('hand', 'coffee'),
+  item('back', 'crossbag'),
+  item('back', 'cape'),
+  item('back', 'wings'),
   item('hand', 'umbrella'),
-  item('hand', 'balloon'),
+  item('hand', 'coffee'),
   item('hand', 'book'),
-  item('feet', 'boots'),
-  item('feet', 'sneakers'),
+  item('hand', 'balloon'),
   item('feet', 'slippers'),
+  item('feet', 'sneakers'),
+  item('feet', 'boots'),
 ];
 
 const BY_ID: ReadonlyMap<string, OutfitItemMeta> = new Map(OUTFIT_ITEMS.map((i) => [i.id, i]));
@@ -50,11 +50,12 @@ export const isKnownItem = (itemId: string): boolean => BY_ID.has(itemId);
 export const itemsOfSlot = (slot: Slot): readonly OutfitItemMeta[] => OUTFIT_ITEMS.filter((i) => i.slot === slot);
 
 /**
- * 처음부터 가지고 있는 아이템. 지금은 25개 전부.
- * TODO(미정, SPEC "솔이 옷장"): 일부 아이템은 옷 가게에서 코인으로 구매하게 바꿀 예정 — 어떤 것을 잠글지는 사용자에게 묻고 정한다.
- *       (규칙 10: 임의로 일부를 잠그지 않는다)
+ * 처음부터 가지고 있는 아이템 6벌 (비니 · 안경 · 후드티 · 보따리 · 커피 · 슬리퍼).
+ * 나머지 19벌은 옷 가게에서 코인으로 산다 (src/domain/shop.ts).
+ * 보유는 줄지 않는다 (CLAUDE.md 규칙 1) — 마이그레이션 · 가져오기는 이미 가진 옷을 지우지 않는다.
+ * TODO([제안]): 시작 6벌은 시안 기준 가안. 확정되면 여기만 바꾼다.
  */
-export const STARTS_OWNED: readonly string[] = OUTFIT_ITEMS.map((i) => i.id);
+export const STARTS_OWNED: readonly string[] = ['head-beanie', 'face-glasses', 'body-hoodie', 'back-bundle', 'hand-coffee', 'feet-slippers'];
 
 export function isOwned(ownedIds: ReadonlySet<string>, itemId: string): boolean {
   return ownedIds.has(itemId);
@@ -77,9 +78,11 @@ export function unequip(equipped: Equipped, slot: Slot): Equipped {
   return next;
 }
 
-/** 전부 벗는다 */
-export function clearAll(): Equipped {
-  return {};
+/** 눌러서 입기/벗기: 입고 있는 옷을 다시 누르면 벗고, 아니면 그 슬롯에 입는다 (가지고 있는 옷만) */
+export function toggleWear(equipped: Equipped, itemId: string, ownedIds: ReadonlySet<string>): Equipped {
+  const meta = BY_ID.get(itemId);
+  if (!meta || !isOwned(ownedIds, itemId)) return { ...equipped };
+  return equipped[meta.slot] === itemId ? unequip(equipped, meta.slot) : equip(equipped, itemId, ownedIds);
 }
 
 /**

@@ -1,7 +1,7 @@
 // 솔이네 옷장 저장소: 가진 옷 · 입고 있는 옷. 옷은 장식일 뿐이라 다른 데이터에 영향을 주지 않는다.
 
 import { today } from '../domain/day';
-import { isKnownItem, itemMeta, sanitizeEquipped, STARTS_OWNED, type Equipped } from '../domain/outfit';
+import { isKnownItem, itemMeta, sanitizeEquipped, STARTS_OWNED, type Equipped, type Slot } from '../domain/outfit';
 import { getDb, writeTx } from './db';
 import { getSetting, SETTING } from './settings';
 
@@ -42,6 +42,43 @@ export async function seedOwned(now: Date = new Date()): Promise<void> {
     for (const id of STARTS_OWNED) {
       await db.runAsync('INSERT OR IGNORE INTO outfit_owned (item_id, acquired_at, source) VALUES (?, ?, ?)', id, day, 'start');
     }
+    await db.runAsync(
+      'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value',
+      SETTING.outfitSeeded,
+      '1',
+    );
+  });
+}
+
+/** 한 슬롯의 착용만 바꿔 바로 저장한다. itemId가 null이면 그 슬롯을 벗는다 */
+export function setSlot(slot: Slot, itemId: string | null): Promise<void> {
+  if (itemId !== null && itemMeta(itemId)?.slot !== slot) return Promise.resolve();
+  return writeTx(async (db) => {
+    if (itemId === null) await db.runAsync('DELETE FROM outfit_equipped WHERE slot = ?', slot);
+    else
+      await db.runAsync(
+        'INSERT INTO outfit_equipped (slot, item_id) VALUES (?, ?) ON CONFLICT(slot) DO UPDATE SET item_id = excluded.item_id',
+        slot,
+        itemId,
+      );
+  });
+}
+
+/**
+ * 개발자 전용: 가진 옷을 처음 6벌(STARTS_OWNED)로 되돌린다. 옷 가게를 다시 시험하는 용도.
+ * 입고 있던 옷 중 이제 없는 것은 벗긴다. (보유는 줄지 않는 것이 앱의 규칙이라, 화면에는 개발 모드에서만 노출한다)
+ */
+export function devResetOwnedToStart(now: Date = new Date()): Promise<void> {
+  const day = today(now);
+  return writeTx(async (db) => {
+    await db.runAsync('DELETE FROM outfit_owned');
+    for (const id of STARTS_OWNED) {
+      await db.runAsync('INSERT INTO outfit_owned (item_id, acquired_at, source) VALUES (?, ?, ?)', id, day, 'start');
+    }
+    await db.runAsync(
+      `DELETE FROM outfit_equipped WHERE item_id NOT IN (${STARTS_OWNED.map(() => '?').join(', ')})`,
+      ...STARTS_OWNED,
+    );
     await db.runAsync(
       'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value',
       SETTING.outfitSeeded,

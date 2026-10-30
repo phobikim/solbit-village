@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router';
 
 import { colors } from '../../src/ui/theme';
 
-// 탭 5개 (디자인 TURN 12). 하단 바는 하위 화면에서도 떠 있어야 해서 루트 레이아웃의 BottomBar가 그린다 (기본 탭 바는 숨김).
+// 탭 6개 (디자인 TURN 12 · 27). 하단 바는 하위 화면에서도 떠 있어야 해서 루트 레이아웃의 BottomBar가 그린다 (기본 탭 바는 숨김).
 export default function TabsLayout() {
   return (
     <Tabs
@@ -13,6 +13,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="records" options={{ title: '장부' }} />
       <Tabs.Screen name="neighbors" options={{ title: '이웃' }} />
       <Tabs.Screen name="rest" options={{ title: '쉼터' }} />
+      <Tabs.Screen name="closet" options={{ title: '옷장' }} />
       <Tabs.Screen name="me" options={{ title: '나' }} />
     </Tabs>
   );

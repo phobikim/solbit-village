@@ -20,7 +20,7 @@ export const OUTFIT_ART: Readonly<Record<string, OutfitArt>> = {
   ...FEET_ART,
 };
 
-/** 아이템이 차지하는 영역 [x, y, 너비, 높이] — viewBox(0 -20 200 240) 좌표. 시안 26c~g의 값 */
+/** 아이템이 차지하는 영역 [x, y, 너비, 높이] — 캔버스(200×240) 좌표. 시안 옷장 TURN 28 파일 IT 배열의 bb 값 */
 const BBOX: Readonly<Record<string, readonly [number, number, number, number]>> = {
   'head-headphones': [12, 14, 176, 134],
   'head-straw': [10, 14, 180, 92],
@@ -55,8 +55,8 @@ export type CanvasBox = { left: number; top: number; width: number; height: numb
 const r1 = (n: number) => Math.round(n * 10) / 10;
 
 /**
- * 칸 썸네일(size × size): 미니 솔이 + 아이템이 한 정사각형에 들어오게 하는 자리 (시안 26c~f).
- * 솔이 몸(높이 약 0.9 × size)과 아이템 영역이 모두 들어오도록 줄이고 가운데에 놓는다.
+ * 몸 · 등 칸 썸네일(size × size): 솔이에게 입힌 모습. 솔이 몸(14~186, 14~210)과 아이템 영역이 모두 들어오도록 줄이고 가운데에 놓는다.
+ * 시안 옷장 TURN 28 `dressed()` 계산과 같다.
  */
 export function dressedThumbBox(itemId: string, size: number): CanvasBox {
   const [bx, by, bw, bh] = BBOX[itemId] ?? [14, 14, 172, 196];
@@ -66,7 +66,7 @@ export function dressedThumbBox(itemId: string, size: number): CanvasBox {
   const y1 = Math.max(210, by + bh);
   const uw = x1 - x0;
   const uh = y1 - y0;
-  const s = Math.min((size * 0.9) / 196, (size * 0.96) / uw, (size * 0.96) / uh);
+  const s = Math.min((size * 0.96) / uw, (size * 0.96) / uh);
   return {
     left: r1(-x0 * s + (size - uw * s) / 2),
     top: r1(-(y0 + 20) * s + (size - uh * s) / 2),
@@ -75,10 +75,10 @@ export function dressedThumbBox(itemId: string, size: number): CanvasBox {
   };
 }
 
-/** 잠긴 칸의 실루엣: 아이템만 (솔이 없이) 크게 (시안 26g 시트와 같은 계산) */
+/** 머리 · 얼굴 · 손 · 발 칸 썸네일: 옷만 (솔이 없이) 크롭해 크게. 시안 옷장 TURN 28 `thumb()` 계산과 같다 */
 export function itemThumbBox(itemId: string, size: number): CanvasBox {
   const [x, y, w, h] = BBOX[itemId] ?? [14, 14, 172, 196];
-  const s = Math.min((size * (w > h * 1.6 ? 1.05 : 0.88)) / w, (size * 0.88) / h, 1.3);
+  const s = Math.min((size * (w > h * 1.6 ? 1.05 : 0.9)) / w, (size * 0.9) / h, 1.3);
   return {
     left: r1(-x * s + (size - w * s) / 2),
     top: r1(-(y + 20) * s + (size - h * s) / 2),
