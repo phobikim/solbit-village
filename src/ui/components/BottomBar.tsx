@@ -33,7 +33,7 @@ export function BottomBar() {
   const current = tabOfPath(path) ?? last.current;
   last.current = current;
   if (hidesBottomBar(path)) return null;
-  const floating = false;
+  const floating = path === '/' || path === '/index';
 
   return (
     <View
