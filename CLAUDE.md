@@ -47,7 +47,8 @@ src/
     morning.ts          아침 흐름 규칙 (깨우기 노출 · 하루 종류 · 컨디션 · 솔이 포즈 교대)
     rewards.ts          아침 보상표: 월급 · 놀기 흥 식 · 보상표 줄 (임시 상수, [제안]. 지급은 아직 없음)
     wallet.ts           재화(코인 · 흥) 규칙: 더하기 · 쓰기, 음수 거부, 천 단위 표시
-    shop.ts             옷 가게: 옷 가격(OUTFIT_PRICE [제안]) · 살 수 있는가 · 산 뒤 상태
+    closet.ts           옷장 탭: 하단 버튼 상태(getActionState) · 슬롯별 미리보기 · 그리드 순서
+    shop.ts             옷 구매: 옷 가격(OUTFIT_PRICE [제안]) · 살 수 있는가 · 산 뒤 상태
     villageUnlocks.ts   레벨별 해금 id 샘플 (표시 이름은 copy/rewards.ko.ts)
     outfit.ts           솔이 옷장: 슬롯 6 · 아이템 25 · 시작 6벌 · 입기/벗기 · 겹침 순서 (장식일 뿐, 다른 규칙과 무관)
   data/                 SQLite 스키마 · 마이그레이션 · repository

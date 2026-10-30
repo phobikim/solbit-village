@@ -6,58 +6,48 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { cancelAnimation, Easing, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import Svg, { Path, SvgXml } from 'react-native-svg';
 
-import { cellA11y, OUTFIT_NAME, OWNED_TAG, shortLabel } from '../../copy/outfits.ko';
+import { cellA11y, OUTFIT_NAME } from '../../copy/outfits.ko';
 import { itemMeta } from '../../domain/outfit';
 import { formatCount } from '../../domain/wallet';
 import { dressedThumbBox, itemThumbBox } from '../characters/outfits';
 import { ICON_COIN, ICON_STAR } from '../characters/rewardIcons';
 import { SoliOutfit } from '../characters/SoliOutfit';
 import { CLOSET_LAYOUT } from '../layout';
-import { colors, fonts, SHORT_INK } from '../theme';
+import { colors, fonts } from '../theme';
 
 const THUMB = CLOSET_LAYOUT.thumb;
 
 export type CellView = {
   id: string;
-  /** 내 옷장에서 지금 입고 있다 (노랑 링 + 체크) */
+  /** 지금 입고 있다 (노랑 링 + 체크) */
   wearing: boolean;
-  /** 옷 가게에서 입어 보는 중 (분홍 링) */
-  tryOn: boolean;
-  /** 옷 가게: 이미 가진 옷 (흐리게 + 보유 태그, 가격 없음). 방금 산 옷은 흐리게 하지 않는다 */
+  /** 눌러서 고른 칸 (분홍 링) — 미리보기에 입혀져 있다 */
+  selected: boolean;
+  /** 가진 옷인가. 안 가진 옷은 회색 처리 + 가격 칩 */
   owned: boolean;
-  /** 옷 가게: 안 가진 옷의 가격 (가진 옷과 내 옷장 칸은 null) */
-  price: number | null;
-  /** 코인이 모자란 만큼 (0이면 충분) */
-  lack: number;
+  /** 안 가진 옷의 가격 */
+  price: number;
   /** 방금 산 옷: 별이 반짝인다 */
   just: boolean;
 };
 
 type Props = CellView & { width: number; reduceMotion: boolean; onPress: (id: string) => void };
 
-export const ClosetCell = memo(function ClosetCell({ id, wearing, tryOn, owned, price, lack, just, width, reduceMotion, onPress }: Props) {
+export const ClosetCell = memo(function ClosetCell({ id, wearing, selected, owned, price, just, width, reduceMotion, onPress }: Props) {
   const meta = itemMeta(id);
   const name = OUTFIT_NAME[id] ?? id;
   const dressed = meta?.slot === 'body' || meta?.slot === 'back';
-  // 가게에서 이미 가진 옷: 흐리게 + "보유" 태그 + 이름 #8F96CC. 방금 산 옷은 그대로 밝게 둔다
-  const ownedDim = owned && price === null && !wearing && !just;
-  const short = price !== null && lack > 0;
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={cellA11y(name, {
-        wearing,
-        tryOn,
-        owned: ownedDim,
-        price: price !== null ? formatCount(price) : undefined,
-        lack: short ? formatCount(lack) : undefined,
-      })}
-      accessibilityState={{ selected: wearing || tryOn }}
+      accessibilityLabel={cellA11y(name, { wearing, selected, owned, price: formatCount(price) })}
+      accessibilityState={{ selected: wearing || selected }}
       onPress={() => onPress(id)}
       style={[styles.cell, { width }]}
     >
       <View style={[styles.tile, { width, height: width }]}>
-        <View style={{ width: THUMB, height: THUMB, opacity: ownedDim ? 0.4 : 1 }}>
+        {/* 안 가진 옷: opacity + 어두운 오버레이 (SVG 필터는 쓰지 않는다) */}
+        <View style={{ width: THUMB, height: THUMB, opacity: owned ? 1 : 0.4 }}>
           {meta && (
             <SoliOutfit
               equipped={{ [meta.slot]: id }}
@@ -67,8 +57,9 @@ export const ClosetCell = memo(function ClosetCell({ id, wearing, tryOn, owned, 
             />
           )}
         </View>
+        {!owned && <View pointerEvents="none" style={styles.dim} />}
         {wearing && <View pointerEvents="none" style={[styles.ring, { borderColor: colors.yellow }]} />}
-        {tryOn && !wearing && <View pointerEvents="none" style={[styles.ring, { borderColor: colors.pink }]} />}
+        {selected && !wearing && <View pointerEvents="none" style={[styles.ring, { borderColor: colors.pink }]} />}
         {wearing && (
           <View pointerEvents="none" style={styles.check}>
             <Svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke={colors.line} strokeWidth={4} strokeLinecap="round" strokeLinejoin="round">
@@ -76,40 +67,18 @@ export const ClosetCell = memo(function ClosetCell({ id, wearing, tryOn, owned, 
             </Svg>
           </View>
         )}
-        {(ownedDim || (owned && just)) && (
-          <View pointerEvents="none" style={styles.ownTag}>
-            <Text style={styles.ownTagText}>{OWNED_TAG}</Text>
-          </View>
-        )}
         {just && <Sparkles reduceMotion={reduceMotion} />}
       </View>
-      <Text style={[styles.name, { color: owned && price === null ? colors.textMuted : colors.text }]}>{name}</Text>
-      {price !== null && (
-        <View style={[styles.price, short && styles.priceShort]}>
-          <View style={{ opacity: short ? 0.45 : 1 }}>
-            <SvgXml xml={ICON_COIN} width={18} height={18} />
-          </View>
-          <Text style={[styles.priceText, short && styles.priceTextShort]}>{formatCount(price)}</Text>
+      <Text style={[styles.name, { color: owned ? colors.text : colors.textMuted }]}>{name}</Text>
+      {!owned && (
+        <View style={styles.price}>
+          <SvgXml xml={ICON_COIN} width={18} height={18} />
+          <Text style={styles.priceText}>{formatCount(price)}</Text>
         </View>
       )}
-      {short && <Text style={styles.lack}>{shortLabel(formatCount(lack))}</Text>}
     </Pressable>
   );
 });
-
-/** 옷 가게 가기 칸 (내 옷장의 마지막 칸, 점선) */
-export function GoShopCell({ width, label, onPress }: { width: number; label: string; onPress: () => void }) {
-  return (
-    <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={[styles.cell, { width }]}>
-      <View style={[styles.goShop, { width, height: width }]}>
-        <Svg width={26} height={26} viewBox="0 0 24 24" fill="none" stroke={colors.textMuted} strokeWidth={2.6} strokeLinecap="round">
-          <Path d="M12 5v14M5 12h14" />
-        </Svg>
-      </View>
-      <Text style={[styles.name, { color: colors.textMuted }]}>{label}</Text>
-    </Pressable>
-  );
-}
 
 /** 방금 산 옷 칸 위에서 반짝이는 별 3개 (시안 28f). 모션 줄이기면 멈춘 채 보인다 */
 function Sparkles({ reduceMotion }: { reduceMotion: boolean }) {
@@ -156,15 +125,10 @@ const styles = StyleSheet.create({
     borderWidth: 2.5,
     borderColor: colors.night,
   },
-  ownTag: { position: 'absolute', left: 8, top: 8, height: 20, paddingHorizontal: 8, borderRadius: 10, backgroundColor: colors.night, justifyContent: 'center' },
-  ownTagText: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.textSub },
+  dim: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, borderRadius: 20, backgroundColor: 'rgba(13,17,48,0.35)' },
   name: { fontFamily: fonts.bodyHeavy, fontSize: 13 },
   price: { height: 24, flexDirection: 'row', alignItems: 'center', gap: 4, paddingLeft: 3, paddingRight: 9, borderRadius: 12, backgroundColor: '#2B3370' },
-  priceShort: { backgroundColor: colors.cardSub },
   priceText: { fontFamily: fonts.numberBold, fontSize: 13, color: colors.yellow },
-  priceTextShort: { color: '#6E76B0' },
-  lack: { marginTop: -3, fontFamily: fonts.bodyHeavy, fontSize: 11, color: SHORT_INK },
-  goShop: { borderRadius: 20, borderWidth: 2.5, borderStyle: 'dashed', borderColor: '#3A4386', alignItems: 'center', justifyContent: 'center' },
   starA: { position: 'absolute', right: -8, top: -10 },
   starB: { position: 'absolute', left: -6, bottom: 14 },
   starC: { position: 'absolute', right: 14, bottom: -6 },

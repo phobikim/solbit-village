@@ -27,12 +27,6 @@ export const colors = {
   leisure: '#C49BFF',
 } as const;
 
-/**
- * 옷 가게 "모자라요" 글자색 (시안 #FF6B6B). 한 곳에서만 정의한다.
- * TODO([미정]): 경고색 없는 중립 표현으로 바꿀지 — 사용자 확정 전 (CLAUDE.md 규칙 4·6의 취지: 벌 · 경고 느낌을 피한다).
- */
-export const SHORT_INK = '#FF6B6B';
-
 /** 일 지수는 높을수록 빨강 쪽 (#FFC23C → #FF5A4A) */
 export function workColor(value: number): string {
   const t = Math.min(1, Math.max(0, value / 100));

@@ -1,44 +1,42 @@
-// 솔이 옷장 탭 (디자인 TURN 28). 위에서 아래로: 헤더(재화 칩 + 제목) → 미리보기 카드 → [내 옷장 | 옷 가게] → 슬롯 탭 → 3열 격자 → (사기 버튼) → 탭 바.
-// 내 옷장: 가진 옷만. 칸을 누르면 바로 입고 벗고 즉시 저장된다 (슬롯마다 한 벌).
-// 옷 가게: 모든 옷. 칸을 누르면 미리보기에만 입혀 본다 (저장 안 함). 안 가진 옷을 입어 보는 중이면 "사기 · 가격" 버튼이 뜨고, 시트에서 확인 후 산다.
+// 솔이 옷장 탭 (통합 구조). 위에서 아래로: 헤더(재화 칩 + 제목) → 미리보기 카드 → 슬롯 탭 → 3열 격자 → (하단 액션 버튼) → 탭 바.
+// 슬롯의 모든 옷을 보여 준다. 칸을 누르면 "선택"이 되고 미리보기에만 입혀진다 (저장 안 함, 슬롯마다 따로 유지, 탭을 벗어나면 초기화).
+// 하단 버튼은 선택한 옷에 따라 구매하기 / 코인이 모자라요 / 갈아입기 / 착용 중 — 상태 결정은 domain/closet.ts getActionState.
 // 옷은 장식일 뿐이다 — 지수 · 레벨 · 작물 어떤 규칙에도 영향을 주지 않는다 (CLAUDE.md 규칙 2). 코인이 모자라도 벌은 없다.
 
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import {
+  ACTION_BUY,
+  ACTION_EQUIP,
+  ACTION_EQUIPPED,
+  ACTION_SHORT,
+  ACTION_TAKE_OFF,
   BUBBLE_BOUGHT,
-  BUBBLE_CLOSET,
-  BUBBLE_SHOP,
-  buyButtonLabel,
-  CLOSET_PREVIEW_LABEL,
-  CLOSET_TITLE,
-  GO_SHOP,
-  SEGMENT_CLOSET,
-  SEGMENT_SHOP,
-  SLOT_LABEL,
-} from '../../src/copy/outfits.ko';
-import { itemMeta, itemsOfSlot, SLOTS, type Equipped, type Slot } from '../../src/domain/outfit';
+  BUBBLE_DEFAULT,
+  BUBBLE_NOT_OWNED,
+  PREVIEW_RESET,
+} from '../../src/copy/closet.ko';
+import { CLOSET_PREVIEW_LABEL, CLOSET_TITLE, SLOT_LABEL } from '../../src/copy/outfits.ko';
+import { changeSlot, composePreview, EMPTY_PICK, getActionState, gridItems, isPreviewDirty, pickItem, syncPreview } from '../../src/domain/closet';
+import { itemMeta, SLOTS, type Slot } from '../../src/domain/outfit';
 import { priceOf } from '../../src/domain/shop';
-import { formatCount, shortBy } from '../../src/domain/wallet';
+import { formatCount } from '../../src/domain/wallet';
 import { useOutfit } from '../../src/state/outfit';
 import { useWallet } from '../../src/state/wallet';
 import { Ijang } from '../../src/ui/characters';
-import { BuySheet } from '../../src/ui/components/BuySheet';
 import { ChunkyButton, CHUNKY_DROP, CHUNKY_HEIGHT } from '../../src/ui/components/ChunkyButton';
-import { ClosetCell, GoShopCell, type CellView } from '../../src/ui/components/ClosetGrid';
+import { ClosetCell } from '../../src/ui/components/ClosetGrid';
 import { ClosetStage } from '../../src/ui/components/ClosetStage';
 import { CurrencyChips } from '../../src/ui/components/CurrencyChips';
 import { APP_MAX_WIDTH, CLOSET_LAYOUT } from '../../src/ui/layout';
 import { colors, fonts } from '../../src/ui/theme';
 
 const L = CLOSET_LAYOUT;
-
-type View_ = 'closet' | 'shop';
 
 /** 슬롯 탭 아이콘 (시안 옷장 파일의 SLOTS 상수 그대로) */
 const SLOT_ICON: Record<Slot, readonly string[]> = {
@@ -49,6 +47,10 @@ const SLOT_ICON: Record<Slot, readonly string[]> = {
   hand: ['M7 9h9v8a3 3 0 0 1-3 3h-3a3 3 0 0 1-3-3z', 'M16 11h1.5a2 2 0 0 1 0 4H16', 'M9.5 3.5v2.5', 'M13 3.5v2.5'],
   feet: ['M7.5 3.5h5v8l5.5 2a2.5 2.5 0 0 1 2 2.5v2.5H6.5V4.5a1 1 0 0 1 1-1z', 'M6.5 16h13.5'],
 };
+
+/** 못 누르는 버튼 색: 경고색 없이 중립 */
+const DISABLED_BG = '#2B3370';
+const DISABLED_DROP = '#1A2050';
 
 export default function ClosetScreen() {
   const insets = useSafeAreaInsets();
@@ -64,80 +66,82 @@ export default function ClosetScreen() {
   const toggle = useOutfit((s) => s.toggle);
   const buy = useOutfit((s) => s.buy);
 
-  const [view, setView] = useState<View_>('closet');
   const [slot, setSlot] = useState<Slot>('head');
-  /** 옷 가게에서 입어 보는 중인 옷 (저장 안 함) */
-  const [tryOn, setTryOn] = useState<string | null>(null);
+  const [pick, setPick] = useState(EMPTY_PICK);
   /** 방금 산 옷 (별이 반짝인다) */
   const [just, setJust] = useState<string | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const buying = useRef(false);
 
   useFocusEffect(
     useCallback(() => {
       Promise.all([loadOutfit(), loadWallet()]).catch((e) => console.warn('[closet] load failed', e));
+      // 탭을 벗어나면 미리보기는 초기화한다
+      return () => {
+        setPick(EMPTY_PICK);
+        setJust(null);
+      };
     }, [loadOutfit, loadWallet]),
   );
 
-  const shop = view === 'shop';
-  const buyable = shop && tryOn !== null && !owned.has(tryOn);
-  const tryPrice = buyable ? priceOf(tryOn) ?? 0 : 0;
-  const tryLack = buyable ? shortBy(coin, tryPrice) : 0;
+  const selectedMeta = pick.selected ? itemMeta(pick.selected) : undefined;
+  const action = selectedMeta ? getActionState(selectedMeta, { owned, equipped, coins: coin }) : null;
+  const preview = useMemo(() => composePreview(equipped, pick.preview), [equipped, pick.preview]);
+  const dirty = isPreviewDirty(equipped, pick.preview);
 
-  // 미리보기: 입고 있는 옷 + (가게에서) 입어 보는 옷
-  const preview = useMemo<Equipped>(() => {
-    const meta = shop && tryOn ? itemMeta(tryOn) : undefined;
-    return meta && tryOn ? { ...equipped, [meta.slot]: tryOn } : equipped;
-  }, [equipped, shop, tryOn]);
-
-  const goCloset = () => {
-    setView('closet');
-    setTryOn(null);
+  const onPick = (id: string) => {
     setJust(null);
-    setSheetOpen(false);
+    setPick((cur) => pickItem(cur, id, equipped));
   };
-  const goShop = () => {
-    setView('shop');
+  const onSlot = (s: Slot) => {
+    setSlot(s);
+    setPick(changeSlot);
+  };
+  const onReset = () => {
     setJust(null);
+    setPick(EMPTY_PICK);
   };
 
-  const onPick = useCallback(
-    (id: string) => {
-      setJust(null);
-      if (view === 'closet') toggle(id);
-      else setTryOn((cur) => (cur === id ? null : id));
-    },
-    [view, toggle],
-  );
-
-  const onBuy = async (id: string) => {
-    const r = await buy(id);
-    setSheetOpen(false);
-    if (r.ok) {
-      setTryOn(null);
-      setJust(id);
+  const onEquip = () => {
+    if (!selectedMeta) return;
+    toggle(selectedMeta.id);
+    setPick((cur) => ({ ...cur, preview: syncPreview(cur.preview, { ...equipped, [selectedMeta.slot]: selectedMeta.id }) }));
+  };
+  const onTakeOff = () => {
+    if (!selectedMeta) return;
+    toggle(selectedMeta.id);
+    setPick((cur) => ({ selected: null, preview: syncPreview(cur.preview, { ...equipped, [selectedMeta.slot]: undefined }) }));
+  };
+  const onBuy = async () => {
+    if (!selectedMeta || buying.current) return;
+    buying.current = true;
+    setBusy(true);
+    try {
+      const r = await buy(selectedMeta.id);
+      if (r.ok) {
+        setJust(selectedMeta.id);
+        setPick((cur) => ({ ...cur, preview: syncPreview(cur.preview, { ...useOutfit.getState().equipped }) }));
+      }
+    } finally {
+      buying.current = false;
+      setBusy(false);
     }
   };
 
-  const cells: CellView[] = itemsOfSlot(slot)
-    .filter((it) => shop || owned.has(it.id))
-    .map((it) => {
-      const has = owned.has(it.id);
-      const price = shop && !has ? priceOf(it.id) ?? 0 : null;
-      return {
-        id: it.id,
-        wearing: !shop && equipped[slot] === it.id,
-        tryOn: shop && tryOn === it.id,
-        owned: shop && has,
-        price,
-        lack: price !== null ? shortBy(coin, price) : 0,
-        just: just === it.id,
-      };
-    });
+  const cells = gridItems(slot).map((it) => ({
+    id: it.id,
+    wearing: equipped[slot] === it.id,
+    selected: pick.selected === it.id,
+    owned: owned.has(it.id),
+    price: priceOf(it.id) ?? 0,
+    just: just === it.id,
+  }));
 
   const gridInnerWidth = frameWidth - L.grid.side * 2;
   const cellWidth = (gridInnerWidth - L.grid.gapX * (L.grid.cols - 1)) / L.grid.cols;
   const previewWidth = frameWidth - L.preview.side * 2;
-  const say = just ? BUBBLE_BOUGHT : shop ? BUBBLE_SHOP : BUBBLE_CLOSET;
+  const say = just ? BUBBLE_BOUGHT : action && (action.kind === 'buy' || action.kind === 'short') ? BUBBLE_NOT_OWNED : BUBBLE_DEFAULT;
+  const actionHeight = L.action.height + CHUNKY_DROP;
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
@@ -156,58 +160,50 @@ export default function ClosetScreen() {
               <Text style={styles.bubbleText}>{say}</Text>
             </View>
           </View>
+          {dirty && (
+            <Pressable accessibilityRole="button" accessibilityLabel={PREVIEW_RESET} onPress={onReset} style={styles.resetChip}>
+              <Text style={styles.resetText}>{PREVIEW_RESET}</Text>
+            </Pressable>
+          )}
         </ClosetStage>
-      </View>
-
-      <View style={styles.segment} accessibilityRole="tablist">
-        <SegmentButton label={SEGMENT_CLOSET} on={!shop} onPress={goCloset} />
-        <SegmentButton label={SEGMENT_SHOP} on={shop} onPress={goShop} />
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsScroll} contentContainerStyle={styles.tabs}>
         {SLOTS.map((s) => (
-          <SlotTab key={s} slot={s} on={s === slot} onPress={setSlot} />
+          <SlotTab key={s} slot={s} on={s === slot} onPress={onSlot} />
         ))}
       </ScrollView>
 
       <ScrollView
         style={styles.grid}
-        contentContainerStyle={[styles.gridContent, { paddingBottom: buyable ? L.grid.bottomWithBuy : L.grid.bottom }]}
+        contentContainerStyle={[styles.gridContent, { paddingBottom: L.grid.bottom + actionHeight + L.action.bottom }]}
         showsVerticalScrollIndicator={false}
       >
         {cells.map((c) => (
           <ClosetCell key={c.id} {...c} width={cellWidth} reduceMotion={reduceMotion} onPress={onPick} />
         ))}
-        {!shop && <GoShopCell width={cellWidth} label={GO_SHOP} onPress={goShop} />}
       </ScrollView>
 
-      {buyable && (
-        <View style={styles.buySlot} pointerEvents="box-none">
-          <ChunkyButton
-            label={buyButtonLabel(formatCount(tryPrice))}
-            onPress={() => setSheetOpen(true)}
-            bg={tryLack > 0 ? '#2B3370' : colors.pink}
-            ink={tryLack > 0 ? colors.textSub : colors.line}
-            drop={tryLack > 0 ? '#1A2050' : colors.pinkShadow}
-          />
+      {action && (
+        <View style={styles.actionSlot} pointerEvents="box-none">
+          {action.kind === 'equipped' && (
+            <Pressable accessibilityRole="button" accessibilityLabel={ACTION_TAKE_OFF} onPress={onTakeOff} style={styles.takeOff}>
+              <Text style={styles.takeOffText}>{ACTION_TAKE_OFF}</Text>
+            </Pressable>
+          )}
+          <View style={{ flex: 1 }}>
+            {action.kind === 'buy' && <ChunkyButton label={ACTION_BUY(formatCount(action.price))} onPress={onBuy} disabled={busy} />}
+            {action.kind === 'short' && (
+              <ChunkyButton label={ACTION_SHORT(formatCount(action.lack))} onPress={() => {}} disabled bg={DISABLED_BG} ink={colors.textSub} drop={DISABLED_DROP} />
+            )}
+            {action.kind === 'equip' && <ChunkyButton label={ACTION_EQUIP} onPress={onEquip} />}
+            {action.kind === 'equipped' && (
+              <ChunkyButton label={`${ACTION_EQUIPPED} ✓`} a11yLabel={ACTION_EQUIPPED} onPress={() => {}} disabled bg={DISABLED_BG} ink={colors.yellow} drop={DISABLED_DROP} />
+            )}
+          </View>
         </View>
       )}
-
-      <BuySheet itemId={sheetOpen && buyable ? tryOn : null} coin={coin} preview={preview} onBuy={onBuy} onClose={() => setSheetOpen(false)} />
     </View>
-  );
-}
-
-function SegmentButton({ label, on, onPress }: { label: string; on: boolean; onPress: () => void }) {
-  return (
-    <Pressable
-      accessibilityRole="tab"
-      accessibilityState={{ selected: on }}
-      onPress={onPress}
-      style={[styles.segmentBtn, on && styles.segmentOn]}
-    >
-      <Text style={[styles.segmentText, { color: on ? colors.line : colors.textSub }]}>{label}</Text>
-    </Pressable>
   );
 }
 
@@ -258,20 +254,8 @@ const styles = StyleSheet.create({
   },
   bubble: { flexShrink: 1, backgroundColor: colors.card, borderWidth: 2, borderColor: colors.line, borderRadius: 14, paddingVertical: 5, paddingHorizontal: 11 },
   bubbleText: { fontFamily: fonts.bodyHeavy, fontSize: 13, lineHeight: 17, color: colors.text },
-  segment: {
-    flexShrink: 0,
-    marginTop: L.segment.top,
-    marginHorizontal: L.segment.side,
-    height: L.segment.height,
-    padding: 4,
-    borderRadius: 22,
-    backgroundColor: colors.cardSub,
-    flexDirection: 'row',
-    gap: 4,
-  },
-  segmentBtn: { flex: 1, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  segmentOn: { backgroundColor: colors.yellow },
-  segmentText: { fontFamily: fonts.bodyHeavy, fontSize: 15 },
+  resetChip: { position: 'absolute', right: 12, bottom: 12, height: 32, paddingHorizontal: 14, borderRadius: 16, backgroundColor: colors.card, borderWidth: 2, borderColor: colors.line, justifyContent: 'center' },
+  resetText: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.text },
   tabsScroll: { flexGrow: 0, flexShrink: 0, marginTop: L.tabs.top },
   tabs: { paddingHorizontal: L.tabs.side, gap: L.tabs.gap },
   slotTab: {
@@ -296,5 +280,25 @@ const styles = StyleSheet.create({
     rowGap: L.grid.gapY,
     alignContent: 'flex-start',
   },
-  buySlot: { position: 'absolute', left: L.buy.side, right: L.buy.side, bottom: L.buy.bottom - CHUNKY_DROP, height: CHUNKY_HEIGHT + CHUNKY_DROP },
+  actionSlot: {
+    position: 'absolute',
+    left: L.action.side,
+    right: L.action.side,
+    bottom: L.action.bottom - CHUNKY_DROP,
+    height: CHUNKY_HEIGHT + CHUNKY_DROP,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: L.action.gap,
+  },
+  takeOff: {
+    width: L.action.takeOffWidth,
+    height: CHUNKY_HEIGHT,
+    borderRadius: CHUNKY_HEIGHT / 2,
+    backgroundColor: colors.cardSub,
+    borderWidth: 2.5,
+    borderColor: '#3A4386',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  takeOffText: { fontFamily: fonts.bodyHeavy, fontSize: 15, color: colors.textSub },
 });

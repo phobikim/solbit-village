@@ -232,16 +232,12 @@ export const CLOSET_LAYOUT = {
   header: { height: 36, top: 2, bottom: 10 },
   /** 미리보기 카드 (좌우 12) */
   preview: { height: 284, radius: 28, side: 12 },
-  /** 내 옷장 | 옷 가게 세그먼트 */
-  segment: { height: 44, top: 12, side: 12 },
   /** 슬롯 탭 줄 */
   tabs: { height: 36, top: 10, side: 12, gap: 6 },
-  /** 그리드: 3열, 위 14 · 좌우 12, 칸 사이 가로 10 · 세로 12. 아래 16 (입어 보는 중에는 큰 사기 버튼에 가리지 않게 84) */
-  grid: { cols: 3, top: 14, side: 12, gapX: 10, gapY: 12, bottom: 16, bottomWithBuy: 84 },
+  /** 그리드: 3열, 위 14 · 좌우 12, 칸 사이 가로 10 · 세로 12. 아래 16 (하단 액션 버튼이 떠 있으면 버튼 높이만큼 더) */
+  grid: { cols: 3, top: 14, side: 12, gapX: 10, gapY: 12, bottom: 16 },
   /** 칸 안 썸네일 상자 */
   thumb: 80,
-  /** 큰 사기 버튼: 탭 바 바로 위에 붙는다 */
-  buy: { height: 56, side: 16, bottom: 10 },
-  /** 구매 확인 시트 안 미리보기 */
-  sheetPreview: 210,
+  /** 하단 액션 버튼: 탭 바 바로 위에 붙는다. 칩(벗기)은 왼쪽 */
+  action: { height: 56, side: 16, bottom: 10, takeOffWidth: 84, gap: 10 },
 } as const;

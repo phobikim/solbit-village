@@ -1,5 +1,5 @@
 // 아래 단단한 단색 그림자가 있는 큰 둥근 버튼 (시안: box-shadow 0 5px 0). 높이 56 + 그림자 5.
-// 옷 가게의 "사기 · 가격" 고정 버튼과 구매 확인 시트의 [사기]가 함께 쓴다.
+// 옷장 탭 하단 액션 버튼(구매하기 · 갈아입기 · 착용 중 …)이 쓴다. disabled면 눌러도 아무 일도 없고 눌림 모션도 없다.
 
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
@@ -15,18 +15,23 @@ type Props = {
   bg?: string;
   ink?: string;
   drop?: string;
+  /** 글자와 다른 읽기 라벨이 필요할 때 (체크 표시 등) */
+  a11yLabel?: string;
+  disabled?: boolean;
   style?: StyleProp<ViewStyle>;
 };
 
-export function ChunkyButton({ label, onPress, bg = colors.pink, ink = colors.line, drop = colors.pinkShadow, style }: Props) {
+export function ChunkyButton({ label, onPress, bg = colors.pink, ink = colors.line, drop = colors.pinkShadow, a11yLabel, disabled = false, style }: Props) {
   return (
     <View style={[styles.slot, style]}>
       <View style={[styles.drop, { backgroundColor: drop }]} />
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={label}
+        accessibilityLabel={a11yLabel ?? label}
+        accessibilityState={{ disabled }}
+        disabled={disabled}
         onPress={onPress}
-        style={({ pressed }) => [styles.btn, { backgroundColor: bg }, pressed && styles.pressed]}
+        style={({ pressed }) => [styles.btn, { backgroundColor: bg }, pressed && !disabled && styles.pressed]}
       >
         <Text style={[styles.label, { color: ink }]}>{label}</Text>
       </Pressable>

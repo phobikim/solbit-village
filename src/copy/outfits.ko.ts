@@ -1,17 +1,9 @@
-// 솔이 옷장 탭 · 옷 가게 문구. 코드에 하드코딩하지 않는다.
+// 솔이 옷장 탭 · 옷 이름 문구. 코드에 하드코딩하지 않는다. 이장 말풍선 · 버튼 문구는 closet.ko.ts.
 
 import type { Slot } from '../domain/outfit';
 
 export const CLOSET_TITLE = '솔이 옷장';
 export const CLOSET_PREVIEW_LABEL = '솔이 미리보기';
-
-export const SEGMENT_CLOSET = '내 옷장';
-export const SEGMENT_SHOP = '옷 가게';
-
-/** 이장 말풍선 */
-export const BUBBLE_CLOSET = '오늘은 뭘 입어 보시려유?';
-export const BUBBLE_SHOP = '돈 모은 만큼만 사유.';
-export const BUBBLE_BOUGHT = '잘 어울리네유.';
 
 export const SLOT_LABEL: Record<Slot, string> = {
   head: '머리',
@@ -22,32 +14,9 @@ export const SLOT_LABEL: Record<Slot, string> = {
   feet: '발',
 };
 
-export const GO_SHOP = '옷 가게 가기';
-/** 가게 칸: 이미 가진 옷에 붙는 태그 */
-export const OWNED_TAG = '보유';
-/** "모자라요 -N" */
-export const shortLabel = (lack: string) => `모자라요 -${lack}`;
-export const SHORT_WORD = '모자라요';
-
-/** 큰 사기 버튼: "사기 · 1,300" */
-export const buyButtonLabel = (price: string) => `사기 · ${price}`;
-
-// 구매 확인 시트
-export const SHEET_NOW_COIN = '지금 코인';
-export const SHEET_AFTER = '산 뒤';
-export const SHEET_BUY = '사기';
-export const SHEET_LATER = '다음에';
-
 /** 칸 접근성 라벨 */
-export const cellA11y = (name: string, state: { wearing?: boolean; tryOn?: boolean; owned?: boolean; price?: string; lack?: string }) =>
-  [
-    name,
-    state.wearing ? '입는 중' : '',
-    state.tryOn ? '입어 보는 중' : '',
-    state.owned ? OWNED_TAG : '',
-    state.price ? `${state.price} 코인` : '',
-    state.lack ? shortLabel(state.lack) : '',
-  ]
+export const cellA11y = (name: string, state: { wearing?: boolean; selected?: boolean; owned: boolean; price?: string }) =>
+  [name, state.wearing ? '입는 중' : '', state.selected ? '선택함' : '', state.owned ? '' : `${state.price ?? ''} 코인, 안 가짐`]
     .filter(Boolean)
     .join(', ');
 
