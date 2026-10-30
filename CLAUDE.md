@@ -19,7 +19,7 @@
 
 ```
 app/                    expo-router 화면
-  (tabs)/               index(마을) · records(장부: 그날그날 / 대소사) · neighbors(이웃) · rest(쉼터) · closet(옷장: 내 옷장 / 옷 가게) · me(나) — 하단 탭 6개
+  (tabs)/               index(마을) · records(장부: 그날그날 / 대소사) · neighbors(이웃) · rest(쉼터) · closet(옷장: 슬롯별 전체 옷 · 선택=미리보기 · 하단 액션 버튼) · me(나) — 하단 탭 6개
   record.tsx            오늘 기록 시트 (모달)
   seed-result.tsx       씨앗 결과
   ledger/new.tsx        행사 등록 시트
