@@ -84,6 +84,7 @@ export default function VillageScreen() {
         soliMood={v.scene.soliMood}
         soliSkin={v.scene.soliSkin ?? null}
         active={active}
+        lift={insets.bottom}
       />
 
       {/* 솔이를 누르면 솔이 옷장. 영역은 시안 hL/hB/hW/hH 계산 */}
@@ -91,7 +92,7 @@ export default function VillageScreen() {
         accessibilityRole="button"
         accessibilityLabel="솔이 · 옷장 열기"
         onPress={openCloset}
-        style={{ position: 'absolute', left: hit.left, bottom: hit.bottom, width: hit.width, height: hit.height }}
+        style={{ position: 'absolute', left: hit.left, bottom: hit.bottom + insets.bottom, width: hit.width, height: hit.height }}
       >
         <View style={[styles.badge, { left: hit.badgeLeft, top: hit.badgeTop }]}>
           <HangerIcon size={15} color="#FFFFFF" />

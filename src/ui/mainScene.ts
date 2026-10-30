@@ -1,10 +1,10 @@
 // 새 메인(디자인 TURN 30)의 장면 맞춤 · 솔이 누르는 영역. 순수 계산이라 단위 테스트한다 (RN import 없음).
-// 장면은 390×844 좌표계를 xMidYMax slice로 깔아서 어떤 화면비에서도 화면을 꽉 채운다 (가로나 세로 중 더 모자란 쪽에 맞추고, 남는 쪽은 잘린다).
+// 장면은 390×844 좌표계를 가로에 맞춰(배율 = 너비/390) 아래에 붙여 깐다. 세로가 모자라면 하늘 쪽 위가 잘리고, 남으면 위는 하늘색 바탕이 채운다 (배경이 화면보다 커지지 않게).
 
 export const SCENE_DESIGN = { width: 390, height: 844 } as const;
 
 export type SceneFit = {
-  /** 배율 = max(w/390, h/844) */
+  /** 배율 = w/390 (가로 기준) */
   scale: number;
   /** 화면 안에서 장면 왼쪽 위 (가로는 가운데 맞춤, 세로는 아래 맞춤이라 음수일 수 있다) */
   left: number;
@@ -12,7 +12,7 @@ export type SceneFit = {
 };
 
 export function sceneFit(width: number, height: number): SceneFit {
-  const scale = Math.max(width / SCENE_DESIGN.width, height / SCENE_DESIGN.height);
+  const scale = width / SCENE_DESIGN.width;
   return {
     scale,
     left: (width - SCENE_DESIGN.width * scale) / 2,
@@ -35,8 +35,8 @@ export const SOLI_BADGE_SIZE = 28;
 
 /** 시안 hL/hB/hW/hH/bL/bT 계산 그대로 (390×844 기준 가로 230 × 세로 228, 화면에 비례해 늘린다) */
 export function soliHit(width: number, height: number): SoliHit {
-  const s = Math.max(width / SCENE_DESIGN.width, height / SCENE_DESIGN.height);
-  const x = (v: number) => v * s - (SCENE_DESIGN.width * s - width) / 2;
+  const s = width / SCENE_DESIGN.width;
+  const x = (v: number) => v * s;
   const b = (v: number) => (SCENE_DESIGN.height - v) * s;
   return {
     left: round1(x(95)),

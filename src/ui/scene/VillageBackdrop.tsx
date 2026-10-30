@@ -63,6 +63,8 @@ export type VillageBackdropProps = {
   soliSkin: string | null;
   /** 화면이 앞에 있다 (포커스 + 앱이 앞). false면 움직임을 멈춘다 */
   active: boolean;
+  /** 장면 바닥을 화면 바닥보다 이만큼 올린다 (아래 안전 영역: 밭이 기록 버튼 · 탭 바에 가리지 않게) */
+  lift?: number;
 };
 
 /** 시계(초). running이 아니면 멈춘다 */
@@ -181,7 +183,7 @@ const Full = ({ xml }: { xml: string }) => (
   </View>
 );
 
-export const VillageBackdrop = memo(function VillageBackdrop({ variant, width, height, plots, soliMood, soliSkin, active }: VillageBackdropProps) {
+export const VillageBackdrop = memo(function VillageBackdrop({ variant, width, height, plots, soliMood, soliSkin, active, lift = 0 }: VillageBackdropProps) {
   const reduceMotion = useReducedMotion();
   const t = useSceneClock(active && !reduceMotion);
   const v = connectedVariant(variant);
@@ -213,7 +215,7 @@ export const VillageBackdrop = memo(function VillageBackdrop({ variant, width, h
     width: SCENE_DESIGN.width,
     height: SCENE_DESIGN.height,
     left: fit.left + (SCENE_DESIGN.width * fit.scale) / 2 - SCENE_DESIGN.width / 2,
-    top: fit.top + (SCENE_DESIGN.height * fit.scale) / 2 - SCENE_DESIGN.height / 2,
+    top: fit.top - lift + (SCENE_DESIGN.height * fit.scale) / 2 - SCENE_DESIGN.height / 2,
     transform: [{ scale: fit.scale }],
   };
 
