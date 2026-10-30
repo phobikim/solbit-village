@@ -7,7 +7,7 @@ import { StyleSheet, View } from 'react-native';
 import Svg, { Circle, Ellipse, Path, Rect } from 'react-native-svg';
 
 import type { Equipped } from '../../domain/outfit';
-import { SoliOutfit } from '../characters/SoliOutfit';
+import { SoliAvatar } from '../characters/SoliAvatar';
 import { colors } from '../theme';
 
 type Variant = 'main' | 'sheet';
@@ -105,7 +105,7 @@ export function ClosetStage({ variant, width, equipped, children }: Props) {
     <View style={[styles.card, { width, height: S.height, borderRadius: S.radius }]}>
       <Decor variant={variant} width={width} />
       <View pointerEvents="none" style={{ position: 'absolute', left: (width - S.soli.w) / 2, top: S.height - S.soli.bottom - soliH }}>
-        <SoliOutfit equipped={equipped} box={{ width: S.soli.w }} style={{ width: S.soli.w, height: soliH }} />
+        <SoliAvatar equipped={equipped} box={{ width: S.soli.w }} style={{ width: S.soli.w, height: soliH }} />
       </View>
       {children}
     </View>

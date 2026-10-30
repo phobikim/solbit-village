@@ -11,7 +11,7 @@ import { itemMeta } from '../../domain/outfit';
 import { formatCount } from '../../domain/wallet';
 import { dressedThumbBox, itemThumbBox } from '../characters/outfits';
 import { ICON_COIN, ICON_STAR } from '../characters/rewardIcons';
-import { SoliOutfit } from '../characters/SoliOutfit';
+import { SoliAvatar } from '../characters/SoliAvatar';
 import { CLOSET_LAYOUT } from '../layout';
 import { colors, fonts } from '../theme';
 
@@ -51,7 +51,7 @@ export const ClosetCell = memo(function ClosetCell({ id, wearing, selected, owne
         {/* 안 가진 옷: 불투명도 60% + 어두운 오버레이로 흑백 느낌을 근사한다 (react-native-svg 필터는 쓰지 않는다) */}
         <View style={{ width: THUMB, height: THUMB, opacity: owned ? 1 : 0.6 }}>
           {meta && (
-            <SoliOutfit
+            <SoliAvatar
               equipped={{ [meta.slot]: id }}
               box={dressed ? dressedThumbBox(id, THUMB) : itemThumbBox(id, THUMB)}
               itemsOnly={!dressed}
@@ -85,7 +85,7 @@ export const ClosetCell = memo(function ClosetCell({ id, wearing, selected, owne
 });
 
 /** 방금 산 옷 칸 위에서 반짝이는 별 3개 (시안 28f). 모션 줄이기면 멈춘 채 보인다 */
-function Sparkles({ reduceMotion }: { reduceMotion: boolean }) {
+export function Sparkles({ reduceMotion }: { reduceMotion: boolean }) {
   const t = useSharedValue(1);
   useEffect(() => {
     if (reduceMotion) {

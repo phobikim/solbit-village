@@ -247,6 +247,18 @@ export const MIGRATIONS: readonly string[] = [
   );
   INSERT INTO wallet (id, coin, heung) VALUES (1, 0, 0);
   `,
+  // v14 — 마을 배경(꾸미기 · 마을): 가진 배경. 시작 보유는 기본(base) 하나뿐이다.
+  //       적용 중인 배경 하나는 settings 키 village_bg_equipped (없으면 기본). 가격 · 목록은 src/domain/villageBg.ts.
+  //       이미 가진 값은 지우지 않는다 (새 테이블이라 건드릴 것이 없다).
+  //       ※ 요청서는 "v13에 함께"였지만 v13(wallet)은 이미 배포한 기기가 있어 v13을 고치면 그 기기에 테이블이 생기지 않는다 → v14로 분리.
+  `
+  CREATE TABLE village_bg_owned (
+    id          TEXT PRIMARY KEY NOT NULL,             -- 'base' · 'spring' · 'autumn' …
+    acquired_at TEXT,
+    source      TEXT                                   -- 'start' · 'shop'
+  );
+  INSERT INTO village_bg_owned (id, acquired_at, source) VALUES ('base', NULL, 'start');
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

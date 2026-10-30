@@ -14,7 +14,9 @@ import { useRestLogs } from '../../src/state/restLogs';
 import { useNeighbors } from '../../src/state/neighbors';
 import { useRecords } from '../../src/state/records';
 import { meRange, useMeView } from '../../src/state/tabViews';
-import { Soli } from '../../src/ui/characters';
+import { SoliAvatar } from '../../src/ui/characters/SoliAvatar';
+import { useOutfit } from '../../src/state/outfit';
+import { CLOSET_ROW_SUB, CLOSET_ROW_TITLE } from '../../src/copy/outfits.ko';
 import { Avatar } from '../../src/ui/components/Avatar';
 import { HangerIcon } from '../../src/ui/components/HangerIcon';
 import { DEV_DAY_SUB, DEV_DAY_TITLE } from '../../src/copy/morning.ko';
@@ -41,6 +43,8 @@ export default function MeScreen() {
   const loadPlaces = usePlaces((s) => s.load);
   const loadRestLogs = useRestLogs((s) => s.load);
   const me = useMeView(today);
+  // 프로필 솔이도 메인과 같은 컴포넌트 · 같은 입은 옷 (단일 출처 = useOutfit)
+  const equipped = useOutfit((s) => s.equipped);
 
   useFocusEffect(
     useCallback(() => {
@@ -56,7 +60,7 @@ export default function MeScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.profile}>
           <Avatar size={68} background={colors.yellow} offset={6}>
-            <Soli mood="normal" skin={me.soliSkin} size={62} />
+            <SoliAvatar equipped={equipped} skin={me.soliSkin} box={{ width: 62 }} style={{ width: 62, height: 74.4, marginTop: -6.2 }} />
           </Avatar>
           <View style={styles.profileBody}>
             <View style={styles.nameRow}>
@@ -86,13 +90,13 @@ export default function MeScreen() {
         </View>
 
         {/* 이장네 장부는 장부 탭으로, 여가 서랍은 쉼터 탭으로 옮겼다 (디자인 TURN 12) */}
-        <Pressable accessibilityRole="button" accessibilityLabel="솔이 옷장" onPress={() => router.push('/closet')} style={({ pressed }) => [styles.closetRow, pressed && { opacity: 0.8 }]}>
+        <Pressable accessibilityRole="button" accessibilityLabel={CLOSET_ROW_TITLE} onPress={() => router.push('/closet')} style={({ pressed }) => [styles.closetRow, pressed && { opacity: 0.8 }]}>
           <View style={styles.closetChip}>
             <HangerIcon size={22} color={colors.line} strokeWidth={2.6} />
           </View>
           <View style={{ flex: 1, gap: 1 }}>
-            <Text style={styles.closetTitle}>솔이 옷장</Text>
-            <Text style={styles.closetSub}>옷 갈아입히고 새 옷 사기</Text>
+            <Text style={styles.closetTitle}>{CLOSET_ROW_TITLE}</Text>
+            <Text style={styles.closetSub}>{CLOSET_ROW_SUB}</Text>
           </View>
           <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={colors.textMuted} strokeWidth={3.4} strokeLinecap="round" strokeLinejoin="round">
             <Path d="M9 5l7 7-7 7" />

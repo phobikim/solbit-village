@@ -16,20 +16,21 @@ export const FEATURES = {
 } as const;
 
 /**
- * 새 메인(디자인 TURN 30)에서 뺀 요소 기록. 코드 · 도메인은 지우지 않았고, 화면에서 그리지 않는다.
- * 다시 그리려면 app/(tabs)/index.tsx 에서 해당 컴포넌트를 되살린다 (VillageScene · IndexCard · FieldStrip · BroadcastLine 등이 남아 있다).
+ * 새 메인(디자인 TURN 30)의 장면 요소 스위치. true = 장면에 그린다 (app/(tabs)/index.tsx 가 이 값을 VillageBackdrop에 넘긴다).
+ * TURN 30에서 뺐던 게시판 · 이웃 · 집 · 냇가 · 날씨는 TURN 31 메인 보정에서 복원했다. 지수 카드 · 밭 띠는 계속 끈다
+ * (IndexCard · FieldStrip 컴포넌트는 남아 있다).
  */
 export const MAIN_SCENE = {
   /** 지수 카드 4개 (건강 · 일 · 관계 · 쉼). 지수는 나 탭 "최근 4주"에서 본다 */
   indexCards: false,
-  /** 게시판 (행사 쪽지). 행사는 장부 대소사와 방송으로 본다 */
-  board: false,
-  /** 놀러 온 이웃. 이웃은 이웃 탭에서 본다 */
-  visitors: false,
-  /** 집 · 냇가 */
-  houseAndCreek: false,
+  /** 게시판 (행사 쪽지 최대 3개, 누르면 장부 대소사). 복원 (TURN 31 메인 보정) */
+  board: true,
+  /** 놀러 온 가까운 이웃 (최대 2명). 복원 */
+  visitors: true,
+  /** 집 · 냇가(물). 복원 */
+  houseAndCreek: true,
   /** 밭 띠 (장면 밖 띠). 밭은 장면 속으로 들어갔다 */
   fieldStrip: false,
-  /** 날씨 5단계 표현. 계산(domain/weather)은 그대로, 새 하늘 레이어에는 아직 안 옮겼다 */
-  weatherSky: false,
+  /** 날씨 5단계 표현(구름 · 비 · 폭풍). 계산은 domain/weather, 그림은 scene/art.ts weatherSvg. 복원 */
+  weatherSky: true,
 } as const;

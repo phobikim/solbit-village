@@ -29,6 +29,8 @@ export const SETTING = {
   morningDoneDay: 'morning_done_day',
   /** 처음 가진 옷을 넣어 뒀는지 '1'. 없으면 앱이 한 번 넣는다 (백업 가져오기로 지워지면 다시 넣는다) */
   outfitSeeded: 'outfit_seeded',
+  /** 적용 중인 마을 배경 id (없으면 기본). 목록 · 가격은 src/domain/villageBg.ts */
+  villageBgEquipped: 'village_bg_equipped',
   /** 쪽지 제안 기억 (JSON: 장소별 마지막 제안일 · 오늘의 쪽지) */
   restNote: 'rest_note',
 } as const;

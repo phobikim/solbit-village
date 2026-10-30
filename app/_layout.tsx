@@ -8,6 +8,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { initDb } from '../src/data/db';
 import { SETTING, getSetting } from '../src/data/settings';
+import { useOutfit } from '../src/state/outfit';
+import { useVillageBg } from '../src/state/villageBg';
+import { useWallet } from '../src/state/wallet';
 import { shouldShowWake } from '../src/domain/morning';
 import { FEATURES } from '../src/ui/features';
 import { setupNotificationHandler } from '../src/notifications';
@@ -29,6 +32,8 @@ export default function RootLayout() {
     initDb()
       .then(async () => {
         __DEV__ && console.log('[db] ready');
+        // 입은 옷 · 마을 배경 · 코인은 앱을 켤 때 DB에서 한 번 불러온다 (메인이 이 스토어를 구독한다 — 꾸미기를 열지 않아도 바로 보인다)
+        Promise.all([useOutfit.getState().load(), useVillageBg.getState().load(), useWallet.getState().load()]).catch((e) => console.warn('[init] load failed', e));
         // 아침 흐름이 켜져 있고 오늘 아직 안 마쳤으면 솔이 깨우기부터
         if (FEATURES.morningFlow && shouldShowWake(await getSetting(SETTING.morningDoneDay), new Date())) router.replace('/wake');
       })

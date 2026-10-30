@@ -5,7 +5,7 @@
 
 import { router, useFocusEffect } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -18,13 +18,18 @@ import { needsMorningNews } from '../../src/state/newsView';
 import { usePlaces } from '../../src/state/places';
 import { useRecords } from '../../src/state/records';
 import { useRestLogs } from '../../src/state/restLogs';
+import { useOutfit } from '../../src/state/outfit';
+import { useVillageBg } from '../../src/state/villageBg';
 import { useVillageView, villageRange } from '../../src/state/villageView';
 import { useWallet } from '../../src/state/wallet';
 import { HangerIcon } from '../../src/ui/components/HangerIcon';
 import { MainBroadcast } from '../../src/ui/components/MainBroadcast';
 import { PrimaryButton } from '../../src/ui/components/PrimaryButton';
 import { WalletPill } from '../../src/ui/components/WalletPill';
-import { MAIN_HUD, SOLI_BADGE_SIZE, soliHit, tabBarSpace } from '../../src/ui/mainScene';
+import { MAIN_SCENE } from '../../src/ui/features';
+import { SCENE_PCT } from '../../src/ui/layout';
+import { MAIN_HUD, SOLI_BADGE_SIZE, sceneFit, sceneLift, sceneRect, soliHit, tabBarSpace } from '../../src/ui/mainScene';
+import { resolveTheme, themeIsLight } from '../../src/ui/scene/theme';
 import { VillageBackdrop } from '../../src/ui/scene/VillageBackdrop';
 import { colors, fonts } from '../../src/ui/theme';
 import { useScreenActive } from '../../src/ui/useScreenActive';
@@ -32,8 +37,11 @@ import { useVisibleHeight } from '../../src/ui/useVisibleHeight';
 
 const timeLabel = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 const fmt = (n: number) => n.toLocaleString('en-US');
+const NO_VISITORS: never[] = [];
 
 const openCloset = () => router.push('/closet');
+/** 게시판을 누르면 장부 · 대소사 */
+const openBoard = () => router.push({ pathname: '/records', params: { view: 'events' } });
 
 export default function VillageScreen() {
   const today = getToday();
@@ -54,7 +62,30 @@ export default function VillageScreen() {
   const height = useVisibleHeight();
   const width = Math.min(windowWidth, 430);
   const insets = useSafeAreaInsets();
-  const hit = soliHit(width, height);
+  // 밭이 기록 버튼 · 탭 바에 가리지 않게 장면을 올린 만큼 (아래 안전 영역 · 좁은 폭)
+  const lift = sceneLift(width, insets.bottom);
+  const hit = soliHit(width, height, lift);
+  const board = sceneRect(width, height, lift, { x0: (390 * SCENE_PCT.boardHit.x0) / 100, x1: (390 * SCENE_PCT.boardHit.x1) / 100, y0: (844 * SCENE_PCT.boardHit.y0) / 100, y1: (844 * SCENE_PCT.boardHit.y1) / 100 });
+  const equipped = useOutfit((s) => s.equipped);
+  const bgId = useVillageBg((s) => s.equipped);
+  const theme = useMemo(() => resolveTheme(bgId, v.timeOfDay), [bgId, v.timeOfDay]);
+  const fit = useMemo(() => {
+    const f = sceneFit(width, height);
+    return { ...f, top: f.top - lift };
+  }, [width, height, lift]);
+  const row = useMemo(
+    () => ({
+      board: v.scene.board,
+      boardToday: v.scene.boardToday,
+      lanternOn: v.scene.lanternOn,
+      bloom: v.scene.bloom,
+      building: v.scene.building ?? null,
+      showHouseAndCreek: MAIN_SCENE.houseAndCreek,
+      showBoard: MAIN_SCENE.board,
+    }),
+    [v.scene],
+  );
+  const visitors = MAIN_SCENE.visitors ? v.scene.visitors : NO_VISITORS;
 
   useFocusEffect(
     useCallback(() => {
@@ -70,29 +101,40 @@ export default function VillageScreen() {
     }, [today, loadRange, loadFarm, loadNeighbors, loadLedger, loadSkins, loadPlaces, loadRestLogs, loadWallet]),
   );
 
-  const day = v.timeOfDay === 'day';
+  const lightSky = themeIsLight(theme);
   const pct = v.level.needed > 0 ? Math.min(100, Math.max(0, (v.level.into / v.level.needed) * 100)) : 0;
 
   return (
     <View style={styles.root} testID="main-scene">
-      {active && <StatusBar style={day ? 'dark' : 'light'} />}
+      {active && <StatusBar style={lightSky ? 'dark' : 'light'} />}
       <VillageBackdrop
-        variant={day ? 'day' : 'base'}
-        width={width}
-        height={height}
+        theme={theme}
+        weather={MAIN_SCENE.weatherSky ? v.scene.weather : 'sun'}
+        fit={fit}
         plots={v.plots}
-        soliMood={v.scene.soliMood}
+        row={row}
+        visitors={visitors}
+        equipped={equipped}
         soliSkin={v.scene.soliSkin ?? null}
         active={active}
-        lift={insets.bottom}
       />
 
-      {/* 솔이를 누르면 솔이 옷장. 영역은 시안 hL/hB/hW/hH 계산 */}
+      {/* 게시판을 누르면 장부 · 대소사 (기록 입력은 아니다 — 규칙 5) */}
+      {MAIN_SCENE.board && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="마을 게시판 (장부 대소사)"
+          onPress={openBoard}
+          style={{ position: 'absolute', left: board.left, top: board.top, width: board.width, height: board.height }}
+        />
+      )}
+
+      {/* 솔이를 누르면 꾸미기 (솔이 옷 · 마을 배경). 영역은 솔이 상자에서 계산 (mainScene.soliHit) */}
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="솔이 · 옷장 열기"
+        accessibilityLabel="솔이 · 꾸미기 열기"
         onPress={openCloset}
-        style={{ position: 'absolute', left: hit.left, bottom: hit.bottom + insets.bottom, width: hit.width, height: hit.height }}
+        style={{ position: 'absolute', left: hit.left, bottom: hit.bottom, width: hit.width, height: hit.height }}
       >
         <View style={[styles.badge, { left: hit.badgeLeft, top: hit.badgeTop }]}>
           <HangerIcon size={15} color="#FFFFFF" />

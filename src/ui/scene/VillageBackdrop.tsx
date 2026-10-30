@@ -1,9 +1,10 @@
-// 새 메인의 전체 화면 마을 장면 (디자인 TURN 30, 시안 live18). 390×844 좌표계를 xMidYMax slice로 깔아 화면을 꽉 채운다.
-// 층 순서(아래→위): 하늘 → 별 · 해 → 구름 → 땅(원경 · 중경 · 냇가 · 마당 · 울타리) → 나무 → 풀 · 꽃 → 솔이 → 반딧불이/나비 → 밭 5칸.
-// 움직임은 reanimated: 시계 하나(초)를 두고 조각마다 그 시계로 위치 · 투명도 · 기울기를 계산한다.
+// 메인 마을 장면 (디자인 TURN 30, 시안 live18) — 메인과 꾸미기 · 마을 미리보기가 같은 컴포넌트를 쓴다.
+// 390×844 좌표계를 fit(배율 · 위치)대로 깐다. 메인은 화면 전체(가로 기준 배율), 미리보기는 카드 크기로 줄여 잘라 보인다.
+// 층 순서(아래→위): 하늘 → 별 · 해 → 장식 점 → 구름 → 날씨 → 땅 → 집 · 게시판 · 냇가 → 나무 · 풀 · 꽃 → 이웃 → 솔이 → 반딧불이/나비 → 밭 5칸.
+// 색은 전부 theme(VillageTheme)에서 온다. 움직임은 reanimated: 시계 하나(초)를 두고 조각마다 그 시계로 위치 · 투명도 · 기울기를 계산한다.
 //   - 화면이 안 보이면(다른 탭 · 앱이 뒤로 감 · active=false) 시계를 멈추고, 시스템 "동작 줄이기"가 켜져 있으면 처음부터 멈춘 채 둔다.
-//   - 움직이는 조각은 밤 약 30개 / 낮 약 26개로 줄여 두었다 (별은 주기별 3묶음).
-// 밭은 누를 수 없다 (규칙 5). 이 층은 터치를 받지 않는다 — 솔이를 누르는 영역은 화면(index.tsx)이 따로 얹는다.
+//   - 움직이는 조각은 밤 약 30개 / 낮 약 26개로 줄여 두었다 (별은 주기별 3묶음, 장식 점은 한 장).
+// 밭은 누를 수 없다 (규칙 5). 이 층은 터치를 받지 않는다 — 솔이 · 게시판을 누르는 영역은 화면(index.tsx)이 따로 얹는다.
 
 import { memo, useEffect, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -19,52 +20,62 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 
-import type { PlotSlot } from '../../domain/types';
+import type { Equipped } from '../../domain/outfit';
+import type { PlotSlot, Weather } from '../../domain/types';
 import { CachedSvg } from '../characters/CachedSvg';
-import { soliWithSkinSvg, type SoliMood } from '../characters/soli';
-import { wrap } from '../characters/svg';
-import { sceneFit, SCENE_DESIGN } from '../mainScene';
+import { SoliAvatar } from '../characters/SoliAvatar';
+import type { VillageVisitor } from '../characters/village';
+import { SCENE_DESIGN, SOLI_BOB, soliBox, type SceneFit } from '../mainScene';
 import {
   butterflySpecs,
+  celestialVisible,
   cloudSpecs,
-  connectedVariant,
+  decoPiece,
   fireflySpecs,
   flowerPieces,
   landSvg,
+  neighborsSvg,
   PLOT,
   plotCellSvg,
   plotLeft,
+  rowSvg,
+  BLEED,
   SCENE_H,
   SCENE_W,
   shadowSvg,
   skySvg,
-  SOLI_BOB,
-  SOLI_BOX,
   starPiece,
   STAR_GROUPS,
   STAR_PERIODS,
   sunPiece,
-  tuftPieces,
   treePieces,
+  tuftPieces,
+  visibleStars,
+  weatherSvg,
   type BugSpec,
   type Piece,
-  type SceneVariant,
+  type RowParams,
   type SwayPiece,
 } from './art';
+import type { VillageTheme } from './theme';
 
 const TAU = Math.PI * 2;
 
 export type VillageBackdropProps = {
-  variant: SceneVariant;
-  width: number;
-  height: number;
+  theme: VillageTheme;
+  weather: Weather;
+  /** 장면(390×844)을 어디에 얼마나 깔지: 메인은 sceneFit에서 lift를 뺀 값, 미리보기는 카드에 맞춘 값 */
+  fit: SceneFit;
   plots: readonly PlotSlot[];
-  soliMood: SoliMood;
+  /** 집 · 게시판 · 냇가에 필요한 값 (게시판 쪽지 · 야근 등불 · 냇가 꽃 · 건물 스킨) */
+  row: RowParams;
+  visitors: readonly VillageVisitor[];
+  /** 솔이가 입은 옷 (단일 출처 = useOutfit) */
+  equipped: Equipped;
+  /** 교환소에서 얻은 솔이 스킨 */
   soliSkin: string | null;
   /** 화면이 앞에 있다 (포커스 + 앱이 앞). false면 움직임을 멈춘다 */
   active: boolean;
-  /** 장면 바닥을 화면 바닥보다 이만큼 올린다 (아래 안전 영역: 밭이 기록 버튼 · 탭 바에 가리지 않게) */
-  lift?: number;
 };
 
 /** 시계(초). running이 아니면 멈춘다 */
@@ -94,6 +105,16 @@ const Twinkle = memo(function Twinkle({ p, period, t }: { p: Piece; period: numb
 
 const Drift = memo(function Drift({ p, dx, period, t }: { p: Piece; dx: number; period: number; t: SharedValue<number> }) {
   const style = useAnimatedStyle(() => ({ transform: [{ translateX: (dx * (1 - Math.cos((TAU * t.value) / period))) / 2 }] }));
+  return (
+    <Animated.View style={[box(p), style]}>
+      <Art p={p} />
+    </Animated.View>
+  );
+});
+
+/** 위아래로 천천히 떠다닌다 (장식 점) */
+const Float = memo(function Float({ p, dy, period, t }: { p: Piece; dy: number; period: number; t: SharedValue<number> }) {
+  const style = useAnimatedStyle(() => ({ transform: [{ translateY: (dy * (1 - Math.cos((TAU * t.value) / period))) / 2 }] }));
   return (
     <Animated.View style={[box(p), style]}>
       <Art p={p} />
@@ -164,18 +185,26 @@ const Butterfly = memo(function Butterfly({ b, t }: { b: BugSpec; t: SharedValue
   );
 });
 
-/** 솔이 폴짝: 3초 주기, 0;-4;0;-16;0;0 (시안 keyTimes) */
-const SoliJump = memo(function SoliJump({ xml, t }: { xml: string; t: SharedValue<number> }) {
+/** 솔이 폴짝: 3초 주기, 0;-4;0;-16;0;0 (시안 keyTimes). 움직임 크기는 솔이 배율(SOLI_SCALE)을 따른다 */
+const SoliJump = memo(function SoliJump({ equipped, skin, t }: { equipped: Equipped; skin: string | null; t: SharedValue<number> }) {
+  const b = soliBox();
   const style = useAnimatedStyle(() => {
     const u = (t.value % SOLI_BOB.period) / SOLI_BOB.period;
     return { transform: [{ translateY: interpolate(u, SOLI_BOB.keyTimes as unknown as number[], SOLI_BOB.values as unknown as number[]) * SOLI_BOB.unit }] };
   });
   return (
-    <Animated.View style={[{ position: 'absolute', left: SOLI_BOX.left, top: SOLI_BOX.top, width: SOLI_BOX.width, height: SOLI_BOX.height }, style]}>
-      <CachedSvg xml={xml} width={SOLI_BOX.width} height={SOLI_BOX.height} />
+    <Animated.View style={[{ position: 'absolute', left: b.left, top: b.top, width: b.width, height: b.height }, style]}>
+      <SoliAvatar equipped={equipped} skin={skin} box={{ width: b.width }} style={{ width: b.width, height: b.height }} />
     </Animated.View>
   );
 });
+
+/** 하늘 · 땅: 좌우로 BLEED만큼 더 그린 층 (art.ts BLEED) */
+const FullBleed = ({ xml }: { xml: string }) => (
+  <View style={{ position: 'absolute', left: -BLEED, top: 0, width: SCENE_W + BLEED * 2, height: SCENE_H }}>
+    <CachedSvg xml={xml} width={SCENE_W + BLEED * 2} height={SCENE_H} />
+  </View>
+);
 
 const Full = ({ xml }: { xml: string }) => (
   <View style={styles.full}>
@@ -183,52 +212,59 @@ const Full = ({ xml }: { xml: string }) => (
   </View>
 );
 
-export const VillageBackdrop = memo(function VillageBackdrop({ variant, width, height, plots, soliMood, soliSkin, active, lift = 0 }: VillageBackdropProps) {
+export const VillageBackdrop = memo(function VillageBackdrop({ theme, weather, fit, plots, row, visitors, equipped, soliSkin, active }: VillageBackdropProps) {
   const reduceMotion = useReducedMotion();
   const t = useSceneClock(active && !reduceMotion);
-  const v = connectedVariant(variant);
-  const day = v === 'day';
+
+  const showSky = celestialVisible(theme, weather);
+  const starCount = theme.stars && showSky ? visibleStars(weather) : 0;
+  const sun = theme.celestial === 'sun' && showSky;
 
   const art = useMemo(
     () => ({
-      sky: skySvg(v),
-      land: landSvg(v),
+      sky: skySvg(theme, weather),
+      land: landSvg(theme),
+      weather: weatherSvg(theme, weather),
       shadow: shadowSvg(),
-      stars: Array.from({ length: STAR_GROUPS }, (_, g) => starPiece(g)),
+      stars: Array.from({ length: STAR_GROUPS }, (_, g) => starPiece(g, starCount)),
       sun: sunPiece(),
-      clouds: cloudSpecs(v),
-      trees: treePieces(),
-      tufts: tuftPieces(),
-      flowers: flowerPieces(),
-      fireflies: fireflySpecs(),
-      butterflies: butterflySpecs(),
+      deco: decoPiece(theme),
+      clouds: cloudSpecs(theme, weather),
+      trees: treePieces(theme),
+      tufts: tuftPieces(theme),
+      flowers: flowerPieces(theme),
+      fireflies: theme.particles === 'firefly' ? fireflySpecs() : [],
+      butterflies: theme.particles === 'butterfly' ? butterflySpecs() : [],
     }),
-    [v],
+    [theme, weather, starCount],
   );
-  const soli = useMemo(() => wrap(soliWithSkinSvg(soliMood, soliSkin)), [soliMood, soliSkin]);
-  const cells = useMemo(() => Array.from({ length: 5 }, (_, i) => plotCellSvg(plots[i] ?? null, v)), [plots, v]);
+  const rowXml = useMemo(() => rowSvg(theme, row), [theme, row]);
+  const neighborsXml = useMemo(() => neighborsSvg(visitors), [visitors]);
+  const cells = useMemo(() => Array.from({ length: 5 }, (_, i) => plotCellSvg(plots[i] ?? null, theme)), [plots, theme]);
 
-  const fit = sceneFit(width, height);
   // 원래 크기(390×844) 상자를 가운데 기준으로 배율만 줄이고 늘린다
   const frame = {
     position: 'absolute' as const,
     width: SCENE_DESIGN.width,
     height: SCENE_DESIGN.height,
     left: fit.left + (SCENE_DESIGN.width * fit.scale) / 2 - SCENE_DESIGN.width / 2,
-    top: fit.top - lift + (SCENE_DESIGN.height * fit.scale) / 2 - SCENE_DESIGN.height / 2,
+    top: fit.top + (SCENE_DESIGN.height * fit.scale) / 2 - SCENE_DESIGN.height / 2,
     transform: [{ scale: fit.scale }],
   };
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
       <View style={frame}>
-        <Full xml={art.sky} />
-        {!day && art.stars.map((p, g) => <Twinkle key={`s${g}`} p={p} period={STAR_PERIODS[g]} t={t} />)}
-        {day && <Spin p={art.sun} period={40} t={t} />}
+        <FullBleed xml={art.sky} />
+        {art.stars.map((p, g) => p && <Twinkle key={`s${g}`} p={p} period={STAR_PERIODS[g]} t={t} />)}
+        {sun && <Spin p={art.sun} period={40} t={t} />}
+        {art.deco && <Float p={art.deco} dy={8} period={9} t={t} />}
         {art.clouds.map((c, i) => (
           <Drift key={`c${i}`} p={c.piece} dx={c.dx} period={c.period} t={t} />
         ))}
-        <Full xml={art.land} />
+        {art.weather && <Full xml={art.weather} />}
+        <FullBleed xml={art.land} />
+        <Full xml={rowXml} />
         {art.trees.map((s, i) => (
           <Sway key={`t${i}`} s={s} t={t} phase={i * 0.7} />
         ))}
@@ -238,10 +274,15 @@ export const VillageBackdrop = memo(function VillageBackdrop({ variant, width, h
         {art.flowers.map((s, i) => (
           <Sway key={`f${i}`} s={s} t={t} phase={i * 0.9} />
         ))}
+        {neighborsXml && <Full xml={neighborsXml} />}
         <Full xml={art.shadow} />
-        <SoliJump xml={soli} t={t} />
-        {!day && art.fireflies.map((b, i) => <Firefly key={`ff${i}`} b={b} t={t} />)}
-        {day && art.butterflies.map((b, i) => <Butterfly key={`bf${i}`} b={b} t={t} />)}
+        <SoliJump equipped={equipped} skin={soliSkin} t={t} />
+        {art.fireflies.map((b, i) => (
+          <Firefly key={`ff${i}`} b={b} t={t} />
+        ))}
+        {art.butterflies.map((b, i) => (
+          <Butterfly key={`bf${i}`} b={b} t={t} />
+        ))}
         {cells.map((xml, i) => (
           <View key={`p${i}`} style={{ position: 'absolute', left: plotLeft(i), top: PLOT.y, width: PLOT.width, height: PLOT.height }}>
             <CachedSvg xml={xml} width={PLOT.width} height={PLOT.height} />

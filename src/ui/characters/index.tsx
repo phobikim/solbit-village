@@ -14,7 +14,7 @@ import { buildingSvg } from './skins';
 import { faceSvg, FACES, npcSvg, type NpcHair } from './neighbors';
 import { soliWithSkinSvg, type SoliMood } from './soli';
 import { wrap } from './svg';
-import { SCENE_PCT } from '../layout';
+import { LEGACY_SCENE_PCT } from '../layout';
 import { villageSceneSvg, villageSkyTop, type VillageSceneParams } from './village';
 
 export type { IjangMood, NpcHair, SoliMood, VillageSceneParams };
@@ -87,7 +87,7 @@ export const VillageScene = memo(function VillageScene({
   ...scene
 }: VillageSceneParams & { width: number; height: number; onBoardPress?: () => void }) {
   const xml = useMemo(() => villageSceneSvg(scene), [scene]);
-  const hit = SCENE_PCT.boardHit;
+  const hit = LEGACY_SCENE_PCT.boardHit;
   return (
     <View style={{ width, height, backgroundColor: villageSkyTop(scene.timeOfDay) }}>
       <SvgXml xml={xml} width={width} height={height} />

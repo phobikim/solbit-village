@@ -20,7 +20,7 @@
 ```
 app/                    expo-router 화면
   (tabs)/               records(장부: 그날그날 / 대소사) · neighbors(이웃) · index(마을, 가운데) · rest(쉼터) · me(나) — 하단 탭 5개. 마을은 전체 화면 장면 + HUD
-  closet.tsx            솔이 옷장: 탭 없는 전체 화면 (메인 코인 칸 · 솔이 · 나 탭에서 들어옴)
+  closet.tsx            꾸미기(솔이 옷 + 마을 배경): 탭 없는 전체 화면 (메인 코인 칸 · 솔이 · 나 탭에서 들어옴). 파일 이름은 라우트 때문에 그대로
   record.tsx            오늘 기록 시트 (모달)
   seed-result.tsx       씨앗 결과
   ledger/new.tsx        행사 등록 시트
@@ -49,6 +49,7 @@ src/
     rewards.ts          아침 보상표: 월급 · 놀기 흥 식 · 보상표 줄 (임시 상수, [제안]. 지급은 아직 없음)
     wallet.ts           재화(코인 · 흥) 규칙: 더하기 · 쓰기, 음수 거부, 천 단위 표시
     closet.ts           옷장: 하단 버튼 상태(getActionState) · 슬롯별 미리보기 · 그리드 순서
+    villageBg.ts        마을 배경 7종 · 가격(BG_PRICE_PAID [제안]) · 구매 · 하단 버튼 상태(벗기 없음) · 미리보기
     shop.ts             옷 구매: 옷 가격(OUTFIT_PRICE [제안]) · 살 수 있는가 · 산 뒤 상태
     villageUnlocks.ts   레벨별 해금 id 샘플 (표시 이름은 copy/rewards.ko.ts)
     outfit.ts           솔이 옷장: 슬롯 6 · 아이템 25 · 시작 6벌 · 입기/벗기 · 겹침 순서 (장식일 뿐, 다른 규칙과 무관)
@@ -57,9 +58,11 @@ src/
   ui/
     theme.ts            색 · 폰트 · 간격 토큰
     characters/         솔이 · 꾸역 이장 · 이웃 얼굴 SVG (디자인 파일에서 이식)
+      SoliAvatar.tsx    솔이 그리는 컴포넌트 하나 (기본 포즈 + 입은 옷). 메인 · 나 탭 · 꾸미기가 모두 이것을 쓴다
       outfits/          옷 아이템 SVG 문자열 25개(28장, 슬롯별 파일) · 칸 썸네일 배치. 합성은 SoliOutfit.tsx
     morning/            마을 보상표 시트 · 해금 아이콘
-    components/         BroadcastLine, IndexCard, CurrencyChips(코인·흥 칩), ClosetStage · ClosetGrid · BuySheet(옷장 탭), BottomSheet, FieldPlot …
+    scene/              메인 장면: art.ts(그림) · theme.ts(VillageTheme: 마을 배경 7종의 색) · VillageBackdrop.tsx(움직임). 장면 좌표는 layout.ts SCENE_PCT, 솔이 크기는 mainScene.ts SOLI_SCALE
+    components/         BroadcastLine, IndexCard, WalletPill, ClosetStage · ClosetGrid · VillageGrid · VillagePreview(꾸미기), BottomSheet, FieldPlot …
   copy/broadcasts.ko.ts 이장 방송 문구 모음 (코드에 문구 하드코딩 금지)
   notifications/
 design/                 디자인 원본 (수정하지 않음)

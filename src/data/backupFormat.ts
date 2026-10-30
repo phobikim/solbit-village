@@ -1,6 +1,7 @@
 // 백업 JSON 형식 (SPEC 10·11장: 백업은 JSON 내보내기/가져오기). SQLite에 의존하지 않는 순수 모듈.
 
 import { isKnownItem, itemMeta } from '../domain/outfit';
+import { isKnownBg } from '../domain/villageBg';
 import { sanitizeWallet } from '../domain/wallet';
 
 export const BACKUP_APP = 'solbit-village';
@@ -25,12 +26,14 @@ export const BACKUP_TABLES = {
   outfit_owned: ['item_id', 'acquired_at', 'source'],
   outfit_equipped: ['slot', 'item_id'],
   wallet: ['id', 'coin', 'heung'],
+  village_bg_owned: ['id', 'acquired_at', 'source'],
 } as const;
 
 /** 가져온 뒤에 항상 한 줄씩 있어야 하는 테이블 (백업에 없으면 0으로 채운다) */
 export const ENSURE_ROWS_SQL: readonly string[] = [
   'INSERT OR IGNORE INTO harvest_stat (id, total_harvested) VALUES (1, 0)',
   'INSERT OR IGNORE INTO wallet (id, coin, heung) VALUES (1, 0, 0)',
+  "INSERT OR IGNORE INTO village_bg_owned (id, acquired_at, source) VALUES ('base', NULL, 'start')",
 ];
 
 export type BackupTable = keyof typeof BACKUP_TABLES;
@@ -136,6 +139,11 @@ export function parseBackup(text: string, currentSchemaVersion: number): ParseRe
     }
     if (name === 'outfit_equipped') {
       tables[name] = clean.filter((r) => itemMeta(String(r.item_id))?.slot === r.slot);
+      continue;
+    }
+    // 마을 배경: 이 앱이 모르는 배경은 가져오지 않는다 (적용 중인 배경은 settings 값이고, 읽을 때 모르거나 안 가진 배경이면 기본으로 돌린다)
+    if (name === 'village_bg_owned') {
+      tables[name] = clean.filter((r) => isKnownBg(String(r.id)));
       continue;
     }
     // 재화: 한 줄만. 음수 · 이상한 값은 0 (구버전 백업에는 이 테이블이 없다 → 가져온 뒤 0으로 채운다)

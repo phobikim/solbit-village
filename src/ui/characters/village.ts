@@ -1,12 +1,12 @@
 // 메인 마을 무대 (7a) — design/solbit-v5.dc.html의 village11() 이식 (TURN 11 마을 게시판 배치).
-// 4:3 고정 (viewBox 0 0 400 300). 안의 배치는 장면 크기 대비 % 좌표 (src/ui/layout.ts SCENE_PCT):
+// 4:3 고정 (viewBox 0 0 400 300). 안의 배치는 장면 크기 대비 % 좌표 (src/ui/layout.ts LEGACY_SCENE_PCT):
 // 하늘 0~35% · 원경 28~48% · 땅 시작 52% · 집 · 게시판 · 냇가 · 솔이 · 이웃. 밭은 장면 밖 밭 띠(fieldStrip.ts)로 뺐다.
 // 날씨·낮밤·게시판 쪽지·이웃·스킨·야근 등불·냇가 꽃을 매개변수로 받는다.
 
 import { EVENT_PAPER_COLOR } from '../../copy/labels.ko';
 import type { EventType } from '../../domain/events';
 import type { TimeOfDay, Weather } from '../../domain/types';
-import { SCENE_PCT, SCENE_VIEW, sx, sy } from '../layout';
+import { LEGACY_SCENE_PCT, SCENE_VIEW, sx, sy } from '../layout';
 import { fonts } from '../theme';
 import { eventIconInner } from './eventIcons';
 import { faceSvg, FACES } from './neighbors';
@@ -42,7 +42,7 @@ export type VillageSceneParams = {
   bloom: number;
 };
 
-type Palette = {
+export type Palette = {
   s1: string;
   s2: string;
   hill: string;
@@ -65,7 +65,7 @@ type Palette = {
   window: string;
 };
 
-const NIGHT: Palette = {
+export const NIGHT: Palette = {
   s1: '#141A44',
   s2: '#2E2C74',
   hill: '#212C5C',
@@ -89,7 +89,7 @@ const NIGHT: Palette = {
 };
 
 // 낮 색은 시안 village(낮) 팔레트 기준. 하늘 아래쪽은 낮 배경 토큰 #EAF6FF (SPEC 3장 낮/밤 확정).
-const DAY: Palette = {
+export const DAY: Palette = {
   s1: '#7FCBFF',
   s2: '#EAF6FF',
   hill: '#9BE38A',
@@ -169,7 +169,10 @@ function sky(p: VillageSceneParams, c: Palette, glowId: string): string {
 }
 
 /** 게시판과 쪽지 (디자인 11b · 11c · 11d) */
-function board(p: VillageSceneParams, c: Palette): string {
+/** 게시판을 그리는 데 필요한 값 (새 메인 장면도 이 부분만 쓴다) */
+export type BoardParams = Pick<VillageSceneParams, 'board' | 'boardToday' | 'lanternOn'>;
+
+function board(p: BoardParams, c: Palette): string {
   let s = `<ellipse cx="122" cy="166" rx="8" ry="3" fill="#000" opacity=".3"/><ellipse cx="194" cy="166" rx="8" ry="3" fill="#000" opacity=".3"/>`;
   s += `<path d="M122 140 V166 M194 140 V166" ${o(8)}/><path d="M122 140 V166 M194 140 V166" stroke="${c.post}" stroke-width="3.5" stroke-linecap="round"/>`;
   s += `<rect x="108" y="92" width="100" height="56" rx="8" fill="${c.wood}" ${o(3)}/><rect x="113" y="97" width="90" height="46" rx="5" fill="${c.boardInner}"/><path d="M113 112 H203 M113 128 H203" stroke="${c.boardLine}" stroke-width="1.6"/>`;
@@ -228,7 +231,7 @@ function seat(inner: string, src: Box, x0: number, x1: number, bottom: number, m
 }
 
 /** 오두막 (원본 x 6~106, y 66~164) */
-function hut(c: Palette, glow: string): string {
+export function hut(c: Palette, glow: string): string {
   let s = glow;
   s += `<rect x="16" y="116" width="80" height="48" rx="6" fill="${c.hut}" ${o(3)}/><path d="M6 120 L56 86 L106 120Z" fill="#FF4FA0" ${o(3)}/><rect x="28" y="132" width="16" height="32" rx="3" fill="${c.wood}" ${o(2.5)}/><circle cx="40" cy="149" r="1.8" fill="${L}"/><rect x="58" y="128" width="26" height="18" rx="3" fill="${c.window}" ${o(2.5)}/><path d="M71 128 V146 M58 137 H84" stroke="${L}" stroke-width="2"/>`;
   s += `<path d="M56 86 C56 79 59 76 62 73" stroke="${L}" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M61 74 C57 68 50 68 47 72 C51 76 57 77 61 74Z M62 73 C66 67 73 66 76 69 C73 74 66 75 62 73Z" fill="#B6F35C" ${o(2)}/>`;
@@ -236,7 +239,7 @@ function hut(c: Palette, glow: string): string {
 }
 
 /** 게시판 + 옆 등불 (원본 x 106~234, y 90~170) */
-function boardWithLantern(p: VillageSceneParams, c: Palette, glow: string): string {
+export function boardWithLantern(p: BoardParams, c: Palette, glow: string): string {
   let s = board(p, c);
   if (p.lanternOn) s += glow;
   s += `<path d="M214 166 V114" ${o(5)}/><path d="M214 166 V114" stroke="${c.wood}" stroke-width="2" stroke-linecap="round"/><path d="M214 116 H224" ${o(4)}/><path d="M224 116 V120" stroke="${L}" stroke-width="2"/>`;
@@ -245,12 +248,12 @@ function boardWithLantern(p: VillageSceneParams, c: Palette, glow: string): stri
 }
 
 /** 냇가 물 (원본 x 222~364, y 134~166) */
-function creek(c: Palette): string {
+export function creek(c: Palette): string {
   return `<path d="M222 150 Q226 136 254 136 H336 Q362 136 364 150 Q362 162 336 162 H248 Q224 162 222 150Z" fill="${c.water}" ${o(3)}/><path d="M244 148 q8 -4 16 0 M288 152 q8 -4 16 0 M322 144 q6 -3 12 0" stroke="${c.hi}" stroke-width="2.5" stroke-linecap="round" fill="none"/><ellipse cx="226" cy="158" rx="8" ry="5" fill="${c.rock}" ${o(2)}/><ellipse cx="354" cy="160" rx="9" ry="5.5" fill="${c.rock}" ${o(2)}/>`;
 }
 
 /** 냇가 꽃 (원본 x 230~354, y 168~184) — 쉼(모닥불)이 높을수록 많이 핀다 */
-function creekFlowers(bloom: number): string {
+export function creekFlowers(bloom: number): string {
   const flowerX = [236, 252, 268, 284, 300, 316, 332, 348];
   const bloomOrder = [0, 2, 4, 6, 1, 3, 5, 7];
   const bloomCount = Math.round(Math.min(1, Math.max(0, bloom)) * flowerX.length);
@@ -259,10 +262,10 @@ function creekFlowers(bloom: number): string {
   return flowerX.map((x, i) => (blooming.has(i) ? flower(x, 176, flowerCols[i % 3]) : bud(x, 176))).join('');
 }
 
-const HEART = `<path d="M10 0 C10 -7 2 -9 0 -3 C-2 -9 -10 -7 -10 0 C-10 6 0 11 0 11 C0 11 10 6 10 0Z" fill="#FF4FA0" ${o(2.5)}/>`;
+export const HEART = `<path d="M10 0 C10 -7 2 -9 0 -3 C-2 -9 -10 -7 -10 0 C-10 6 0 11 0 11 C0 11 10 6 10 0Z" fill="#FF4FA0" ${o(2.5)}/>`;
 
 /**
- * 마을 장면 4:3 (viewBox 0 0 400 300). 장면 크기 대비 % 좌표는 layout.ts SCENE_PCT.
+ * 마을 장면 4:3 (viewBox 0 0 400 300). 장면 크기 대비 % 좌표는 layout.ts LEGACY_SCENE_PCT.
  */
 export function villageSceneSvg(p: VillageSceneParams): string {
   const night = p.timeOfDay === 'night';
@@ -273,7 +276,7 @@ export function villageSceneSvg(p: VillageSceneParams): string {
   const H = SCENE_VIEW.height;
   const glow = (cx: number, cy: number, r: number, extra = '') =>
     night ? `<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${glowId})" ${extra}/>` : '';
-  const P = SCENE_PCT;
+  const P = LEGACY_SCENE_PCT;
 
   let s =
     `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c.s1}"/><stop offset=".6" stop-color="${c.s2}"/></linearGradient>` +

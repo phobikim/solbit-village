@@ -1,4 +1,4 @@
-import { APP_MAX_WIDTH, contentWidth, morningDayLayout, SCENE_PCT, SCENE_RATIO, SCENE_VIEW, sceneHeight, sx, sy } from '../layout';
+import { APP_MAX_WIDTH, contentWidth, morningDayLayout, LEGACY_SCENE_PCT, SCENE_RATIO, SCENE_VIEW, sceneHeight, sx, sy } from '../layout';
 
 const W390 = contentWidth(390); // 358
 const W375 = contentWidth(375); // 343
@@ -25,32 +25,32 @@ describe('마을 장면 4:3 고정', () => {
 
 describe('장면 안 % 좌표 (SPEC 11장)', () => {
   it('하늘 0~35 / 원경 28~48 / 땅 52', () => {
-    expect(SCENE_PCT.sky).toEqual({ top: 0, bottom: 35 });
-    expect(SCENE_PCT.far).toEqual({ top: 28, bottom: 48 });
-    expect(SCENE_PCT.groundTop).toBe(52);
+    expect(LEGACY_SCENE_PCT.sky).toEqual({ top: 0, bottom: 35 });
+    expect(LEGACY_SCENE_PCT.far).toEqual({ top: 28, bottom: 48 });
+    expect(LEGACY_SCENE_PCT.groundTop).toBe(52);
   });
   it('집 x 4~30 · 게시판 x 32~56 · 냇가 x 60~96 y 52~62, 집 · 게시판 바닥 60', () => {
-    expect(SCENE_PCT.house).toEqual({ x0: 4, x1: 30, bottom: 60 });
-    expect(SCENE_PCT.board).toEqual({ x0: 32, x1: 56, bottom: 60 });
-    expect(SCENE_PCT.creek).toEqual({ x0: 60, x1: 96, y0: 52, y1: 62 });
+    expect(LEGACY_SCENE_PCT.house).toEqual({ x0: 4, x1: 30, bottom: 60 });
+    expect(LEGACY_SCENE_PCT.board).toEqual({ x0: 32, x1: 56, bottom: 60 });
+    expect(LEGACY_SCENE_PCT.creek).toEqual({ x0: 60, x1: 96, y0: 52, y1: 62 });
   });
   it('솔이 가운데 바닥 96 너비 30 / 이웃 18 · 82 바닥 94 너비 16', () => {
-    expect(SCENE_PCT.soli).toEqual({ cx: 50, bottom: 96, width: 30 });
-    expect(SCENE_PCT.neighbors).toEqual({ cx: [18, 82], bottom: 94, width: 16 });
+    expect(LEGACY_SCENE_PCT.soli).toEqual({ cx: 50, bottom: 96, width: 30 });
+    expect(LEGACY_SCENE_PCT.neighbors).toEqual({ cx: [18, 82], bottom: 94, width: 16 });
   });
   it('겹치지 않는다: 집 | 게시판 | 냇가가 가로로 나란히, 솔이 · 이웃도 장면 안', () => {
-    expect(SCENE_PCT.house.x1).toBeLessThan(SCENE_PCT.board.x0);
-    expect(SCENE_PCT.board.x1).toBeLessThan(SCENE_PCT.creek.x0);
-    const s = SCENE_PCT.soli;
+    expect(LEGACY_SCENE_PCT.house.x1).toBeLessThan(LEGACY_SCENE_PCT.board.x0);
+    expect(LEGACY_SCENE_PCT.board.x1).toBeLessThan(LEGACY_SCENE_PCT.creek.x0);
+    const s = LEGACY_SCENE_PCT.soli;
     expect(s.cx - s.width / 2).toBeGreaterThanOrEqual(0);
     expect(s.cx + s.width / 2).toBeLessThanOrEqual(100);
-    for (const cx of SCENE_PCT.neighbors.cx) {
-      expect(cx - SCENE_PCT.neighbors.width / 2).toBeGreaterThanOrEqual(0);
-      expect(cx + SCENE_PCT.neighbors.width / 2).toBeLessThanOrEqual(100);
+    for (const cx of LEGACY_SCENE_PCT.neighbors.cx) {
+      expect(cx - LEGACY_SCENE_PCT.neighbors.width / 2).toBeGreaterThanOrEqual(0);
+      expect(cx + LEGACY_SCENE_PCT.neighbors.width / 2).toBeLessThanOrEqual(100);
     }
     // 이웃과 솔이도 가로로 안 겹친다
-    expect(SCENE_PCT.neighbors.cx[0] + SCENE_PCT.neighbors.width / 2).toBeLessThanOrEqual(s.cx - s.width / 2);
-    expect(SCENE_PCT.neighbors.cx[1] - SCENE_PCT.neighbors.width / 2).toBeGreaterThanOrEqual(s.cx + s.width / 2);
+    expect(LEGACY_SCENE_PCT.neighbors.cx[0] + LEGACY_SCENE_PCT.neighbors.width / 2).toBeLessThanOrEqual(s.cx - s.width / 2);
+    expect(LEGACY_SCENE_PCT.neighbors.cx[1] - LEGACY_SCENE_PCT.neighbors.width / 2).toBeGreaterThanOrEqual(s.cx + s.width / 2);
   });
   it('% → 장면 좌표', () => {
     expect(sx(50)).toBe(200);

@@ -1,9 +1,13 @@
-// 솔이 옷장 탭 · 옷 이름 문구. 코드에 하드코딩하지 않는다. 이장 말풍선 · 버튼 문구는 closet.ko.ts.
+// 꾸미기(솔이 옷 · 마을 배경) 화면 제목 · 옷 이름 문구. 코드에 하드코딩하지 않는다. 이장 말풍선 · 버튼 문구는 closet.ko.ts.
 
 import type { Slot } from '../domain/outfit';
 
-export const CLOSET_TITLE = '솔이 옷장';
+export const CLOSET_TITLE = '꾸미기';
 export const CLOSET_PREVIEW_LABEL = '솔이 미리보기';
+
+/** 나 탭의 꾸미기 줄. 부제는 임시 문구다 ([제안]) */
+export const CLOSET_ROW_TITLE = '꾸미기';
+export const CLOSET_ROW_SUB = '솔이 옷 · 마을 배경';
 
 export const SLOT_LABEL: Record<Slot, string> = {
   head: '머리',

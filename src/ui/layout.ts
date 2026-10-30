@@ -12,7 +12,7 @@ export const SCENE_RATIO = 3 / 4;
 export const SCENE_VIEW = { width: 400, height: 300 } as const;
 
 /** 장면 안 배치 (장면 너비 · 높이 대비 %). x는 너비 기준, y는 높이 기준, bottom은 바닥선 y */
-export const SCENE_PCT = {
+export const LEGACY_SCENE_PCT = {
   /** 하늘 (해 · 구름 · 별 · 비 · 번개) */
   sky: { top: 0, bottom: 35 },
   /**
@@ -31,6 +31,29 @@ export const SCENE_PCT = {
   neighbors: { cx: [18, 82] as const, bottom: 94, width: 16 },
   /** 게시판을 누르는 영역 (게시판 간판 부분) */
   boardHit: { x0: 32, x1: 56, y0: 38, y1: 60 },
+} as const;
+
+/**
+ * 새 메인 장면(390×844 전체 화면)의 배치 — 한 곳에 모은다. x는 너비 390 기준 %, y(bottom · top)는 높이 844 기준 %.
+ * 솔이는 가운데 앞 마당이고 크기 · 발 위치는 src/ui/mainScene.ts (SOLI_SCALE). 밭 5칸은 scene/art.ts PLOT (y 648~700).
+ *
+ * 세로 줄 (위에서 아래로):
+ *   뒤 줄  y 370~470 : 집 · 게시판 · 냇가  (솔이 머리 y≈482 보다 위 → 서로 가리지 않는다)
+ *   마당   y 470~622 : 나무 · 솔이 · 이웃(발 y 622)
+ *   밭     y 648~700 : 5칸 (기록 버튼 · 탭 바 바로 위)
+ * HUD · 방송띠(위) 와 기록 버튼 · 탭 바(아래)는 화면 가장자리라 이 좌표와 겹치지 않는다 (장면을 올리는 정도는 mainScene.ts sceneLift).
+ */
+export const SCENE_PCT = {
+  /** 집 · 게시판 · 냇가: 가로는 SPEC 11 비율, 바닥선은 모두 y≈470 (55.7%) */
+  house: { x0: 4, x1: 30, bottom: 55.7 },
+  board: { x0: 32, x1: 56, bottom: 55.7 },
+  creek: { x0: 60, x1: 96, bottom: 55.7, height: 3.8 },
+  /** 냇가 꽃: 냇가 바로 아래 (바닥선 + 아래로 6px) */
+  creekFlowers: { x0: 62, x1: 94, bottom: 56.4 },
+  /** 놀러 온 가까운 이웃: 솔이 좌우 마당 (18% · 82%), 폭 16%, 발은 솔이와 비슷한 높이 (y≈622) */
+  neighbors: { cx: [18, 82] as const, bottom: 73.7, width: 16 },
+  /** 게시판을 누르는 영역 (게시판 간판 부분: 게시판 그림 위쪽 ~ 바닥선) */
+  boardHit: { x0: 32, x1: 56, y0: 47, y1: 55.7 },
 } as const;
 
 /** 장면 % → 그림 좌표 */
