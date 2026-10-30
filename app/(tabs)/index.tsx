@@ -1,12 +1,11 @@
-// 7a 마을 (메인) — 디자인 TURN 30 A안. 마을 장면이 상태바 뒤 화면 맨 위까지 전체를 채우고,
-// 그 위에 반투명 HUD(마을 이름 · Lv · 경험치 / 지갑 알약)와 방송띠가 얹힌다. 아래에는 "오늘 기록하기"와 탭 바가 떠 있다.
-// 지수 카드 · 게시판 · 놀러 온 이웃 · 집 · 냇가 · 밭 띠 · 날씨 5단계 표현은 이번 화면에서 빠졌다 (src/ui/features.ts MAIN_SCENE에 기록, 코드 · 도메인은 그대로).
-// 솔이를 누르면 솔이 옷장이 열린다. 기록 입력은 "오늘 기록하기" 시트 한 곳뿐이다 (규칙 5) — 밭은 누를 수 없다.
+// 7a 마을 (메인). 기록·밭·경험치를 SQLite에서 읽어 마을을 그린다.
+// 구성 순서: 재화 바(코인 · 흥) → 헤더 → 방송 → 마을 장면(4:3 고정) → 지수 → 밭 띠 → 오늘 기록하기 → 탭 바.
+// 장면 비율은 절대 바꾸지 않고, 높이가 모자라면 나머지를 압축한다. 그래도 안 들어가면 메인만 스크롤 (탭 바 고정).
+// 높이 규칙과 압축 단계는 src/ui/layout.ts (SPEC 11장).
 
 import { router, useFocusEffect } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { useCallback, useState } from 'react';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { useCallback, useState, type ReactNode } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { VILLAGE_NAME } from '../../src/copy/labels.ko';
@@ -18,22 +17,25 @@ import { needsMorningNews } from '../../src/state/newsView';
 import { usePlaces } from '../../src/state/places';
 import { useRecords } from '../../src/state/records';
 import { useRestLogs } from '../../src/state/restLogs';
-import { useVillageView, villageRange } from '../../src/state/villageView';
 import { useWallet } from '../../src/state/wallet';
-import { HangerIcon } from '../../src/ui/components/HangerIcon';
-import { MainBroadcast } from '../../src/ui/components/MainBroadcast';
+import { useVillageView, villageRange } from '../../src/state/villageView';
+import { VillageScene } from '../../src/ui/characters';
+import { BroadcastLine } from '../../src/ui/components/BroadcastLine';
+import { CurrencyChips } from '../../src/ui/components/CurrencyChips';
+import { FieldStrip } from '../../src/ui/components/FieldStrip';
+import { IndexCard } from '../../src/ui/components/IndexCard';
+import { LevelBar } from '../../src/ui/components/LevelBar';
 import { PrimaryButton } from '../../src/ui/components/PrimaryButton';
-import { WalletPill } from '../../src/ui/components/WalletPill';
-import { MAIN_HUD, SOLI_BADGE_SIZE, soliHit, tabBarSpace } from '../../src/ui/mainScene';
-import { VillageBackdrop } from '../../src/ui/scene/VillageBackdrop';
-import { colors, fonts } from '../../src/ui/theme';
-import { useScreenActive } from '../../src/ui/useScreenActive';
+import { contentWidth, MAIN_LAYOUT, mainLayout } from '../../src/ui/layout';
+import { colors, fonts, radius } from '../../src/ui/theme';
 import { useVisibleHeight } from '../../src/ui/useVisibleHeight';
 
 const timeLabel = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-const fmt = (n: number) => n.toLocaleString('en-US');
 
-const openCloset = () => router.push('/closet');
+/** 게시판을 누르면 장부 · 대소사 */
+const openBoard = () => router.push({ pathname: '/records', params: { view: 'events' } });
+
+const SIDE = MAIN_LAYOUT.sidePadding;
 
 export default function VillageScreen() {
   const today = getToday();
@@ -47,14 +49,12 @@ export default function VillageScreen() {
   const loadWallet = useWallet((s) => s.load);
   const [now, setNow] = useState(() => new Date());
   const v = useVillageView(today, now);
-  const active = useScreenActive();
 
-  // 장면은 화면(상태바 뒤 포함) 전체. 웹은 보이는 높이를 쓴다
+  // 사용 가능 높이 = 보이는 높이(웹은 window.innerHeight) − 위 안전 영역 − (탭 바 + 아래 안전 영역)
+  const visibleHeight = useVisibleHeight();
   const { width: windowWidth } = useWindowDimensions();
-  const height = useVisibleHeight();
-  const width = Math.min(windowWidth, 430);
   const insets = useSafeAreaInsets();
-  const hit = soliHit(width, height);
+  const L = mainLayout(visibleHeight, insets.top, insets.bottom, contentWidth(windowWidth));
 
   useFocusEffect(
     useCallback(() => {
@@ -70,103 +70,93 @@ export default function VillageScreen() {
     }, [today, loadRange, loadFarm, loadNeighbors, loadLedger, loadSkins, loadPlaces, loadRestLogs, loadWallet]),
   );
 
-  const day = v.timeOfDay === 'day';
-  const pct = v.level.needed > 0 ? Math.min(100, Math.max(0, (v.level.into / v.level.needed) * 100)) : 0;
+  const body: ReactNode = (
+    <>
+      <View style={[styles.currency, { height: L.currency }]}>
+        <CurrencyChips />
+      </View>
 
-  return (
-    <View style={styles.root} testID="main-scene">
-      {active && <StatusBar style={day ? 'dark' : 'light'} />}
-      <VillageBackdrop
-        variant={day ? 'day' : 'base'}
-        width={width}
-        height={height}
-        plots={v.plots}
-        soliMood={v.scene.soliMood}
-        soliSkin={v.scene.soliSkin ?? null}
-        active={active}
-      />
+      <View style={[styles.header, { height: L.header, marginTop: L.currencyGap }]}>
+        <View style={styles.titleRow}>
+          <Text style={styles.title}>{VILLAGE_NAME}</Text>
+          <View style={styles.levelBadge}>
+            <Text style={styles.levelText}>Lv.{v.level.level}</Text>
+          </View>
+        </View>
+        <LevelBar current={v.level.into} goal={v.level.needed} height={22} />
+      </View>
 
-      {/* 솔이를 누르면 솔이 옷장. 영역은 시안 hL/hB/hW/hH 계산 */}
+      <View style={{ marginTop: L.gap, zIndex: 20 }}>
+        <BroadcastLine message={v.broadcast} time={timeLabel(now)} fixed={{ height: L.broadcast, lines: L.broadcastLines }} />
+      </View>
+
+      {/* 마을 무대 4:3 고정: 탭하는 장치는 없다 (규칙 5). 수확은 자동이다. */}
+      <View testID="main-scene" style={[styles.scene, { marginTop: L.gap, width: L.sceneWidth, height: L.scene }]}>
+        <VillageScene {...v.scene} width={L.sceneWidth} height={L.scene} onBoardPress={openBoard} />
+      </View>
+
+      {/* 지수 영역은 항상 보인다. 누르면 나 탭의 4주 추세로 */}
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="솔이 · 옷장 열기"
-        onPress={openCloset}
-        style={{ position: 'absolute', left: hit.left, bottom: hit.bottom, width: hit.width, height: hit.height }}
+        accessibilityLabel="지수 추세 보기 (나 탭)"
+        onPress={() => router.navigate('/me')}
+        style={[styles.indices, { marginTop: L.gap, height: L.indices }]}
       >
-        <View style={[styles.badge, { left: hit.badgeLeft, top: hit.badgeTop }]}>
-          <HangerIcon size={15} color="#FFFFFF" />
-        </View>
+        {v.indices.map((it) => (
+          <IndexCard key={it.kind} {...it} variant={L.indexVariant} height={L.indices} />
+        ))}
       </Pressable>
 
-      <View style={[styles.top, { paddingTop: insets.top + MAIN_HUD.top }]} pointerEvents="box-none">
-        <View style={styles.hudRow} pointerEvents="box-none">
-          <View style={styles.hud}>
-            <View style={styles.hudTitleRow}>
-              <Text style={styles.hudTitle} numberOfLines={1}>
-                {VILLAGE_NAME}
-              </Text>
-              <View style={styles.levelBadge}>
-                <Text style={styles.levelText}>Lv.{v.level.level}</Text>
-              </View>
-            </View>
-            <View style={styles.hudBarRow}>
-              <View style={styles.barTrack} accessibilityLabel={`마을 경험치 ${v.level.into} / ${v.level.needed}`}>
-                <View style={[styles.barFill, { width: `${pct}%` }]} />
-              </View>
-              <Text style={styles.hudXp}>
-                {fmt(v.level.into)} / {fmt(v.level.needed)}
-              </Text>
-            </View>
-          </View>
-          {/* TODO(route: 마을 행사): 흥 칸은 마을 행사 화면이 생기면 거기로 보낸다. 지금은 누르지 않는다 (onHeungPress 없음) */}
-          <WalletPill variant="hud" onCoinPress={openCloset} />
-        </View>
-
-        <MainBroadcast message={v.broadcast} time={timeLabel(now)} />
+      {/* 밭 띠: 장면 밖. 5칸 가로, 작물 성장 그림 + 상태 글자 */}
+      <View style={[styles.field, { marginTop: L.gap }]}>
+        <FieldStrip plots={v.plots} time={v.timeOfDay} height={L.field} labels={L.fieldLabels} />
       </View>
 
-      <View style={[styles.bottom, { bottom: tabBarSpace(insets.bottom) }]} pointerEvents="box-none">
-        <PrimaryButton label={v.recordedToday ? '오늘 기록 고치기' : '오늘 기록하기'} onPress={() => router.push('/record')} style={styles.cta} />
-      </View>
+      {/* 남는 높이는 기록 버튼 위로 (버튼은 탭 바 바로 위에 붙는다) */}
+      <View style={{ flex: L.scroll ? 0 : 1, minHeight: L.gap }} />
+
+      <PrimaryButton
+        label={v.recordedToday ? '오늘 기록 고치기' : '오늘 기록하기'}
+        onPress={() => router.push('/record')}
+        style={[styles.cta, { height: L.cta }]}
+      />
+    </>
+  );
+
+  return (
+    <View style={[styles.root, { paddingTop: insets.top }]} testID={`main-layout-step-${L.step}`}>
+      {L.scroll ? (
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          {body}
+        </ScrollView>
+      ) : (
+        <View style={styles.fill}>{body}</View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#141A44', overflow: 'hidden' },
-  top: { position: 'absolute', left: 0, right: 0, top: 0 },
-  hudRow: { paddingHorizontal: MAIN_HUD.side, flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 },
-  hud: {
-    flexShrink: 1,
-    minWidth: 0,
-    paddingTop: 7,
-    paddingHorizontal: 11,
-    paddingBottom: 9,
-    borderRadius: 18,
-    backgroundColor: 'rgba(30,37,88,0.8)',
-    borderWidth: 2.5,
-    borderColor: colors.line,
-    gap: 6,
+  root: { flex: 1, backgroundColor: colors.night },
+  fill: { flex: 1 },
+  scrollContent: { paddingBottom: 8 },
+  currency: { paddingHorizontal: SIDE + 4, justifyContent: 'center' },
+  header: { paddingTop: 2, paddingHorizontal: SIDE + 4, justifyContent: 'space-between' },
+  titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  title: { fontFamily: fonts.title, fontSize: 26, lineHeight: 34, color: colors.yellow },
+  levelBadge: {
+    backgroundColor: colors.pink,
+    borderRadius: 20,
+    paddingVertical: 3,
+    paddingHorizontal: 14,
+    shadowColor: colors.pink,
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 6 },
   },
-  hudTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  hudTitle: { fontFamily: fonts.title, fontSize: 19, lineHeight: 21, color: colors.yellow, flexShrink: 1 },
-  levelBadge: { backgroundColor: colors.pink, borderRadius: 11, paddingVertical: 2, paddingHorizontal: 9 },
-  levelText: { fontFamily: fonts.title, fontSize: 14, lineHeight: 18, color: colors.line },
-  hudBarRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  barTrack: { width: 78, height: 10, borderRadius: 5, backgroundColor: colors.night, overflow: 'hidden' },
-  barFill: { position: 'absolute', left: 0, top: 0, bottom: 0, borderRadius: 5, backgroundColor: colors.yellow },
-  hudXp: { fontFamily: fonts.numberBold, fontSize: 11, color: colors.textSub },
-  badge: {
-    position: 'absolute',
-    width: SOLI_BADGE_SIZE,
-    height: SOLI_BADGE_SIZE,
-    borderRadius: SOLI_BADGE_SIZE / 2,
-    backgroundColor: 'rgba(30,37,88,0.86)',
-    borderWidth: 2.5,
-    borderColor: colors.line,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bottom: { position: 'absolute', left: 0, right: 0 },
-  cta: { marginHorizontal: MAIN_HUD.cta.side, height: MAIN_HUD.cta.height },
+  levelText: { fontFamily: fonts.title, fontSize: 20, lineHeight: 26, color: colors.line },
+  scene: { alignSelf: 'center', borderRadius: radius.card, overflow: 'hidden', backgroundColor: '#141A44' },
+  indices: { flexDirection: 'row', gap: 8, marginHorizontal: SIDE },
+  field: { marginHorizontal: SIDE },
+  cta: { marginHorizontal: SIDE },
 });
