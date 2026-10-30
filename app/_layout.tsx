@@ -54,6 +54,7 @@ export default function RootLayout() {
             <Stack.Screen name="wake" options={{ animation: 'fade', gestureEnabled: false }} />
             <Stack.Screen name="morning/day" options={{ animation: 'fade', gestureEnabled: false }} />
             <Stack.Screen name="settings" />
+            <Stack.Screen name="closet" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="neighbor-new" options={{ presentation: 'modal' }} />
             <Stack.Screen name="ledger/new" options={{ presentation: 'modal' }} />
             <Stack.Screen name="storage" />

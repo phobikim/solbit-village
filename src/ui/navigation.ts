@@ -1,13 +1,12 @@
 // 화면 경로 → 하단 바에서 켜질 탭
 
-export type TabKey = 'village' | 'records' | 'neighbors' | 'rest' | 'closet' | 'me';
+export type TabKey = 'village' | 'records' | 'neighbors' | 'rest' | 'me';
 
 /** 탭 아래 하위 화면 */
 const PAGES: readonly [TabKey, readonly string[]][] = [
   ['records', ['/records']],
   ['neighbors', ['/neighbors']],
   ['rest', ['/rest', '/place-map']],
-  ['closet', ['/closet']],
   ['me', ['/me', '/storage', '/settings']],
 ];
 
@@ -25,7 +24,8 @@ export const AFTER_WAKE_HREF = '/morning/day' as const;
 export const AFTER_DAY_HREF = '/(tabs)' as const;
 
 /** 하단 바를 숨기는 전체 화면 */
-const FULLSCREEN_PATHS: readonly string[] = ['/wake', '/morning/day'];
+/** 솔이 옷장(/closet)은 탭이 아니라 탭 바가 없는 전체 화면이다 (디자인 TURN 30) */
+const FULLSCREEN_PATHS: readonly string[] = ['/wake', '/morning/day', '/closet'];
 
 export function hidesBottomBar(path: string): boolean {
   return FULLSCREEN_PATHS.includes(path);

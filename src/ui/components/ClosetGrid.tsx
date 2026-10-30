@@ -27,13 +27,15 @@ export type CellView = {
   owned: boolean;
   /** 안 가진 옷의 가격 */
   price: number;
+  /** 안 가진 옷인데 코인이 모자라다 (가격 칩 글자 #8F96CC + 코인 불투명도 .5, 경고색 없음) */
+  short: boolean;
   /** 방금 산 옷: 별이 반짝인다 */
   just: boolean;
 };
 
 type Props = CellView & { width: number; reduceMotion: boolean; onPress: (id: string) => void };
 
-export const ClosetCell = memo(function ClosetCell({ id, wearing, selected, owned, price, just, width, reduceMotion, onPress }: Props) {
+export const ClosetCell = memo(function ClosetCell({ id, wearing, selected, owned, price, short, just, width, reduceMotion, onPress }: Props) {
   const meta = itemMeta(id);
   const name = OUTFIT_NAME[id] ?? id;
   const dressed = meta?.slot === 'body' || meta?.slot === 'back';
@@ -46,8 +48,8 @@ export const ClosetCell = memo(function ClosetCell({ id, wearing, selected, owne
       style={[styles.cell, { width }]}
     >
       <View style={[styles.tile, { width, height: width }]}>
-        {/* 안 가진 옷: opacity + 어두운 오버레이 (SVG 필터는 쓰지 않는다) */}
-        <View style={{ width: THUMB, height: THUMB, opacity: owned ? 1 : 0.4 }}>
+        {/* 안 가진 옷: 불투명도 60% + 어두운 오버레이로 흑백 느낌을 근사한다 (react-native-svg 필터는 쓰지 않는다) */}
+        <View style={{ width: THUMB, height: THUMB, opacity: owned ? 1 : 0.6 }}>
           {meta && (
             <SoliOutfit
               equipped={{ [meta.slot]: id }}
@@ -72,8 +74,10 @@ export const ClosetCell = memo(function ClosetCell({ id, wearing, selected, owne
       <Text style={[styles.name, { color: owned ? colors.text : colors.textMuted }]}>{name}</Text>
       {!owned && (
         <View style={styles.price}>
-          <SvgXml xml={ICON_COIN} width={18} height={18} />
-          <Text style={styles.priceText}>{formatCount(price)}</Text>
+          <View style={{ opacity: short ? 0.5 : 1 }}>
+            <SvgXml xml={ICON_COIN} width={18} height={18} />
+          </View>
+          <Text style={[styles.priceText, short && { color: colors.textMuted }]}>{formatCount(price)}</Text>
         </View>
       )}
     </Pressable>
@@ -125,7 +129,7 @@ const styles = StyleSheet.create({
     borderWidth: 2.5,
     borderColor: colors.night,
   },
-  dim: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, borderRadius: 20, backgroundColor: 'rgba(13,17,48,0.35)' },
+  dim: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, borderRadius: 20, backgroundColor: 'rgba(30,37,88,0.5)' },
   name: { fontFamily: fonts.bodyHeavy, fontSize: 13 },
   price: { height: 24, flexDirection: 'row', alignItems: 'center', gap: 4, paddingLeft: 3, paddingRight: 9, borderRadius: 12, backgroundColor: '#2B3370' },
   priceText: { fontFamily: fonts.numberBold, fontSize: 13, color: colors.yellow },

@@ -4,7 +4,7 @@ import type { DayType } from '../domain/morning';
 
 export const MORNING_TITLE = '아침 준비';
 /** 발자국 2칸 + 깃발 (하루 → 마을). 하루 고르기가 1단계 */
-export const MORNING_STEP_LABEL = '하루, 마을 중 1단계';
+export const MORNING_STEP_LABEL = '아침, 하루 중 2단계, 다음은 마을';
 
 /** 오늘 하루 고르기 화면 이장 방송 (질문 한 가지뿐 — 컨디션은 묻지 않는다) */
 export const DAY_PICK_BROADCAST = '오늘은 일하는 날이유, 노는 날이유?';

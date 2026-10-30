@@ -1,35 +1,5 @@
-// 메인 화면(7a) 레이아웃 — 고정 규칙. 이 파일은 RN을 import하지 않는다 (순수 계산 + 상수 → 단위 테스트).
-//
-// 구성 순서: 재화 바(코인 · 흥) → 헤더(마을 이름 + Lv + 성장 바) → 방송 → 마을 장면 → 지수 → 밭 띠 → 오늘 기록하기 → 탭 바
-// 마을 장면은 4:3 고정 (너비 = 콘텐츠 영역 전체, 높이 = 너비 × 3/4). 장면 비율은 절대 바꾸지 않고,
-// 높이가 모자라면 나머지 요소를 압축한다. 그래도 안 들어가면 메인만 스크롤 (탭 바 고정).
-
-// ── 요소 높이 (pt) — 기본 / 압축 ─────────────────────────────────────────
-
-export const MAIN_LAYOUT = {
-  /** 재화 바: 코인 · 흥 칩 한 줄 (헤더 위). 압축하지 않는다 */
-  currency: 36,
-  /** 재화 바 | 헤더 간격. 압축하지 않는다 */
-  currencyGap: 10,
-  /** 헤더: 마을 이름 + Lv 한 줄 + 성장 바 (부제 없음). 재화 바는 따로 위에 있다 */
-  header: 64,
-  /** 방송: 2줄 / 1줄 말줄임 (탭하면 펼침) */
-  broadcast: { full: 68, compact: 44 },
-  /** 지수: 기본(링 + 숫자 + 문구) / 문구 제거(링 + 숫자) / 한 줄 띠(아이콘 + 숫자, 링 없음). 지수 색은 늘 유지 */
-  indices: { full: 96, ring: 72, strip: 44 },
-  /** 밭 띠: 기본(그림 + 상태 글자) / 압축(글자 숨김) */
-  field: { full: 72, compact: 56 },
-  /** 오늘 기록하기 */
-  cta: { full: 56, compact: 52 },
-  /** 탭 바 (하단 안전 영역은 따로 더한다). 항상 고정 */
-  tabBar: 76,
-  /** 요소 사이 간격 */
-  gap: { full: 10, compact: 8 },
-  /** 간격이 들어가는 곳: 헤더|방송 · 방송|장면 · 장면|지수 · 지수|밭 띠 · 밭 띠|기록 버튼 */
-  gapCount: 5,
-  /** 콘텐츠 영역 좌우 여백 */
-  sidePadding: 16,
-} as const;
+// 화면 레이아웃 상수 · 순수 계산. 이 파일은 RN을 import하지 않는다 (단위 테스트).
+// 새 메인(TURN 30)의 장면 맞춤은 src/ui/mainScene.ts. 아래 4:3 장면 좌표(SCENE_*)는 예전 마을 장면(VillageScene) 전용이다.
 
 /** 웹에서 앱 틀의 최대 너비 (app/_layout.tsx frame.maxWidth) */
 export const APP_MAX_WIDTH = 430;
@@ -69,109 +39,12 @@ export const sy = (pct: number) => (SCENE_VIEW.height * pct) / 100;
 
 /** 콘텐츠 영역 너비 = 보이는 너비(웹은 앱 틀 최대 너비로 제한) − 좌우 여백 */
 export function contentWidth(windowWidth: number): number {
-  return Math.max(0, Math.min(windowWidth, APP_MAX_WIDTH) - MAIN_LAYOUT.sidePadding * 2);
+  return Math.max(0, Math.min(windowWidth, APP_MAX_WIDTH) - 16 * 2);
 }
 
 /** 장면 높이 = 너비 × 3/4 */
 export function sceneHeight(width: number): number {
   return Math.round(width * SCENE_RATIO * 100) / 100;
-}
-
-// ── 메인 레이아웃 계산 ──────────────────────────────────────────────────
-
-/**
- * 압축 단계 (장면 비율은 절대 바꾸지 않는다)
- * 0 기본: 지수 96, 방송 2줄, 밭 띠 72 (글자 있음)
- * 1 지수 문구 제거 (96 → 72)
- * 2 방송 1줄 + 지수 한 줄 띠(44) + 밭 띠 56 (글자 숨김)
- * 3 간격 8, 기록 버튼 52
- * 4 그래도 안 들어가면 메인 스크롤 허용 (탭 바는 고정). 크기는 3단계와 같다.
- */
-export type CompactStep = 0 | 1 | 2 | 3 | 4;
-export type IndexVariant = 'full' | 'ring' | 'strip';
-
-export type MainLayout = {
-  step: CompactStep;
-  /** 사용 가능 높이: 보이는 높이 − 위 안전 영역 − (탭 바 + 아래 안전 영역) */
-  available: number;
-  currency: number;
-  currencyGap: number;
-  header: number;
-  broadcast: number;
-  broadcastLines: 1 | 2;
-  /** 마을 장면: 너비 × 3/4 */
-  sceneWidth: number;
-  scene: number;
-  indices: number;
-  indexVariant: IndexVariant;
-  field: number;
-  /** 밭 띠 칸마다 상태 글자를 보이는가 */
-  fieldLabels: boolean;
-  cta: number;
-  gap: number;
-  /** 요소 + 간격 + 장면을 다 더한 높이 */
-  content: number;
-  /** content > available이면 메인 스크롤 (4단계) */
-  scroll: boolean;
-};
-
-type Pick = {
-  broadcast: number;
-  lines: 1 | 2;
-  indices: number;
-  variant: IndexVariant;
-  field: number;
-  labels: boolean;
-  cta: number;
-  gap: number;
-};
-
-const M = MAIN_LAYOUT;
-const STEPS: readonly Pick[] = [
-  { broadcast: M.broadcast.full, lines: 2, indices: M.indices.full, variant: 'full', field: M.field.full, labels: true, cta: M.cta.full, gap: M.gap.full },
-  { broadcast: M.broadcast.full, lines: 2, indices: M.indices.ring, variant: 'ring', field: M.field.full, labels: true, cta: M.cta.full, gap: M.gap.full },
-  { broadcast: M.broadcast.compact, lines: 1, indices: M.indices.strip, variant: 'strip', field: M.field.compact, labels: false, cta: M.cta.full, gap: M.gap.full },
-  { broadcast: M.broadcast.compact, lines: 1, indices: M.indices.strip, variant: 'strip', field: M.field.compact, labels: false, cta: M.cta.compact, gap: M.gap.compact },
-];
-
-const fixedOf = (p: Pick) => M.currency + M.currencyGap + M.header + p.broadcast + p.indices + p.field + p.cta + p.gap * M.gapCount;
-
-/**
- * 보이는 높이 · 안전 영역 · 콘텐츠 너비로 메인 레이아웃을 정한다.
- * 장면(너비 × 3/4)을 먼저 놓고, 나머지 요소가 들어갈 때까지 단계를 올린다. 3단계로도 안 들어가면 4단계(스크롤).
- */
-export function mainLayout(visibleHeight: number, insetTop: number, insetBottom: number, width: number): MainLayout {
-  const available = Math.max(0, visibleHeight - insetTop - M.tabBar - insetBottom);
-  const scene = sceneHeight(width);
-  let step: CompactStep = 4;
-  let chosen = STEPS[STEPS.length - 1];
-  for (let i = 0; i < STEPS.length; i++) {
-    if (fixedOf(STEPS[i]) + scene <= available) {
-      step = i as CompactStep;
-      chosen = STEPS[i];
-      break;
-    }
-  }
-  const content = fixedOf(chosen) + scene;
-  return {
-    step,
-    available,
-    currency: M.currency,
-    currencyGap: M.currencyGap,
-    header: M.header,
-    broadcast: chosen.broadcast,
-    broadcastLines: chosen.lines,
-    sceneWidth: width,
-    scene,
-    indices: chosen.indices,
-    indexVariant: chosen.variant,
-    field: chosen.field,
-    fieldLabels: chosen.labels,
-    cta: chosen.cta,
-    gap: chosen.gap,
-    content,
-    scroll: step === 4,
-  };
 }
 
 // ── 아침 흐름 2번째 화면 "오늘 하루 고르기" (디자인 v5 26a~c) ───────────
@@ -211,11 +84,11 @@ export type MorningDayLayout = {
   scroll: boolean;
 };
 
-export function morningDayLayout(visibleHeight: number, insetTop: number, insetBottom: number): MorningDayLayout {
+export function morningDayLayout(visibleHeight: number, insetTop: number, insetBottom: number, withRewardLink = true): MorningDayLayout {
   const M = MORNING_DAY_LAYOUT;
   const available = Math.max(0, visibleHeight - insetTop - insetBottom);
   const fixedOf = (card: number) =>
-    M.header + M.broadcast + M.gapScene + M.gapDays + M.label + card + M.gapReward + M.rewardLink + M.gapButton + M.button + M.gapLater + M.later + M.bottomPad;
+    M.header + M.broadcast + M.gapScene + M.gapDays + M.label + card + (withRewardLink ? M.gapReward + M.rewardLink : 0) + M.gapButton + M.button + M.gapLater + M.later + M.bottomPad;
 
   const full = Math.min(M.scene.max, available - fixedOf(M.dayCard.full));
   if (full >= M.scene.comfortable) return { step: 0, available, scene: full, dayCard: M.dayCard.full, scroll: false };
@@ -228,16 +101,19 @@ export function morningDayLayout(visibleHeight: number, insetTop: number, insetB
 // 미리보기는 284 고정이다. 남는 높이는 그리드가 받고, 그리드는 안에서 스크롤한다.
 
 export const CLOSET_LAYOUT = {
-  /** 헤더: 재화 칩 2개(왼쪽) + 제목(오른쪽). 위 2 · 아래 10 여백 포함 */
-  header: { height: 36, top: 2, bottom: 10 },
+  /** 헤더: 뒤로 버튼 40 + 제목 + 지갑 알약(36). 위 2 · 아래 10 여백 포함 */
+  header: { height: 40, top: 2, bottom: 10 },
   /** 미리보기 카드 (좌우 12) */
   preview: { height: 284, radius: 28, side: 12 },
   /** 슬롯 탭 줄 */
   tabs: { height: 36, top: 10, side: 12, gap: 6 },
-  /** 그리드: 3열, 위 14 · 좌우 12, 칸 사이 가로 10 · 세로 12. 아래 16 (하단 액션 버튼이 떠 있으면 버튼 높이만큼 더) */
-  grid: { cols: 3, top: 14, side: 12, gapX: 10, gapY: 12, bottom: 16 },
+  /** 그리드: 3열, 위 14 · 좌우 12, 칸 사이 가로 10 · 세로 12. 아래 30 (하단 액션 버튼이 떠 있으면 100) */
+  grid: { cols: 3, top: 14, side: 12, gapX: 10, gapY: 12, bottom: 30, bottomWithAction: 100 },
   /** 칸 안 썸네일 상자 */
   thumb: 80,
-  /** 하단 액션 버튼: 탭 바 바로 위에 붙는다. 칩(벗기)은 왼쪽 */
-  action: { height: 56, side: 16, bottom: 10, takeOffWidth: 84, gap: 10 },
+  /** 하단 액션 버튼: 안전 영역 위 26. 벗기 버튼은 왼쪽 폭 84 */
+  action: { height: 56, side: 16, bottom: 26, takeOffWidth: 84, gap: 10 },
 } as const;
+
+/** 지수 카드 모양 (IndexCard). 새 메인에서는 쓰지 않지만 컴포넌트는 남겨 두었다 */
+export type IndexVariant = 'full' | 'ring' | 'strip';

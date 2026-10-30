@@ -1,4 +1,4 @@
-// 아침 흐름 화면 헤더: "아침 준비" + 발자국 1칸 + 깃발 (하루 → 마을). 하루 고르기가 지금 단계라 연두로 채워진다.
+// 아침 흐름 화면 헤더 (디자인 TURN 29): "아침 준비" + 체크한 첫 칸(아침) → 발자국(지금, 하루 고르기) → 깃발(마을).
 
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Ellipse, Path, Rect } from 'react-native-svg';
@@ -11,13 +11,25 @@ export function MorningHeader() {
     <View style={styles.header}>
       <Text style={styles.title}>{MORNING_TITLE}</Text>
       <View style={styles.steps} accessible accessibilityLabel={MORNING_STEP_LABEL}>
+        <Done />
+        <Dashes color={colors.relation} />
         <Dot />
-        <Dashes color={colors.disabled} />
+        <Dashes color="#4A5290" />
         <Svg width={24} height={30} viewBox="0 0 26 32">
           <Rect x={3} y={2} width={2.6} height={29} rx={1.3} fill="#FFFFFF" />
           <Path d="M5.6 3h17l-4 5 4 5h-17z" fill={colors.pink} />
         </Svg>
       </View>
+    </View>
+  );
+}
+
+function Done() {
+  return (
+    <View style={[styles.dot, { backgroundColor: '#3A437F' }]}>
+      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={colors.relation} strokeWidth={4} strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M5 12.5l4.5 4.5L19 7.5" />
+      </Svg>
     </View>
   );
 }

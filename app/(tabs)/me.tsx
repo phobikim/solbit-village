@@ -2,7 +2,8 @@
 
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 
 import { VILLAGE_NAME } from '../../src/copy/labels.ko';
 import { parseDayKey, today as getToday } from '../../src/domain/day';
@@ -15,6 +16,7 @@ import { useRecords } from '../../src/state/records';
 import { meRange, useMeView } from '../../src/state/tabViews';
 import { Soli } from '../../src/ui/characters';
 import { Avatar } from '../../src/ui/components/Avatar';
+import { HangerIcon } from '../../src/ui/components/HangerIcon';
 import { DEV_DAY_SUB, DEV_DAY_TITLE } from '../../src/copy/morning.ko';
 import { DEV_WAKE_SUB, DEV_WAKE_TITLE } from '../../src/copy/settings.ko';
 import { DevTools } from '../../src/ui/components/DevTools';
@@ -84,6 +86,18 @@ export default function MeScreen() {
         </View>
 
         {/* 이장네 장부는 장부 탭으로, 여가 서랍은 쉼터 탭으로 옮겼다 (디자인 TURN 12) */}
+        <Pressable accessibilityRole="button" accessibilityLabel="솔이 옷장" onPress={() => router.push('/closet')} style={({ pressed }) => [styles.closetRow, pressed && { opacity: 0.8 }]}>
+          <View style={styles.closetChip}>
+            <HangerIcon size={22} color={colors.line} strokeWidth={2.6} />
+          </View>
+          <View style={{ flex: 1, gap: 1 }}>
+            <Text style={styles.closetTitle}>솔이 옷장</Text>
+            <Text style={styles.closetSub}>옷 갈아입히고 새 옷 사기</Text>
+          </View>
+          <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={colors.textMuted} strokeWidth={3.4} strokeLinecap="round" strokeLinejoin="round">
+            <Path d="M9 5l7 7-7 7" />
+          </Svg>
+        </Pressable>
         <View style={styles.menuRow}>
           <MenuCard
             icon="storage"
@@ -145,4 +159,8 @@ const styles = StyleSheet.create({
   trendsTitle: { fontFamily: fonts.bodyHeavy, fontSize: 14, color: colors.text },
   trendsRange: { fontFamily: fonts.number, fontSize: 11, color: colors.textMuted },
   menuRow: { flexDirection: 'row', gap: 8 },
+  closetRow: { backgroundColor: colors.cardSub, borderRadius: 20, paddingVertical: 10, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  closetChip: { width: 36, height: 36, borderRadius: 12, backgroundColor: colors.leisure, alignItems: 'center', justifyContent: 'center' },
+  closetTitle: { fontFamily: fonts.bodyHeavy, fontSize: 14, color: colors.text },
+  closetSub: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.textSub },
 });
