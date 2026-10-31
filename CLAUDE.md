@@ -29,7 +29,7 @@ app/                    expo-router 화면
   neighbor-new.tsx      이웃 등록
   morning-news.tsx      밤사이 마을 소식
   wake.tsx              아침 흐름 1: 솔이 깨우기 (morningFlow 플래그 뒤)
-  morning/              아침 흐름 2: day.tsx 오늘 하루 고르기(일/놀기 + 마을 보상표 시트). 끝나면 마을로 (복장 단계 없음, 옷은 옷장 탭)
+  morning/              아침 흐름 2: day.tsx 오늘 하루 고르기(일/놀기 알약 + 오늘의 보상 카드). 끝나면 마을로 (복장 단계 없음, 옷은 옷장 탭)
 src/
   domain/               게임 규칙. 순수 TS, React/RN import 금지
     crops.ts            작물 결정 · 성장 단계 · 밭 5칸 · 자동 수확
@@ -44,7 +44,7 @@ src/
     broadcast.ts        상황 → 이장 방송 선택
     day.ts              "하루"의 경계 계산
     morning.ts          아침 흐름 규칙 (깨우기 노출 · 하루 종류 · 컨디션 · 솔이 포즈 교대)
-    rewards.ts          아침 보상표: 월급 · 놀기 흥 식 · 보상표 줄 (임시 상수, [제안]. 지급은 아직 없음)
+    rewards.ts          아침 보상: 월급(레벨별) · 놀기 흥 +10 고정 · 보상표 줄 (월급은 임시 상수 [제안]. 지급은 아직 없음)
     wallet.ts           재화(코인 · 흥) 규칙: 더하기 · 쓰기, 음수 거부, 천 단위 표시
     closet.ts           옷장: 하단 버튼 상태(getActionState) · 슬롯별 미리보기 · 그리드 순서
     villageBg.ts        마을 배경 7종 · 가격(BG_PRICE_PAID [제안]) · 구매 · 하단 버튼 상태(벗기 없음) · 미리보기

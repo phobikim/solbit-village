@@ -78,17 +78,18 @@ export const MORNING_DAY_LAYOUT = {
   broadcast: 68,
   /** 방송 | 장면 */
   gapScene: 12,
-  scene: { max: 318, min: 170, /** 이 아래로 줄어들면 카드를 압축 */ comfortable: 220 },
+  scene: { max: 318, min: 170, /** 이 아래로 줄어들면 스크롤 대신 장면을 더 줄이지 않고 최소로 둔다 */ comfortable: 220 },
   /** 장면 | "오늘은" */
   gapDays: 14,
-  /** 소제목 줄 + 소제목과 카드 사이 */
+  /** 소제목 줄 22 + 소제목과 알약 사이 8 */
   label: 30,
-  dayCard: { full: 150, compact: 124 },
-  /** 선택 카드 | 보상표 보기 줄 */
+  /** 일 · 놀기 알약 한 줄 (디자인 TURN 29 개정) */
+  dayCard: 56,
+  /** 알약 | 오늘의 보상 카드 */
   gapReward: 8,
-  /** "보상표 보기" 버튼 32 + 보조 문구 줄 */
-  rewardLink: 52,
-  /** 보상표 보기 줄 | 다음 버튼 */
+  /** 오늘의 보상 카드 */
+  rewardCard: 96,
+  /** 오늘의 보상 카드 | 다음 버튼 */
   gapButton: 12,
   button: 56,
   /** 다음 버튼 | 나중에 할래유 */
@@ -99,25 +100,22 @@ export const MORNING_DAY_LAYOUT = {
 } as const;
 
 export type MorningDayLayout = {
-  /** 0 기본 · 1 카드 압축 · 2 압축해도 모자라 스크롤 */
+  /** 0 장면이 편하게 들어감 · 1 장면을 줄여서 들어감 · 2 최소로 줄여도 모자라 스크롤 */
   step: 0 | 1 | 2;
   available: number;
   scene: number;
-  dayCard: number;
   scroll: boolean;
 };
 
-export function morningDayLayout(visibleHeight: number, insetTop: number, insetBottom: number, withRewardLink = true): MorningDayLayout {
+export function morningDayLayout(visibleHeight: number, insetTop: number, insetBottom: number): MorningDayLayout {
   const M = MORNING_DAY_LAYOUT;
   const available = Math.max(0, visibleHeight - insetTop - insetBottom);
-  const fixedOf = (card: number) =>
-    M.header + M.broadcast + M.gapScene + M.gapDays + M.label + card + (withRewardLink ? M.gapReward + M.rewardLink : 0) + M.gapButton + M.button + M.gapLater + M.later + M.bottomPad;
-
-  const full = Math.min(M.scene.max, available - fixedOf(M.dayCard.full));
-  if (full >= M.scene.comfortable) return { step: 0, available, scene: full, dayCard: M.dayCard.full, scroll: false };
-  const compact = Math.min(M.scene.max, available - fixedOf(M.dayCard.compact));
-  if (compact >= M.scene.min) return { step: 1, available, scene: compact, dayCard: M.dayCard.compact, scroll: false };
-  return { step: 2, available, scene: M.scene.min, dayCard: M.dayCard.compact, scroll: true };
+  const fixed =
+    M.header + M.broadcast + M.gapScene + M.gapDays + M.label + M.dayCard + M.gapReward + M.rewardCard + M.gapButton + M.button + M.gapLater + M.later + M.bottomPad;
+  const scene = Math.min(M.scene.max, available - fixed);
+  if (scene >= M.scene.comfortable) return { step: 0, available, scene, scroll: false };
+  if (scene >= M.scene.min) return { step: 1, available, scene, scroll: false };
+  return { step: 2, available, scene: M.scene.min, scroll: true };
 }
 
 // ── 옷장 탭 (디자인 TURN 28). 위에서 아래로: 상태바 → 헤더 → 미리보기 → 세그먼트 → 슬롯 탭 → 그리드 → 탭 바 ──

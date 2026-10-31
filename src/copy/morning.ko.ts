@@ -4,7 +4,7 @@ import type { DayType } from '../domain/morning';
 
 export const MORNING_TITLE = '아침 준비';
 /** 발자국 2칸 + 깃발 (하루 → 마을). 하루 고르기가 1단계 */
-export const MORNING_STEP_LABEL = '아침, 하루 중 2단계, 다음은 마을';
+export const MORNING_STEP_LABEL = '3단계 중 2단계';
 
 /** 오늘 하루 고르기 화면 이장 방송 (질문 한 가지뿐 — 컨디션은 묻지 않는다) */
 export const DAY_PICK_BROADCAST = '오늘은 일하는 날이유, 노는 날이유?';
@@ -24,11 +24,14 @@ export const DAY_REWARD_LABEL: Record<DayType, string> = {
   play: '흥',
 };
 export const rewardValue = (n: number) => `+${n}`;
-/** 카드 접근성 라벨: "일, 월급 +160" */
-export const dayCardA11y = (day: DayType, n: number) => `${DAY_LABEL[day]}, ${DAY_REWARD_LABEL[day]} ${rewardValue(n)}`;
 
-export const REWARD_TABLE_OPEN = '보상표 보기';
-export const REWARD_NOTE = '보상은 저녁 기록을 저장하면 받아요';
+/** 오늘의 보상 카드 (디자인 TURN 29 개정): 하루를 고르기 전에는 "골라보슈 · ?" */
+export const TODAY_REWARD = '오늘의 보상';
+export const REWARD_UNPICKED_LABEL = '골라보슈';
+export const REWARD_UNPICKED_VALUE = '?';
+/** 카드 오른쪽 칸: 보상은 저녁 기록을 저장할 때 지급 */
+export const REWARD_PAYOUT = ['저녁 기록', '저장 시 지급'] as const;
+export const REWARD_CARD_A11Y = (label: string, value: string) => `오늘의 보상, ${label} ${value}. 저녁 기록을 저장하면 지급`;
 
 export const MORNING_NEXT = '다음';
 export const MORNING_LATER = '나중에 할래유';

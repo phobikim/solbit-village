@@ -1,7 +1,6 @@
-// 아침 흐름 화면 헤더 (디자인 TURN 29): "아침 준비" + 체크한 첫 칸(아침) → 발자국(지금, 하루 고르기) → 깃발(마을).
+// 아침 흐름 화면 헤더 (디자인 TURN 29 개정): "아침 준비" + 3단계 점 — 지난 단계(아침) 초록 점 · 지금(하루 고르기) 노랑 알약 · 다음(마을) 속 빈 점.
 
 import { StyleSheet, Text, View } from 'react-native';
-import Svg, { Ellipse, Path, Rect } from 'react-native-svg';
 
 import { MORNING_STEP_LABEL, MORNING_TITLE } from '../../copy/morning.ko';
 import { colors, fonts } from '../theme';
@@ -11,51 +10,19 @@ export function MorningHeader() {
     <View style={styles.header}>
       <Text style={styles.title}>{MORNING_TITLE}</Text>
       <View style={styles.steps} accessible accessibilityLabel={MORNING_STEP_LABEL}>
-        <Done />
-        <Dashes color={colors.relation} />
-        <Dot />
-        <Dashes color="#4A5290" />
-        <Svg width={24} height={30} viewBox="0 0 26 32">
-          <Rect x={3} y={2} width={2.6} height={29} rx={1.3} fill="#FFFFFF" />
-          <Path d="M5.6 3h17l-4 5 4 5h-17z" fill={colors.pink} />
-        </Svg>
+        <View style={[styles.dot, { backgroundColor: colors.relation }]} />
+        <View style={styles.now} />
+        <View style={[styles.dot, styles.next]} />
       </View>
     </View>
-  );
-}
-
-function Done() {
-  return (
-    <View style={[styles.dot, { backgroundColor: '#3A437F' }]}>
-      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={colors.relation} strokeWidth={4} strokeLinecap="round" strokeLinejoin="round">
-        <Path d="M5 12.5l4.5 4.5L19 7.5" />
-      </Svg>
-    </View>
-  );
-}
-
-function Dot() {
-  return (
-    <View style={styles.dot}>
-      <Svg width={16} height={16} viewBox="0 0 24 24" fill={colors.line}>
-        <Ellipse cx={8} cy={15} rx={3} ry={4.5} />
-        <Ellipse cx={16} cy={9} rx={3} ry={4.5} />
-      </Svg>
-    </View>
-  );
-}
-
-function Dashes({ color }: { color: string }) {
-  return (
-    <Svg width={22} height={4} viewBox="0 0 22 4">
-      <Path d="M2 2H20" stroke={color} strokeWidth={3} strokeDasharray="1 6" strokeLinecap="round" />
-    </Svg>
   );
 }
 
 const styles = StyleSheet.create({
   header: { paddingTop: 2, paddingHorizontal: 20, paddingBottom: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title: { fontFamily: fonts.title, fontSize: 28, lineHeight: 34, color: colors.yellow },
-  steps: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  dot: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.relation },
+  steps: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  dot: { width: 12, height: 12, borderRadius: 6 },
+  now: { width: 28, height: 12, borderRadius: 6, backgroundColor: colors.yellow },
+  next: { backgroundColor: colors.night, borderWidth: 2, borderColor: '#4A5290' },
 });

@@ -11,8 +11,6 @@ export const REST_FEATURES = {
 /** 아침 흐름 (솔이 깨우기 → 컨디션 …). false면 앱 시작 때 자동으로 뜨지 않고, 웹 /wake · 나 탭 개발자 항목으로만 연다. */
 export const FEATURES = {
   morningFlow: false,
-  /** 하루 고르기의 "보상표 보기" 진입. 시트 컴포넌트(VillageRewardSheet)는 남겨 두고 진입만 끈다 (디자인 TURN 29) */
-  rewardTable: false,
 } as const;
 
 /**

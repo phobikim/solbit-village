@@ -8,11 +8,8 @@ import { unlockForLevel, type UnlockInfo } from './villageUnlocks';
 export const SALARY_BASE = 100;
 /** 월급: 레벨이 하나 오를 때마다 늘어나는 금액 */
 export const SALARY_PER_LEVEL = 10;
-/** 놀기 흥: Lv.1 기준 */
-export const PLAY_HEUNG_BASE = 10;
-/** 놀기 흥: 레벨 PLAY_HEUNG_STEP_EVERY 마다 늘어나는 양 */
-export const PLAY_HEUNG_STEP = 2;
-export const PLAY_HEUNG_STEP_EVERY = 5;
+/** 놀기 흥: 레벨과 상관없이 고정 +10 (디자인 TURN 29 개정 2026-10-31. 예전 식 10 + 2 × floor(Lv ÷ 5)는 없앴다) */
+export const PLAY_HEUNG = 10;
 
 // TODO([미정]): 지급은 저녁 기록 저장 시. 흥과 장작 상한 관계 확정 후 구현
 // (지급 시점, 흥 = 쉼 지수 연결, 놀기 흥과 장작 상한(35)의 관계가 아직 정해지지 않았다. 잔액 저장소는 있다: src/data/wallet.ts)
@@ -31,10 +28,6 @@ export function salaryForLevel(level: number): number {
   return SALARY_BASE + (clampLevel(level) - 1) * SALARY_PER_LEVEL;
 }
 
-/** 노는 날 흥 = BASE + floor(레벨 / EVERY) × STEP. 상한 없음. (Lv1~4 10, Lv5~9 12, Lv10~14 14) */
-export function playHeungForLevel(level: number): number {
-  return PLAY_HEUNG_BASE + Math.floor(clampLevel(level) / PLAY_HEUNG_STEP_EVERY) * PLAY_HEUNG_STEP;
-}
 
 export type RewardRow = {
   level: number;
@@ -49,7 +42,7 @@ export function rewardRow(level: number): RewardRow {
   return {
     level: lv,
     salary: salaryForLevel(lv),
-    heung: playHeungForLevel(lv),
+    heung: PLAY_HEUNG,
     unlock: unlockForLevel(lv),
     milestone: MILESTONE_LEVELS.includes(lv),
   };

@@ -1,6 +1,6 @@
 import {
   MILESTONE_LEVELS,
-  playHeungForLevel,
+  PLAY_HEUNG,
   progressRatio,
   rewardRow,
   rewardStatus,
@@ -27,16 +27,10 @@ describe('salaryForLevel', () => {
   });
 });
 
-describe('playHeungForLevel', () => {
-  it('식: 10 + 2 × floor(Lv ÷ 5) — Lv1·4 = 10, Lv5·9 = 12, Lv10·12 = 14', () => {
-    for (const lv of [1, 2, 3, 4]) expect(playHeungForLevel(lv)).toBe(10);
-    for (const lv of [5, 6, 7, 8, 9]) expect(playHeungForLevel(lv)).toBe(12);
-    for (const lv of [10, 11, 12, 13, 14]) expect(playHeungForLevel(lv)).toBe(14);
-    expect(playHeungForLevel(15)).toBe(16);
-  });
-  it('1 미만은 1로 본다', () => {
-    expect(playHeungForLevel(0)).toBe(10);
-    expect(playHeungForLevel(-3)).toBe(10);
+describe('놀기 흥: 레벨과 상관없이 +10 고정', () => {
+  it('상수 10, 어느 레벨의 보상 줄이든 같다', () => {
+    expect(PLAY_HEUNG).toBe(10);
+    for (const lv of [1, 5, 7, 10, 13, 30]) expect(rewardRow(lv).heung).toBe(10);
   });
 });
 
@@ -48,13 +42,13 @@ describe('rewardRow', () => {
     for (const lv of [1, 4, 6, 9, 11, 12, 13]) expect(rewardRow(lv).milestone).toBe(false);
   });
   it('월급 · 흥 · 해금을 한 줄로 묶는다', () => {
-    expect(rewardRow(7)).toEqual({ level: 7, salary: 160, heung: 12, unlock: { id: 'well', icon: 'well' }, milestone: false });
+    expect(rewardRow(7)).toEqual({ level: 7, salary: 160, heung: 10, unlock: { id: 'well', icon: 'well' }, milestone: false });
   });
   it('표에 없는 레벨은 해금 null 이어도 금액은 이어진다', () => {
     const r = rewardRow(13);
     expect(r.unlock).toBeNull();
     expect(r.salary).toBe(220);
-    expect(r.heung).toBe(14);
+    expect(r.heung).toBe(10);
   });
   it('0 · 음수는 Lv.1 줄', () => {
     expect(rewardRow(0).level).toBe(1);

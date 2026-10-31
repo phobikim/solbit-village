@@ -1,6 +1,7 @@
 // 아침 흐름 2번째(마지막) 화면 "오늘 하루 고르기" (디자인 v5 26a~c). 일하는 날 / 노는 날 중 하나를 고르고, 받을 보상(예정)을 카드에서 바로 보여 준다.
 // 값은 메모리(zustand)에만 둔다 — DB 저장 없음. 기록 입력 · 코인/흥 지급은 이 화면에 두지 않는다 (지급은 저녁 기록 저장 시, 별도 작업).
-// [다음]도 [나중에 할래유]도 마을(메인)로 간다 (AFTER_DAY_HREF). 복장은 솔이 옷장 화면에서 고른다. "보상표 보기"는 FEATURES.rewardTable 뒤.
+// [다음]도 [나중에 할래유]도 마을(메인)로 간다 (AFTER_DAY_HREF). 복장은 솔이 옷장 화면에서 고른다.
+// TURN 29 개정: 선택은 알약 한 줄 + 아래 "오늘의 보상" 카드. 마을 보상표 진입은 뺐다 (VillageRewardSheet 컴포넌트는 남겨 둔다).
 // TODO([미정]): 지급은 저녁 기록 저장 시. 흥과 장작 상한 관계 확정 후 구현
 
 import { router } from 'expo-router';
@@ -8,15 +9,13 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path, SvgXml } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 
 import {
   DAY_PICK_BROADCAST,
   DAY_SECTION,
   MORNING_LATER,
   MORNING_NEXT,
-  REWARD_NOTE,
-  REWARD_TABLE_OPEN,
   villageLevelChip,
 } from '../../src/copy/morning.ko';
 import type { DayType } from '../../src/domain/morning';
@@ -24,12 +23,9 @@ import { useMorning, useTodayDayType } from '../../src/state/morningStore';
 import { useMorningVillage } from '../../src/state/villageLevel';
 import { BroadcastLine } from '../../src/ui/components/BroadcastLine';
 import { MorningHeader } from '../../src/ui/components/MorningHeader';
-import { DayCards } from '../../src/ui/components/MorningChoices';
+import { DayCards, RewardCard } from '../../src/ui/components/MorningChoices';
 import { MorningScene } from '../../src/ui/components/MorningScene';
-import { ICON_TROPHY } from '../../src/ui/characters/rewardIcons';
 import { APP_MAX_WIDTH, MORNING_DAY_LAYOUT, morningDayLayout } from '../../src/ui/layout';
-import { FEATURES } from '../../src/ui/features';
-import { VillageRewardSheet } from '../../src/ui/morning/VillageRewardSheet';
 import { AFTER_DAY_HREF } from '../../src/ui/navigation';
 import { colors, fonts } from '../../src/ui/theme';
 import { useScreenActive } from '../../src/ui/useScreenActive';
@@ -51,10 +47,9 @@ export default function MorningDayScreen() {
   const setDayType = useMorning((s) => s.setDayType);
   // 고른 값은 [다음]을 눌러야 저장된다. [나중에 할래유]로 넘어가면 저장하지 않는다.
   const [picked, setPicked] = useState<DayType | null>(saved);
-  const [sheetOpen, setSheetOpen] = useState(false);
 
   // SafeAreaView가 위쪽 안전 영역을 처리하고, 아래쪽은 이 화면이 직접 더한다
-  const L = morningDayLayout(visibleHeight, insets.top, insets.bottom, FEATURES.rewardTable);
+  const L = morningDayLayout(visibleHeight, insets.top, insets.bottom);
   const sceneWidth = Math.min(windowWidth, APP_MAX_WIDTH) - 24;
   const canNext = picked !== null;
 
@@ -78,7 +73,7 @@ export default function MorningDayScreen() {
         <BroadcastLine message={DAY_PICK_BROADCAST} time={`${pad(now.getHours())}:${pad(now.getMinutes())}`} />
 
         <View style={styles.scene}>
-          <MorningScene width={sceneWidth} height={L.scene} dayType={picked} active={active && !sheetOpen} reduceMotion={reduceMotion} />
+          <MorningScene width={sceneWidth} height={L.scene} dayType={picked} active={active} reduceMotion={reduceMotion} />
         </View>
 
         <View style={[styles.block, { marginTop: M.gapDays }]}>
@@ -95,18 +90,9 @@ export default function MorningDayScreen() {
               <Text style={styles.levelChipText}>{villageLevelChip(village.level)}</Text>
             </View>
           </View>
-          <DayCards value={picked} onPick={setPicked} height={L.dayCard} rewards={village.rewards} />
+          <DayCards value={picked} onPick={setPicked} />
+          <RewardCard value={picked} rewards={village.rewards} />
         </View>
-
-        {FEATURES.rewardTable && (
-          <View style={[styles.rewardLink, { marginTop: M.gapReward }]}>
-            <Pressable accessibilityRole="button" onPress={() => setSheetOpen(true)} hitSlop={{ top: 6, bottom: 6 }} style={styles.openTable}>
-              <SvgXml xml={ICON_TROPHY} width={18} height={18} />
-              <Text style={styles.openTableText}>{REWARD_TABLE_OPEN}</Text>
-            </Pressable>
-            <Text style={styles.note}>{REWARD_NOTE}</Text>
-          </View>
-        )}
 
         <View style={styles.spacer} />
 
@@ -126,7 +112,6 @@ export default function MorningDayScreen() {
         </View>
       </ScrollView>
 
-      <VillageRewardSheet visible={sheetOpen} onClose={() => setSheetOpen(false)} level={village.level} progress={village.progress} />
     </SafeAreaView>
   );
 }
@@ -141,10 +126,6 @@ const styles = StyleSheet.create({
   labelText: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.textSub },
   levelChip: { backgroundColor: colors.yellow, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 99 },
   levelChipText: { fontFamily: fonts.numberBold, fontSize: 12, color: colors.line },
-  rewardLink: { alignItems: 'center', gap: 2 },
-  openTable: { height: 32, paddingHorizontal: 10, flexDirection: 'row', alignItems: 'center', gap: 6 },
-  openTableText: { fontFamily: fonts.bodyHeavy, fontSize: 14, color: colors.yellow },
-  note: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.textMuted },
   spacer: { flexGrow: 1, minHeight: M.gapButton },
   bottom: { marginHorizontal: 16, alignItems: 'center', gap: M.gapLater },
   next: {
