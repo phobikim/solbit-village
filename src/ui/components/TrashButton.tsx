@@ -7,10 +7,11 @@ import { colors } from '../theme';
 
 const TRASH = `<svg viewBox="0 0 24 24" fill="none" stroke="${colors.pink}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v5M14 11v5"/></svg>`;
 
-export function TrashButton({ label, onPress }: { label: string; onPress: () => void }) {
+/** small: 대소사 카드용 작은 휴지통 (장부 개선안) */
+export function TrashButton({ label, onPress, small }: { label: string; onPress: () => void; small?: boolean }) {
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={`${label} 지우기`} onPress={onPress} style={styles.btn}>
-      <SvgXml xml={TRASH} width={18} height={18} />
+    <Pressable accessibilityRole="button" accessibilityLabel={`${label} 지우기`} onPress={onPress} style={[styles.btn, small && styles.small]}>
+      <SvgXml xml={TRASH} width={small ? 15 : 18} height={small ? 15 : 18} />
     </Pressable>
   );
 }
@@ -26,4 +27,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  small: { width: 32, height: 32, borderRadius: 16 },
 });

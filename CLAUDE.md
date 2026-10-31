@@ -40,7 +40,7 @@ src/
     village.ts          마을 경험치 · 레벨 · 해금
     harvest.ts          수확 레벨 · 농부 칭호 · 스킨 교환
     neighbors.ts        가까움 · 단짝 · 마을 등장 이웃
-    events.ts           행사 D-day · 지나간 일
+    events.ts           행사 D-day · 여러 날 일정(시작일~종료일) · 달력 막대 · 날짜 고르기
     broadcast.ts        상황 → 이장 방송 선택
     day.ts              "하루"의 경계 계산
     morning.ts          아침 흐름 규칙 (깨우기 노출 · 하루 종류 · 컨디션 · 솔이 포즈 교대)

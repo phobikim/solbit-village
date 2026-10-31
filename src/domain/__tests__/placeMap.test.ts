@@ -126,7 +126,7 @@ describe('다녀온 곳은 지도에 놓지 않는다 (visited=false만 배치)'
 
 describe('깃발 종류: 가고 싶은 곳 / 이장이 미는 곳 / 날짜 잡은 곳', () => {
   const today = '2026-10-24';
-  const ev = (id: string, date: string): VillageEvent => ({ id, name: '여행', date, type: 'travel', repeatYearly: false, createdAt: 0 });
+  const ev = (id: string, date: string): VillageEvent => ({ id, name: '여행', date, endDate: null, type: 'travel', repeatYearly: false, createdAt: 0 });
 
   it('오래 담아둔(60일 이상) 가장 오래된 깃발만 이장이 민다 · 날짜 잡은 깃발은 뺀다', () => {
     const old = place(1, { addedDate: '2026-07-01', createdAt: 1 });

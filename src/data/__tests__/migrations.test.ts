@@ -87,3 +87,18 @@ maybe('마이그레이션 v11: 기존 여가/쉼 기록 → 쉼 기록(장작)',
     expect(db.prepare('SELECT COUNT(*) AS n FROM rest_log').all()[0].n).toBe(0);
   });
 });
+
+maybe('마이그레이션 v15: 행사 종료일 (여러 날 일정)', () => {
+  it('이미 있는 행사는 종료일 NULL(하루 일정)로 그대로 남는다', () => {
+    const db = open(14);
+    db.prepare("INSERT INTO event (id, name, date, type, repeat_yearly, created_at) VALUES ('e1', '엄마 생신', '2026-11-04', 'birth', 1, 1)").run();
+    db.exec(MIGRATIONS[14]);
+    const row = db.prepare("SELECT * FROM event WHERE id = 'e1'").all()[0];
+    expect(row).toMatchObject({ name: '엄마 생신', date: '2026-11-04', end_date: null, type: 'birth', repeat_yearly: 1 });
+  });
+  it('종료일을 넣어 저장할 수 있다', () => {
+    const db = open(SCHEMA_VERSION);
+    db.prepare("INSERT INTO event (id, name, date, end_date, type, repeat_yearly, created_at) VALUES ('e2', '제주 여행', '2026-10-27', '2026-10-29', 'travel', 0, 2)").run();
+    expect(db.prepare("SELECT end_date FROM event WHERE id = 'e2'").all()[0].end_date).toBe('2026-10-29');
+  });
+});

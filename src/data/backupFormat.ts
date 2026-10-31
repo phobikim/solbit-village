@@ -19,7 +19,7 @@ export const BACKUP_TABLES = {
   inventory: ['crop', 'qty'],
   harvest_stat: ['id', 'total_harvested'],
   village_xp: ['id', 'date', 'amount', 'reason', 'at'],
-  event: ['id', 'name', 'date', 'type', 'repeat_yearly', 'created_at'],
+  event: ['id', 'name', 'date', 'end_date', 'type', 'repeat_yearly', 'created_at'],
   skin: ['id', 'owned', 'equipped'],
   place: ['id', 'name', 'duration', 'visited', 'memo', 'note', 'event_id', 'log_id', 'visited_date', 'nights', 'added_date', 'created_at'],
   rest_log: ['id', 'date', 'text', 'tags', 'size', 'created_at'],

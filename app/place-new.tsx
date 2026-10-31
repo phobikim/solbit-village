@@ -80,6 +80,7 @@ export default function PlaceSheet() {
           id: eventId,
           name: ev?.name ?? `${editing.name} 여행`.slice(0, EVENT_NAME_MAX),
           date: planDate,
+          endDate: null,
           type: 'travel',
           repeatYearly: false,
           createdAt: ev?.createdAt ?? Date.now(),

@@ -31,6 +31,7 @@ const ev = (date: string, over: Partial<VillageEvent> = {}): VillageEvent => ({
   id: `e${date}`,
   name: '일정',
   date,
+  endDate: null,
   type: 'etc',
   repeatYearly: false,
   createdAt: 0,

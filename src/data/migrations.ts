@@ -259,6 +259,10 @@ export const MIGRATIONS: readonly string[] = [
   );
   INSERT INTO village_bg_owned (id, acquired_at, source) VALUES ('base', NULL, 'start');
   `,
+  // v15 — 여러 날에 걸친 행사(장부 개선안): 종료일 열 하나. NULL = 하루 일정 (이미 있는 행사는 그대로 하루 일정).
+  `
+  ALTER TABLE event ADD COLUMN end_date TEXT;
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

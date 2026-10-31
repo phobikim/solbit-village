@@ -40,7 +40,7 @@ export const broadcasts = {
   eventWeek: (name: string, tail: string) => `${name} 일주일 남았슈. ${tail}`,
   /** 게시판이 빈 조용한 날 */
   boardEmpty: '게시판이 비었슈. 이장이 일을 안 한 건 아니유.',
-  /** 행사 전날 — 생일·기념일 */
+  /** 행사 전날 — 생일 */
   eventEveAnniversary: (name: string) => `내일이 ${name}이유. 빈손으로 가지 마슈.`,
   /** 행사 전날 — 일정 · 기타 */
   eventEve: (name: string) => `내일 ${name} 있슈. 이장두 괜히 떨려유.`,

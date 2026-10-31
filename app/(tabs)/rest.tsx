@@ -155,6 +155,7 @@ export default function RestScreen() {
       id: newId('ev'),
       name: `${note.name} 여행`.slice(0, EVENT_NAME_MAX),
       date: freeDay,
+      endDate: null,
       type: 'travel' as const,
       repeatYearly: false,
       createdAt: Date.now(),

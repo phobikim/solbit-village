@@ -45,6 +45,7 @@ const event = (id: string, date: string, over: Partial<VillageEvent> = {}): Vill
   id,
   name: '사파 여행',
   date,
+  endDate: null,
   type: 'travel',
   repeatYearly: false,
   createdAt: 0,

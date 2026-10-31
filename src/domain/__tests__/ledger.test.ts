@@ -6,7 +6,13 @@ import {
   eventsToday,
   eventsTomorrow,
   nextOccurrence,
-  pastEvents,
+  eventLastDay,
+  eventLength,
+  eventTypesByDay,
+  eventsOnDay,
+  normalizeEnd,
+  pickRange,
+  rangeOf,
   upcomingEvents,
   type VillageEvent,
 } from '../events';
@@ -26,6 +32,7 @@ const ev = (id: string, date: string, createdAt = 0, repeatYearly = false): Vill
   id,
   name: id,
   date,
+    endDate: null,
   type: repeatYearly ? 'birth' : 'etc',
   repeatYearly,
   createdAt,
@@ -46,13 +53,6 @@ describe('행사', () => {
 
   it('행사 전날', () => {
     expect(eventsTomorrow([ev('x', '2026-10-21'), ev('y', '2026-10-22')], today).map((e) => e.id)).toEqual(['x']);
-  });
-
-  it('지나간 일: 날짜가 지난 행사만, 최근 순 (성취 · 일상 기록 · 시스템 기록은 없음)', () => {
-    const items = pastEvents(events, today);
-    expect(items.map((i) => i.id)).toEqual(['past']);
-    const more = [ev('old', '2026-09-01'), ev('mid', '2026-10-10'), ev('newer', '2026-10-19'), ev('later', '2026-10-25')];
-    expect(pastEvents(more, today).map((i) => i.id)).toEqual(['newer', 'mid', 'old']);
   });
 });
 
@@ -184,11 +184,10 @@ describe('매년 반복 (생일·기념일)', () => {
     expect(nextOccurrence(ev('윤일', '2024-02-29', 0, true), '2026-10-20')).toBe('2027-02-28');
     expect(nextOccurrence(ev('윤일', '2024-02-29', 0, true), '2027-10-20')).toBe('2028-02-29');
   });
-  it('게시판·방송에는 다음에 오는 날짜로, 지나간 일로는 옮기지 않는다', () => {
+  it('게시판·방송에는 다음에 오는 날짜로 보인다', () => {
     const mom = ev('엄마 생신', '2025-10-21', 0, true);
     expect(upcomingEvents([mom], today)[0].date).toBe('2026-10-21');
     expect(eventsTomorrow([mom], today).length).toBe(1);
-    expect(pastEvents([mom], today)).toEqual([]);
   });
 });
 
@@ -197,6 +196,7 @@ describe('달력의 행사 표시', () => {
     id,
     name: id,
     date,
+    endDate: null,
     type,
     repeatYearly,
     createdAt,
@@ -209,5 +209,79 @@ describe('달력의 행사 표시', () => {
     const mom = at('mom', '2025-11-04', 1, 'birth', true);
     expect([...eventDaysInMonth([mom], 2027, 11)]).toEqual([['2027-11-04', 'birth']]);
     expect(eventDaysInMonth([mom], 2024, 11).size).toBe(0);
+  });
+});
+
+describe('여러 날에 걸친 일정 (장부 개선안)', () => {
+  const trip = (id: string, date: string, endDate: string | null, createdAt = 0, type: VillageEvent['type'] = 'travel'): VillageEvent => ({
+    id,
+    name: id,
+    date,
+    endDate,
+    type,
+    repeatYearly: false,
+    createdAt,
+  });
+  it('마지막 날 · 며칠짜리: 하루 일정은 종료일이 없다', () => {
+    expect(eventLastDay(trip('a', '2026-10-27', null))).toBe('2026-10-27');
+    expect(eventLastDay(trip('a', '2026-10-27', '2026-10-29'))).toBe('2026-10-29');
+    expect(eventLength(trip('a', '2026-10-27', null))).toBe(1);
+    expect(eventLength(trip('a', '2026-10-30', '2026-11-02'))).toBe(4);
+  });
+  it('종료일이 시작일과 같거나 앞서면 하루 일정', () => {
+    expect(normalizeEnd('2026-10-27', '2026-10-27')).toBeNull();
+    expect(normalizeEnd('2026-10-27', '2026-10-20')).toBeNull();
+    expect(normalizeEnd('2026-10-27', null)).toBeNull();
+    expect(normalizeEnd('2026-10-27', '2026-10-28')).toBe('2026-10-28');
+  });
+  it('달력 막대: 기간의 모든 날짜에 들어가고, 달을 넘어도 그 달 몫만', () => {
+    const t = trip('제주', '2026-10-30', '2026-11-02', 1);
+    expect([...eventTypesByDay([t], 2026, 10).keys()]).toEqual(['2026-10-30', '2026-10-31']);
+    expect([...eventTypesByDay([t], 2026, 11).keys()]).toEqual(['2026-11-01', '2026-11-02']);
+  });
+  it('같은 날 분류가 여럿이면 먼저 적은 순, 같은 분류는 한 번만', () => {
+    const list = [trip('b', '2026-10-27', null, 2, 'work'), trip('a', '2026-10-27', '2026-10-28', 1, 'travel'), trip('c', '2026-10-27', null, 3, 'work')];
+    const m = eventTypesByDay(list, 2026, 10);
+    expect(m.get('2026-10-27')).toEqual(['travel', 'work']);
+    expect(m.get('2026-10-28')).toEqual(['travel']);
+  });
+  it('그날의 대소사: 기간에 걸친 일정과 하루 일정, 먼저 적은 순', () => {
+    const list = [trip('b', '2026-10-28', null, 2), trip('a', '2026-10-27', '2026-10-29', 1), trip('x', '2026-11-01', null, 3)];
+    expect(eventsOnDay(list, '2026-10-28').map((e) => e.id)).toEqual(['a', 'b']);
+    expect(eventsOnDay(list, '2026-10-30')).toEqual([]);
+  });
+  it('진행 중인 일정도 다가오는 행사에 남고, D-day는 시작일 기준이다. 끝나면 빠진다', () => {
+    const t = trip('제주', '2026-10-19', '2026-10-22');
+    expect(upcomingEvents([t], '2026-10-21').map((e) => [e.id, e.date])).toEqual([['제주', '2026-10-19']]);
+    expect(upcomingEvents([t], '2026-10-22')).toHaveLength(1);
+    expect(upcomingEvents([t], '2026-10-23')).toEqual([]);
+  });
+  it('매년 반복 생일은 하루 일정으로만 달력에 찍힌다', () => {
+    const mom = { ...trip('mom', '2025-11-04', null, 1, 'birth'), repeatYearly: true };
+    expect([...eventTypesByDay([mom], 2027, 11).keys()]).toEqual(['2027-11-04']);
+  });
+});
+
+describe('날짜 고르기: 시작일 → 종료일 (행사 등록)', () => {
+  it('처음에는 하루 일정이고, 누르면 새로 시작일을 고른다', () => {
+    const s = rangeOf('2026-10-24');
+    expect(s).toEqual({ start: '2026-10-24', end: null, step: 'done' });
+    expect(pickRange(s, '2026-10-27')).toEqual({ start: '2026-10-27', end: null, step: 'end' });
+  });
+  it('시작일 뒤 날짜를 누르면 기간이 정해진다', () => {
+    const s = pickRange(rangeOf('2026-10-24'), '2026-10-27');
+    expect(pickRange(s, '2026-10-29')).toEqual({ start: '2026-10-27', end: '2026-10-29', step: 'done' });
+  });
+  it('시작일보다 앞선 날짜를 누르면 시작일이 바뀐다 (계속 종료일을 기다린다)', () => {
+    const s = pickRange(rangeOf('2026-10-24'), '2026-10-27');
+    expect(pickRange(s, '2026-10-25')).toEqual({ start: '2026-10-25', end: null, step: 'end' });
+  });
+  it('같은 날짜를 두 번 누르면 하루 일정', () => {
+    const s = pickRange(rangeOf('2026-10-24'), '2026-10-27');
+    expect(pickRange(s, '2026-10-27')).toEqual({ start: '2026-10-27', end: null, step: 'done' });
+  });
+  it('기간 선택이 끝난 뒤 다시 누르면 새로 선택한다', () => {
+    const done = pickRange(pickRange(rangeOf('2026-10-24'), '2026-10-27'), '2026-10-29');
+    expect(pickRange(done, '2026-11-02')).toEqual({ start: '2026-11-02', end: null, step: 'end' });
   });
 });

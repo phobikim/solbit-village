@@ -5,7 +5,7 @@ import { DEFAULT_NEWS_ALARM, formatAlarmTime, morningNews, parseAlarmTime, shift
 
 const today = '2026-10-21';
 const p = (id: number, crop: Planting['crop'], plantedDate: string, slot = id): Planting => ({ id, crop, plantedDate, slot });
-const ev = (name: string, date: string): VillageEvent => ({ id: name, name, date, type: 'etc', repeatYearly: false, createdAt: 0 });
+const ev = (name: string, date: string): VillageEvent => ({ id: name, name, date, endDate: null, type: 'etc', repeatYearly: false, createdAt: 0 });
 
 describe('밤사이 마을 소식', () => {
   it('아무 일도 없으면 조용한 소식 (기록이 없던 날에도 소식은 온다)', () => {

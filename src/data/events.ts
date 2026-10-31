@@ -4,12 +4,13 @@ import type { DayKey } from '../domain/day';
 import type { EventType, VillageEvent } from '../domain/events';
 import { getDb, writeTx } from './db';
 
-type Row = { id: string; name: string; date: string; type: EventType; repeat_yearly: number; created_at: number };
+type Row = { id: string; name: string; date: string; end_date: string | null; type: EventType; repeat_yearly: number; created_at: number };
 
 const toEvent = (r: Row): VillageEvent => ({
   id: r.id,
   name: r.name,
   date: r.date,
+  endDate: r.end_date,
   type: r.type,
   repeatYearly: r.repeat_yearly === 1,
   createdAt: r.created_at,
@@ -24,12 +25,13 @@ export async function listEvents(): Promise<VillageEvent[]> {
 export function saveEvent(e: VillageEvent): Promise<void> {
   return writeTx(async (db) => {
     await db.runAsync(
-      `INSERT INTO event (id, name, date, type, repeat_yearly, created_at) VALUES (?, ?, ?, ?, ?, ?)
+      `INSERT INTO event (id, name, date, end_date, type, repeat_yearly, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
-         name = excluded.name, date = excluded.date, type = excluded.type, repeat_yearly = excluded.repeat_yearly`,
+         name = excluded.name, date = excluded.date, end_date = excluded.end_date, type = excluded.type, repeat_yearly = excluded.repeat_yearly`,
       e.id,
       e.name,
       e.date,
+      e.endDate,
       e.type,
       e.repeatYearly ? 1 : 0,
       e.createdAt,

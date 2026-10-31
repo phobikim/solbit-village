@@ -121,6 +121,16 @@ describe('쉼 기록(스키마 v11) 백업', () => {
     expect(r.backup.tables.place?.[0]).toMatchObject({ visited: 1, visited_date: '2026-10-27', nights: 2, log_id: null });
   });
 
+  it('행사 종료일(v15)은 왕복하고, 종료일이 없는 옛 백업도 가져온다', () => {
+    const withEnd = buildBackup(15, { event: [{ id: 'e1', name: '제주', date: '2026-10-27', end_date: '2026-10-29', type: 'travel', repeat_yearly: 0, created_at: 1 }] });
+    const r = parseBackup(JSON.stringify(withEnd), 15);
+    expect(r.ok && r.backup.tables.event?.[0]).toMatchObject({ date: '2026-10-27', end_date: '2026-10-29' });
+    const old = buildBackup(14, { event: [{ id: 'e2', name: '엄마 생신', date: '2026-11-04', type: 'birth', repeat_yearly: 1, created_at: 1 }] });
+    const r2 = parseBackup(JSON.stringify(old), 15);
+    expect(r2.ok).toBe(true);
+    if (r2.ok) expect(r2.backup.tables.event?.[0]).not.toHaveProperty('end_date');
+  });
+
   it('v11 전 백업은 가져올 때 여가 칩을 쉼 기록(장작)으로 옮긴다', () => {
     const old = buildBackup(10, { day_record: [day('2026-10-20', '["산책","영화"]'), day('2026-10-21', '[]'), day('2026-10-22', '망가짐')] });
     const r = parseBackup(JSON.stringify(old), 11);

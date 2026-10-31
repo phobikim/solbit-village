@@ -1,27 +1,15 @@
-// 12b 장부 · 대소사: 다가오는 행사 + 지나간 일(지난 행사, 아이콘 없이). 일상·시스템 기록은 넣지 않는다.
+// 12b 장부 · 대소사: 다가오는 행사(진행 중인 여러 날 일정 포함). '지나간 일' 영역은 없다 (장부 개선안).
 // 머리에 정리 · + 등록 (디자인 v7). 정리 모드(13b)에서는 행사 줄 끝 휴지통.
 
 import { router } from 'expo-router';
-import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { EVENT_TYPE_COLOR, EVENT_TYPE_LABEL, LEDGER_EMPTY, WEEKDAYS } from '../../copy/labels.ko';
-import { dDayLabel, parseDayKey, weekdayOf, type DayKey } from '../../domain/day';
-import { BOARD_MAX, pastEvents, upcomingEvents, type VillageEvent } from '../../domain/events';
-import { BannerIcon, EventIcon } from '../characters';
+import { LEDGER_EMPTY } from '../../copy/labels.ko';
+import type { DayKey } from '../../domain/day';
+import { BOARD_MAX, upcomingEvents, type VillageEvent } from '../../domain/events';
 import { colors, fonts } from '../theme';
+import { EventCard } from './EventCard';
 import { TidyButton } from './TidyButton';
-import { TrashButton } from './TrashButton';
-
-const pad = (n: number) => String(n).padStart(2, '0');
-const mdDow = (d: DayKey) => {
-  const { month, day } = parseDayKey(d);
-  return `${pad(month)}.${pad(day)} (${WEEKDAYS[weekdayOf(d)]})`;
-};
-const md = (d: DayKey) => {
-  const { month, day } = parseDayKey(d);
-  return `${pad(month)}.${pad(day)}`;
-};
 
 /** 행사 등록 · 고치기 시트 열기 */
 export function openEventSheet(id?: string) {
@@ -40,7 +28,6 @@ type Props = {
 
 export function LedgerEvents({ today, events, loaded, tidy, onToggleTidy, onDelete }: Props) {
   const upcoming = upcomingEvents(events, today);
-  const past = useMemo(() => pastEvents(events, today), [events, today]);
 
   return (
     <View style={styles.wrap}>
@@ -57,45 +44,16 @@ export function LedgerEvents({ today, events, loaded, tidy, onToggleTidy, onDele
       </View>
       {loaded && upcoming.length === 0 && <Text style={styles.empty}>{LEDGER_EMPTY}</Text>}
       {upcoming.map((e, i) => (
-        <Pressable key={e.id} disabled={tidy} onPress={() => openEventSheet(e.id)} style={[styles.card, i === 0 && styles.cardBanner]}>
-          <View style={styles.icon}>
-            <EventIcon type={e.type} size={30} />
-          </View>
-          <View style={styles.body}>
-            <View style={styles.nameRow}>
-              <Text style={styles.name} numberOfLines={1}>
-                {e.name}
-              </Text>
-              <Text style={[styles.badge, { color: EVENT_TYPE_COLOR[e.type] }]}>{EVENT_TYPE_LABEL[e.type]}</Text>
-            </View>
-            <Text style={styles.date}>
-              {mdDow(e.date)}
-              {i === 0 ? ' · 게시판 맨 앞' : i < BOARD_MAX ? ' · 게시판' : ''}
-              {e.repeatYearly ? ' · 매년' : ''}
-            </Text>
-          </View>
-          <View style={[styles.dday, i === 0 && styles.ddayBanner]}>
-            <Text style={[styles.ddayText, i === 0 && { color: colors.line }]}>{dDayLabel(e.date, today)}</Text>
-          </View>
-          {tidy && <TrashButton label={e.name} onPress={() => onDelete(e)} />}
-        </Pressable>
-      ))}
-
-      {past.length > 0 && <Text style={[styles.section, { marginTop: 8 }]}>지나간 일</Text>}
-      {/* 지나간 일: 아이콘 없이 이름 · 분류 · 날짜만 */}
-      {past.map((ev) => (
-        <Pressable key={ev.id} disabled={tidy} onPress={() => openEventSheet(ev.id)} style={[styles.card, styles.cardPast]}>
-          <View style={styles.body}>
-            <View style={styles.nameRow}>
-              <Text style={styles.name} numberOfLines={1}>
-                {ev.name}
-              </Text>
-              <Text style={[styles.badge, { color: EVENT_TYPE_COLOR[ev.type] }]}>{EVENT_TYPE_LABEL[ev.type]}</Text>
-            </View>
-          </View>
-          <Text style={styles.pastDate}>{md(ev.date)}</Text>
-          {tidy && <TrashButton label={ev.name} onPress={() => onDelete(ev)} />}
-        </Pressable>
+        <EventCard
+          key={e.id}
+          event={e}
+          today={today}
+          suffix={i === 0 ? ' · 게시판 맨 앞' : i < BOARD_MAX ? ' · 게시판' : ''}
+          banner={i === 0}
+          tidy={tidy}
+          onPress={() => openEventSheet(e.id)}
+          onDelete={() => onDelete(e)}
+        />
       ))}
     </View>
   );
@@ -109,35 +67,4 @@ const styles = StyleSheet.create({
   addText: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.line },
   section: { fontFamily: fonts.bodyHeavy, fontSize: 13, color: colors.textSub, paddingLeft: 4, marginTop: 4 },
   empty: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.textMuted, padding: 8 },
-  card: {
-    backgroundColor: colors.cardSub,
-    borderRadius: 22,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  cardBanner: { borderColor: colors.yellow },
-  cardPast: { backgroundColor: '#181F4C' },
-  icon: { width: 40, height: 40, borderRadius: 14, backgroundColor: colors.night, alignItems: 'center', justifyContent: 'center' },
-  body: { flex: 1, gap: 3 },
-  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  name: { flexShrink: 1, fontFamily: fonts.bodyHeavy, fontSize: 16, color: colors.text },
-  badge: {
-    fontFamily: fonts.bodyHeavy,
-    fontSize: 11,
-    backgroundColor: colors.track,
-    borderRadius: 99,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    overflow: 'hidden',
-  },
-  date: { fontFamily: fonts.number, fontSize: 12, color: colors.textSub },
-  dday: { backgroundColor: colors.track, borderRadius: 14, paddingVertical: 5, paddingHorizontal: 10 },
-  ddayBanner: { backgroundColor: colors.yellow },
-  ddayText: { fontFamily: fonts.title, fontSize: 16, color: colors.text },
-  pastDate: { fontFamily: fonts.number, fontSize: 13, color: colors.textMuted },
 });

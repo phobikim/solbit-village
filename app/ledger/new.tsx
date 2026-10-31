@@ -15,11 +15,22 @@ import {
 } from '../../src/copy/labels.ko';
 import { newId } from '../../src/data/events';
 import { dDayLabel, parseDayKey, today as getToday, weekdayOf, type DayKey } from '../../src/domain/day';
-import { EVENT_NAME_MAX, EVENT_TYPES, REPEATABLE_TYPES, type EventType } from '../../src/domain/events';
+import {
+  DEFAULT_EVENT_TYPE,
+  EVENT_NAME_MAX,
+  EVENT_TYPES,
+  eventLength,
+  normalizeEnd,
+  pickRange,
+  rangeOf,
+  REPEATABLE_TYPES,
+  type EventType,
+  type RangeSelection,
+} from '../../src/domain/events';
 import { useLedger } from '../../src/state/ledger';
 import { usePlaces } from '../../src/state/places';
 import { EventIcon } from '../../src/ui/characters';
-import { DatePicker } from '../../src/ui/components/form';
+import { RangePicker } from '../../src/ui/components/RangePicker';
 import { PrimaryButton } from '../../src/ui/components/PrimaryButton';
 import { Field, FieldLabel, IjangBubble } from '../../src/ui/components/record/pickers';
 import { colors, fonts } from '../../src/ui/theme';
@@ -41,9 +52,11 @@ export default function EventSheet() {
 
   const linkPlace = usePlaces((s) => s.linkEvent);
   const [name, setName] = useState(params.name ?? '');
-  const [date, setDate] = useState<DayKey>(today);
-  const [type, setType] = useState<EventType>(EVENT_TYPES.includes(params.type as EventType) ? (params.type as EventType) : 'birth');
-  // 매년 반복: 생일·기념일에서만 보이고, 처음엔 켜져 있다 (디자인 11e)
+  // 날짜: 시작일 → 종료일 순서로 눌러 기간을 고른다 (처음엔 오늘 하루)
+  const [range, setRange] = useState<RangeSelection>(() => rangeOf(today));
+  const date = range.start;
+  const [type, setType] = useState<EventType>(EVENT_TYPES.includes(params.type as EventType) ? (params.type as EventType) : DEFAULT_EVENT_TYPE);
+  // 매년 반복: 생일에서만 보이고, 처음엔 켜져 있다 (디자인 11e)
   const [repeat, setRepeat] = useState(true);
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -51,7 +64,7 @@ export default function EventSheet() {
   useEffect(() => {
     if (!editing) return;
     setName(editing.name);
-    setDate(editing.date);
+    setRange(rangeOf(editing.date, editing.endDate));
     setType(editing.type);
     setRepeat(editing.repeatYearly);
   }, [editing]);
@@ -70,6 +83,8 @@ export default function EventSheet() {
         id: eventId,
         name: name.trim().slice(0, EVENT_NAME_MAX),
         date,
+        // 매년 반복 생일은 하루 일정으로만 둔다
+        endDate: repeatable && repeat ? null : normalizeEnd(range.start, range.end),
         type,
         repeatYearly: repeatable && repeat,
         createdAt: editing?.createdAt ?? Date.now(),
@@ -111,10 +126,11 @@ export default function EventSheet() {
             <FieldLabel>날짜</FieldLabel>
             <View style={styles.dateRow}>
               <Text style={styles.dateText}>
-                {dateLabel(date)} · <Text style={styles.dday}>{dDayLabel(date, today)}</Text>
+                {range.end ? `${dateLabel(date)} – ${dateLabel(range.end)} · ${eventLength({ date, endDate: range.end })}일` : dateLabel(date)} ·{' '}
+                <Text style={styles.dday}>{dDayLabel(date, today)}</Text>
               </Text>
             </View>
-            <DatePicker value={date} onChange={setDate} min={editing ? undefined : today} selectedColor={EVENT_TYPE_COLOR[type]} />
+            <RangePicker value={range} onPick={(d) => setRange((r) => pickRange(r, d))} min={editing ? undefined : today} color={EVENT_TYPE_COLOR[type]} />
           </View>
 
           <View style={styles.section}>
