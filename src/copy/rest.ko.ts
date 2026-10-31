@@ -1,7 +1,7 @@
 // 쉼터 문구 (디자인 v6 12c · 12d). 이장 말투는 충청도 사투리.
 
 import { WEATHER_NAME } from './labels.ko';
-import type { FireBand, RestSize, RestTagKind } from '../domain/fire';
+import type { FireBand, FireMood, RestSize, RestTagKind } from '../domain/fire';
 import type { LeisureBand } from '../domain/indices';
 import type { Weather } from '../domain/types';
 
@@ -97,13 +97,12 @@ export const restCopy = {
 
 // ── 모닥불 (디자인 v8 15a) ──────────────────────────────────────────────
 
-/** 불 상태 문구 (카드 큰 글씨) */
-export const FIRE_LINE: Record<FireBand | 'none', string> = {
+/** 풍경 카드 제목 (디자인 5 쉼터 v2 1a): 불 세기 3단계. 기록 전(none)은 아직 불이 안 붙은 상태 */
+export const FIRE_LINE: Record<FireMood | 'none', string> = {
   none: '아직 불이 안 붙었슈',
-  blaze: '불이 활활 타올라유',
-  burning: '불이 잘 타고 있슈',
-  dying: '불이 사그라들었슈',
-  out: '불이 꺼져가유',
+  off: '불이 꺼졌슈',
+  mid: '불이 잘 타고 있슈',
+  hot: '뜨끈허니 좋구먼유',
 };
 /** 불 카드 아랫줄 (디자인 15a): "쉼 지수 31 · 이번 주 장작 5개", 이번 주 장작이 없으면 "쉼 지수 24" */
 export const fireSubLabel = (rest: number | null, weekCount: number) =>
@@ -115,8 +114,8 @@ export const REST_TABS = { fire: '모닥불', map: '보따리 지도' } as const
 /** 모닥불 탭: 이번 주 장작 · 다녀온 곳 줄 (디자인 15a · 34a) */
 export const fireCopy = {
   thisWeek: '이번 주 장작',
-  emptyTitle: '이번 주 장작이 아직 없슈',
-  emptySub: '쉬었던 거 생각나면 하나 던져봐유. 한두 시간도 장작이유.',
+  /** 고른 날에 장작이 없을 때 (디자인 1a) */
+  emptyDay: '이 날은 장작이 없슈. 쉰 날은 불도 쉬어유.',
   visitedBadge: '다녀옴',
   visitedTitle: '다녀온 곳',
   /** 다녀온 곳 줄 이름 "다녀온 곳 3곳" */

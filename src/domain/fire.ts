@@ -69,6 +69,20 @@ export function weekLogs(logs: readonly RestLog[], mon: DayKey): RestLog[] {
     .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt || b.id.localeCompare(a.id));
 }
 
+/** 이번 주 요일 한 칸 (디자인 5 쉼터 v2 1a): 그날 쉼 기록, 가장 큰 장작, 다녀온 곳에서 온 기록이 있는가 */
+export type WeekDay = { date: DayKey; logs: RestLog[]; size: RestSize | null; visit: boolean };
+
+/** 월 ~ 일 7칸. 칸마다 그날 장작이 가장 큰 것대로 놓인다 (여러 개면 큰 것). 기록은 최신이 위 */
+export function weekDays(logs: readonly RestLog[], mon: DayKey): WeekDay[] {
+  const week = weekLogs(logs, mon);
+  return Array.from({ length: 7 }, (_, i) => {
+    const date = addDays(mon, i);
+    const day = week.filter((l) => l.date === date);
+    const size = day.reduce<RestSize | null>((best, l) => (best === null || SIZE_SCORE[l.size] > SIZE_SCORE[best] ? l.size : best), null);
+    return { date, logs: day, size, visit: day.some(isVisitLog) };
+  });
+}
+
 /** 하루 점수: 그날 장작 점수 합 (최대 35). 다녀온 날은 통나무 = 35. */
 export function dayScore(logs: readonly RestLog[], isTrip: boolean): number {
   if (isTrip) return DAY_SCORE_MAX;
@@ -104,6 +118,15 @@ export function fireIndex(src: RestSource, end: DayKey, hasRecord: (d: DayKey) =
 export type FireBand = 'blaze' | 'burning' | 'dying' | 'out';
 export function fireBand(v: number): FireBand {
   return v >= 70 ? 'blaze' : v >= 40 ? 'burning' : v >= 20 ? 'dying' : 'out';
+}
+
+/**
+ * 쉼터 풍경의 불 세기 3단계 (디자인 5 쉼터 v2 1a): 꺼짐 / 보통 / 뜨끈. 구구 할매도 이 세기대로 얼었다 녹는다.
+ * 꺼져감(20 미만) · 기록 전 = 꺼짐, 사그라듦 · 타오름 = 보통, 활활(70+) = 뜨끈.
+ */
+export type FireMood = 'off' | 'mid' | 'hot';
+export function fireMood(band: FireBand | null): FireMood {
+  return band === 'blaze' ? 'hot' : band === 'burning' || band === 'dying' ? 'mid' : 'off';
 }
 
 /** 쪽지 제안이 나오는 불 상태: 사그라듦 이하 */

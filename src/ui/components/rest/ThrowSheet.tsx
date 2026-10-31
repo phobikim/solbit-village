@@ -37,7 +37,7 @@ export type ThrowSheetState =
   | { mode: 'edit'; log: RestLog };
 
 /** 시트를 닫으면서 알려 주는 것: 방금 저장한 쉼 기록, [다녀왔슈]였으면 다녀온 곳이 된 깃발 */
-export type ThrowDone = { logId: string; placeId: string | null };
+export type ThrowDone = { logId: string; placeId: string | null; date: DayKey };
 
 type Props = {
   state: ThrowSheetState | null;
@@ -149,16 +149,16 @@ function Body({ state, today, onClose, onDone }: { state: ThrowSheetState; today
       if (state.mode === 'edit') {
         const log: RestLog = { ...state.log, ...body };
         await throwLog(log, []);
-        onDone({ logId: log.id, placeId: null });
+        onDone({ logId: log.id, placeId: null, date: log.date });
       } else {
         const log: RestLog = { id: newId('rl'), date, createdAt: Date.now(), ...body };
         if (state.mode === 'visit') {
           const r = visitThrow(state.place, log);
           await throwLog(r.log, [r.place]);
-          onDone({ logId: log.id, placeId: r.place.id });
+          onDone({ logId: log.id, placeId: r.place.id, date: log.date });
         } else {
           await throwLog(log, []);
-          onDone({ logId: log.id, placeId: null });
+          onDone({ logId: log.id, placeId: null, date: log.date });
         }
       }
     } catch (e) {

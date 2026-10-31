@@ -27,6 +27,7 @@ import { newId } from '../../src/data/events';
 import { savePlaces } from '../../src/data/places';
 import { getSetting, setSetting, SETTING } from '../../src/data/settings';
 import { addDays, parseDayKey, today as getToday, weekdayOf, type DayKey } from '../../src/domain/day';
+import { weekDays } from '../../src/domain/fire';
 import { EVENT_NAME_MAX } from '../../src/domain/events';
 import { keptDays, settleTrips, weekStart, type Place } from '../../src/domain/rest';
 import {
@@ -49,7 +50,7 @@ import { Ijang } from '../../src/ui/characters';
 import { indexIconSvg } from '../../src/ui/characters/icons';
 import { Screen } from '../../src/ui/components/Screen';
 import { SegTabs } from '../../src/ui/components/SegTabs';
-import { FireCard, VisitedRow, WeekList, weekRangeLabel } from '../../src/ui/components/rest/FireParts';
+import { DayCards, RestSceneCard, ThrowButton, VisitedRow, WeekStrip, weekRangeLabel } from '../../src/ui/components/rest/FireParts';
 import { MapTab, useMapView } from '../../src/ui/components/rest/MapTab';
 import { ThrowSheet, type ThrowDone, type ThrowSheetState } from '../../src/ui/components/rest/ThrowSheet';
 import { REST_FEATURES } from '../../src/ui/features';
@@ -70,7 +71,8 @@ export default function RestScreen() {
   const today = getToday();
   const [tab, setTab] = useState<Tab>('fire');
   const [sheet, setSheet] = useState<ThrowSheetState | null>(null);
-  const [fresh, setFresh] = useState<{ logId: string; placeId: string | null } | null>(null);
+  const [fresh, setFresh] = useState<ThrowDone | null>(null);
+  const [selectedDay, setSelectedDay] = useState<DayKey>(today);
   const [pickedId, setPickedId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [noteState, setNoteState] = useState<NoteState | null>(null);
@@ -121,6 +123,8 @@ export default function RestScreen() {
   const v = useRestView(byDate, places, logs, today);
   const open = noteOpen(v.band);
   const mon = weekStart(today);
+  const days = useMemo(() => weekDays(logs, mon), [logs, mon]);
+  const day = days.find((d) => d.date === selectedDay) ?? days[0];
 
   const draw = useMemo(() => (open && noteState ? todayNote(places, noteState, today) : null), [open, noteState, places, today]);
 
@@ -167,7 +171,8 @@ export default function RestScreen() {
     setNotice(null);
     setTab('fire');
     setFresh(r);
-    // 새 항목은 이번 주 장작 맨 위 — 거기까지 올린다 (탭을 바꿔 새로 그려진 뒤)
+    // 새 항목이 든 요일을 골라 보여 준다 — 요일 띠까지 올린다 (탭을 바꿔 새로 그려진 뒤)
+    if (r.date >= mon && r.date <= addDays(mon, 6)) setSelectedDay(r.date);
     setTimeout(() => scroller.current?.scrollTo({ y: Math.max(0, listY.current - 8), animated: true }), 120);
   };
 
@@ -189,7 +194,8 @@ export default function RestScreen() {
       />
       {tab === 'fire' ? (
         <ScrollView ref={scroller} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <FireCard band={v.band} rest={v.rest} weekCount={v.weekLogs.length} onThrow={() => setSheet({ mode: 'new' })} />
+          <RestSceneCard band={v.band} rest={v.rest} weekCount={v.weekLogs.length} />
+          <ThrowButton onThrow={() => setSheet({ mode: 'new' })} />
 
           {REST_FEATURES.signal && v.signal && (
             <View style={styles.signal}>
@@ -216,13 +222,15 @@ export default function RestScreen() {
             </View>
           )}
 
-          <WeekList
-            logs={v.weekLogs}
+          <WeekStrip
+            days={days}
             range={weekRangeLabel(mon, addDays(mon, 6))}
-            freshId={fresh?.logId ?? null}
-            onPress={(log) => setSheet({ mode: 'edit', log })}
+            selected={day.date}
+            freshDate={fresh?.date ?? null}
+            onSelect={setSelectedDay}
             onLayoutY={(y) => (listY.current = y)}
           />
+          <DayCards day={day} freshId={fresh?.logId ?? null} onPress={(log) => setSheet({ mode: 'edit', log })} />
 
           <VisitedRow
             places={v.visited}

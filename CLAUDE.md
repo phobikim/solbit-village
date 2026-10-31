@@ -56,6 +56,8 @@ src/
   ui/
     theme.ts            색 · 폰트 · 간격 토큰
     characters/         솔이 · 꾸역 이장 · 이웃 얼굴 SVG (디자인 파일에서 이식)
+      tabIcons.ts       하단 바 아이콘 5개 (시트 9 1a: 초가집 · 장부 · 이웃 · 모닥불 · 솔이, 글자 없이 컬러 스티커)
+      gugu.ts · restScene.ts   구구 할매(쉼터 NPC, 불 세기 3가지) · 쉼터 모닥불 풍경
       SoliAvatar.tsx    솔이 그리는 컴포넌트 하나 (기본 포즈 + 입은 옷). 메인 · 나 탭 · 꾸미기가 모두 이것을 쓴다
       outfits/          옷 아이템 SVG 문자열 25개(28장, 슬롯별 파일) · 칸 썸네일 배치. 합성은 SoliOutfit.tsx
     morning/            마을 보상표 시트 · 해금 아이콘

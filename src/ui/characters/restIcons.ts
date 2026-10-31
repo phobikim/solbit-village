@@ -67,3 +67,24 @@ export function villagePinSvg(): string {
 export function noteSvg(): string {
   return `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M6 5 H26 V22 L20 28 H6Z" fill="#FFE14D" stroke="${L}" stroke-width="2.4" stroke-linejoin="round"/><path d="M20 28 V22 H26" fill="#F3C93A" stroke="${L}" stroke-width="2.2" stroke-linejoin="round"/><path d="M10 11 H22 M10 16 H18" stroke="${L}" stroke-width="2" stroke-linecap="round"/></svg>`;
 }
+
+/** 요일 칸 장작 그림 (디자인 5 쉼터 v2 1a): 잔가지(새잎 달린 가지) / 장작(쪼갠 토막) / 통나무(나이테). 크기는 너비 x 높이 */
+export const DAY_WOOD: Record<RestSize | 'empty', { w: number; h: number }> = {
+  twig: { w: 34, h: 22 },
+  firewood: { w: 40, h: 30 },
+  log: { w: 44, h: 40 },
+  empty: { w: 30, h: 14 },
+};
+
+export function dayWoodSvg(kind: RestSize | 'empty'): string {
+  const { w, h } = DAY_WOOD[kind];
+  const body =
+    kind === 'twig'
+      ? `<path d="M3 18L31 8M18 13l4-8" stroke="${L}" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M3 18L31 8M18 13l4-8" stroke="#B97D48" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M22.5 5c2-3 6-3.5 8.5-2.5-1 2.8-5 4-8.5 2.5z" fill="#A8EB5A" stroke="${L}" stroke-width="2" stroke-linejoin="round"/>`
+      : kind === 'firewood'
+        ? `<path d="M11 4.5h21a6 10.5 0 0 1 0 21H11z" fill="#8E5A38" stroke="${L}" stroke-width="2.5" stroke-linejoin="round"/><path d="M18 11h11M20 18.5h9" stroke="#5A3420" stroke-width="2" stroke-linecap="round"/><ellipse cx="11" cy="15" rx="6.5" ry="10.5" fill="#E9B98A" stroke="${L}" stroke-width="2.5"/><ellipse cx="11" cy="15" rx="3.2" ry="5.6" fill="none" stroke="#B97D48" stroke-width="1.8"/>`
+        : kind === 'log'
+          ? `<path d="M15 3h21a7 17 0 0 1 0 34H15z" fill="#7A4A2E" stroke="${L}" stroke-width="2.5" stroke-linejoin="round"/><path d="M23 10h10M25 20h11M23 30h10" stroke="#4A2A18" stroke-width="2.2" stroke-linecap="round"/><path d="M31 3c1.5 3 4 2.5 5 0" fill="#A8EB5A" stroke="${L}" stroke-width="2" stroke-linejoin="round"/><ellipse cx="15" cy="20" rx="10" ry="17" fill="#E9B98A" stroke="${L}" stroke-width="2.5"/><ellipse cx="15" cy="20" rx="6" ry="10.5" fill="none" stroke="#B97D48" stroke-width="1.8"/><ellipse cx="15" cy="20" rx="2.6" ry="4.4" fill="none" stroke="#B97D48" stroke-width="1.8"/>`
+          : `<path d="M3 12q12-10 24 0z" fill="#2B3370" stroke="#4A5290" stroke-width="2" stroke-dasharray="3 3" stroke-linejoin="round"/>`;
+  return `<svg viewBox="0 0 ${kind === 'twig' ? 36 : w} ${h}" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
+}

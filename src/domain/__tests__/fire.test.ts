@@ -7,7 +7,9 @@ import {
   isVisitLog,
   VISITED_TAG_LABEL,
   visitedTag,
+  weekDays,
   weekLogs,
+  fireMood,
   lastFireDay,
   logContacts,
   NO_REST,
@@ -99,6 +101,24 @@ describe('이번 주 7칸 · 장작 안 들어온 지 n일', () => {
     ];
     expect(weekLogs(list, '2026-10-19').map((l) => l.id)).toEqual(['sun', 'wed2', 'wed', 'mon']);
     expect(weekLogs([], '2026-10-19')).toEqual([]);
+  });
+  it('요일 7칸: 그날 가장 큰 장작 · 다녀온 곳 표시 · 기록 없는 날은 비어 있다', () => {
+    const list = [
+      log('a', '2026-10-19', 'twig'),
+      log('b', '2026-10-19', 'log'),
+      log('c', '2026-10-24', 'log', { tags: [visitedTag()] }),
+      log('x', '2026-10-26', 'log'),
+    ];
+    const days = weekDays(list, '2026-10-19');
+    expect(days.map((d) => d.date)).toEqual(['2026-10-19', '2026-10-20', '2026-10-21', '2026-10-22', '2026-10-23', '2026-10-24', '2026-10-25']);
+    expect(days.map((d) => d.size)).toEqual(['log', null, null, null, null, 'log', null]);
+    expect(days[0].logs.map((l) => l.id).sort()).toEqual(['a', 'b']);
+    expect(days.map((d) => d.visit)).toEqual([false, false, false, false, false, true, false]);
+  });
+  it('불 세기 3단계: 꺼짐(꺼져감 · 기록 전) / 보통(사그라듦 · 타오름) / 뜨끈(활활)', () => {
+    expect([null, 'out'].map((b) => fireMood(b as never))).toEqual(['off', 'off']);
+    expect(['dying', 'burning'].map((b) => fireMood(b as never))).toEqual(['mid', 'mid']);
+    expect(fireMood('blaze')).toBe('hot');
   });
   it('다녀온 곳에서 온 기록은 "다녀옴" 태그로 알아본다', () => {
     expect(VISITED_TAG_LABEL).toBe('다녀옴');
