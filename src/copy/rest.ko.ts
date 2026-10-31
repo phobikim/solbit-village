@@ -104,10 +104,6 @@ export const FIRE_LINE: Record<FireMood | 'none', string> = {
   mid: '불이 잘 타고 있슈',
   hot: '뜨끈허니 좋구먼유',
 };
-/** 불 카드 아랫줄 (디자인 15a): "쉼 지수 31 · 이번 주 장작 5개", 이번 주 장작이 없으면 "쉼 지수 24" */
-export const fireSubLabel = (rest: number | null, weekCount: number) =>
-  `쉼 지수 ${rest ?? '-'}${weekCount > 0 ? ` · 이번 주 장작 ${weekCount}개` : ''}`;
-
 /** 쉼터 위쪽 탭 (디자인 TURN 35) */
 export const REST_TABS = { fire: '모닥불', map: '보따리 지도' } as const;
 
@@ -117,13 +113,8 @@ export const fireCopy = {
   /** 고른 날에 장작이 없을 때 (디자인 1a) */
   emptyDay: '이 날은 장작이 없슈. 쉰 날은 불도 쉬어유.',
   visitedBadge: '다녀옴',
-  visitedTitle: '다녀온 곳',
-  /** 다녀온 곳 줄 이름 "다녀온 곳 3곳" */
-  visitedCount: (n: number) => `${n}곳`,
 };
 
-/** 다녀온 곳 카드의 머문 일수 (디자인 15a): 하루 / 1박 2일 */
-export const stayLabel = (nights: number) => (nights === 0 ? '하루' : `${nights}박 ${nights + 1}일`);
 
 export const SIZE_LABEL: Record<RestSize, string> = { twig: '잔가지', firewood: '장작', log: '통나무' };
 export const SIZE_HINT: Record<RestSize, string> = { twig: '한두 시간', firewood: '반나절', log: '하루 꼬박' };

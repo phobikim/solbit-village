@@ -1,14 +1,13 @@
 // 모닥불 탭의 조각 (디자인 15a · 34a): 불 카드 · 이번 주 장작 · 다녀온 곳 줄. 순서와 배치는 app/(tabs)/rest.tsx가 정한다.
 
 import { useEffect, useMemo, useRef } from 'react';
-import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
 import { WEEKDAYS } from '../../../copy/labels.ko';
-import { fireCopy, FIRE_LINE, fireSubLabel, SIZE_LABEL, stayLabel } from '../../../copy/rest.ko';
+import { fireCopy, FIRE_LINE, SIZE_LABEL } from '../../../copy/rest.ko';
 import { parseDayKey, weekdayOf, type DayKey } from '../../../domain/day';
 import { fireMood, isVisitLog, type FireBand, type RestLog, type WeekDay } from '../../../domain/fire';
-import type { Place } from '../../../domain/rest';
 import { DAY_WOOD, dayWoodSvg } from '../../characters/restIcons';
 import { restSceneFxSvg, restSceneSvg } from '../../characters/restScene';
 import { colors, fonts } from '../../theme';
@@ -48,8 +47,8 @@ function Sparkle() {
   );
 }
 
-/** 풍경 카드 (디자인 1a): 밤 풍경 위에 모닥불 · 구구 할매 · 불 상태 제목 + "쉼 지수 n · 이번 주 장작 n개" */
-export function RestSceneCard({ band, rest, weekCount }: { band: FireBand | null; rest: number | null; weekCount: number }) {
+/** 풍경 카드 (디자인 1a): 밤 풍경 위에 모닥불 · 구구 할매 · 불 상태 제목 */
+export function RestSceneCard({ band }: { band: FireBand | null }) {
   const mood = fireMood(band);
   const key = band === null ? 'none' : mood;
   const xml = useMemo(() => restSceneSvg(mood), [mood]);
@@ -79,7 +78,6 @@ export function RestSceneCard({ band, rest, weekCount }: { band: FireBand | null
       </View>
       <View style={styles.sceneHead} pointerEvents="none">
         <Text style={[styles.sceneTitle, { color: FIRE_COLOR[key] }]}>{FIRE_LINE[key]}</Text>
-        <Text style={styles.sceneSub}>{fireSubLabel(rest, weekCount)}</Text>
       </View>
     </View>
   );
@@ -194,45 +192,10 @@ export function DayCards({ day, freshId, onPress }: { day: WeekDay; freshId: str
   );
 }
 
-/**
- * 다녀온 곳 줄: 장소 이름 · 다녀온 날짜 · 머문 일수 카드 가로 목록 + 개수. 없으면 줄을 숨긴다 (34a).
- * (시안 15a에는 이 줄의 그림이 없어 이번 주 장작 줄과 같은 톤으로 만들었다.)
- */
-export function VisitedRow({ places, freshId, onPress }: { places: readonly Place[]; freshId: string | null; onPress: (p: Place) => void }) {
-  if (places.length === 0) return null;
-  return (
-    <View style={styles.block}>
-      <View style={styles.blockHead}>
-        <Text style={styles.blockTitle}>{fireCopy.visitedTitle}</Text>
-        <Text style={styles.blockRange}>{fireCopy.visitedCount(places.length)}</Text>
-      </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.cards}>
-        {places.map((p) => (
-          <Pressable
-            key={p.id}
-            accessibilityRole="button"
-            accessibilityLabel={`다녀온 곳 ${p.name}`}
-            onPress={() => onPress(p)}
-            style={[styles.visitCard, p.id === freshId && styles.rowFresh]}
-          >
-            <Text style={styles.visitName} numberOfLines={1}>
-              {p.name}
-            </Text>
-            <Text style={styles.visitDate}>{p.visitedDate ? mdLabel(p.visitedDate) : ''}</Text>
-            <Text style={styles.visitStay}>{stayLabel(p.nights)}</Text>
-            {p.id === freshId && <Sparkle />}
-          </Pressable>
-        ))}
-      </ScrollView>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   scene: { height: 280, borderRadius: 28, overflow: 'hidden', backgroundColor: '#0F1636', borderWidth: 2, borderColor: '#2B3370' },
-  sceneHead: { position: 'absolute', left: 16, top: 14, gap: 2 },
+  sceneHead: { position: 'absolute', left: 16, top: 14 },
   sceneTitle: { fontFamily: fonts.title, fontSize: 22, lineHeight: 28 },
-  sceneSub: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.textSub },
   throwBtn: { height: 44, borderRadius: 22, backgroundColor: colors.yellow, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 4, borderBottomColor: '#C9A800' },
   throwPressed: { transform: [{ translateY: 2 }], borderBottomWidth: 2 },
   throwText: { fontFamily: fonts.title, fontSize: 16, color: colors.line },
@@ -264,9 +227,4 @@ const styles = StyleSheet.create({
   visitBadge: { height: 20, paddingHorizontal: 7, borderRadius: 10, backgroundColor: colors.relation, justifyContent: 'center' },
   visitBadgeText: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.line },
   sparkle: { position: 'absolute', right: -6, top: -10, width: 30, height: 30 },
-  cards: { gap: 8, paddingHorizontal: 2, paddingTop: 10, paddingBottom: 2 },
-  visitCard: { width: 124, backgroundColor: colors.cardSub, borderRadius: 20, padding: 12, gap: 4, borderWidth: 3, borderColor: 'transparent' },
-  visitName: { fontFamily: fonts.bodyHeavy, fontSize: 15, color: colors.text },
-  visitDate: { fontFamily: fonts.number, fontSize: 12, color: colors.textMuted },
-  visitStay: { fontFamily: fonts.bodyHeavy, fontSize: 12, color: colors.textSub },
 });

@@ -50,7 +50,7 @@ import { Ijang } from '../../src/ui/characters';
 import { indexIconSvg } from '../../src/ui/characters/icons';
 import { Screen } from '../../src/ui/components/Screen';
 import { SegTabs } from '../../src/ui/components/SegTabs';
-import { DayCards, RestSceneCard, ThrowButton, VisitedRow, WeekStrip, weekRangeLabel } from '../../src/ui/components/rest/FireParts';
+import { DayCards, RestSceneCard, ThrowButton, WeekStrip, weekRangeLabel } from '../../src/ui/components/rest/FireParts';
 import { MapTab, useMapView } from '../../src/ui/components/rest/MapTab';
 import { ThrowSheet, type ThrowDone, type ThrowSheetState } from '../../src/ui/components/rest/ThrowSheet';
 import { REST_FEATURES } from '../../src/ui/features';
@@ -194,7 +194,7 @@ export default function RestScreen() {
       />
       {tab === 'fire' ? (
         <ScrollView ref={scroller} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <RestSceneCard band={v.band} rest={v.rest} weekCount={v.weekLogs.length} />
+          <RestSceneCard band={v.band} />
           <ThrowButton onThrow={() => setSheet({ mode: 'new' })} />
 
           {REST_FEATURES.signal && v.signal && (
@@ -231,12 +231,6 @@ export default function RestScreen() {
             onLayoutY={(y) => (listY.current = y)}
           />
           <DayCards day={day} freshId={fresh?.logId ?? null} onPress={(log) => setSheet({ mode: 'edit', log })} />
-
-          <VisitedRow
-            places={v.visited}
-            freshId={fresh?.placeId ?? null}
-            onPress={(p: Place) => router.push({ pathname: '/place-new', params: { id: p.id } })}
-          />
 
           {open && (
             <View style={styles.noteWrap}>
