@@ -1,4 +1,4 @@
-import { addTag, isKnownPlace, recognizeTags, refreshTags, type TagContext } from '../restTags';
+import { addTag, recognizeTags, refreshTags, type TagContext } from '../restTags';
 
 const ctx: TagContext = {
   neighbors: [
@@ -69,10 +69,6 @@ describe('태그 고치기', () => {
     expect(addTag(tags, { kind: 'place', label: '남산' })).toHaveLength(1);
     expect(addTag(tags, { kind: 'place', label: '   ' })).toHaveLength(1);
     expect(addTag([], { kind: 'place', label: '가'.repeat(30) })[0].label).toHaveLength(12);
-  });
-  it('보따리에 있는 장소인가', () => {
-    expect(isKnownPlace('속초바다', ctx.places)).toBe(true);
-    expect(isKnownPlace('남산', ctx.places)).toBe(false);
   });
 });
 

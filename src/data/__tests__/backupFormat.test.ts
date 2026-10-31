@@ -108,6 +108,19 @@ describe('쉼 기록(스키마 v11) 백업', () => {
     }
   });
 
+  it('[다녀왔슈] 뒤 쉼 기록(통나무 + "다녀옴" 태그)과 다녀온 곳(박 수)도 그대로 왕복한다', () => {
+    const tags = JSON.stringify([{ kind: 'place', label: '속초' }, { kind: 'etc', label: '다녀옴' }]);
+    const backup = buildBackup(14, {
+      rest_log: [{ id: 'rl_9', date: '2026-10-27', text: '속초 다녀옴', tags, size: 'log', created_at: 9 }],
+      place: [{ id: 'p9', name: '속초', duration: 'half', visited: 1, log_id: null, visited_date: '2026-10-27', nights: 2, added_date: '2026-10-01', created_at: 1 }],
+    });
+    const r = parseBackup(JSON.stringify(backup), 14);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.backup.tables.rest_log?.[0]).toMatchObject({ id: 'rl_9', size: 'log', tags });
+    expect(r.backup.tables.place?.[0]).toMatchObject({ visited: 1, visited_date: '2026-10-27', nights: 2, log_id: null });
+  });
+
   it('v11 전 백업은 가져올 때 여가 칩을 쉼 기록(장작)으로 옮긴다', () => {
     const old = buildBackup(10, { day_record: [day('2026-10-20', '["산책","영화"]'), day('2026-10-21', '[]'), day('2026-10-22', '망가짐')] });
     const r = parseBackup(JSON.stringify(old), 11);

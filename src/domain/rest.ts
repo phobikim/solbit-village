@@ -1,11 +1,12 @@
 // 쉼터 — 보따리(가고 싶은 곳 = 깃발 · 다녀온 곳 = 발자국). 쉼 지수(모닥불)는 fire.ts.
-// 다녀온 곳의 날짜 범위(출발일 ~ 출발일 + n박)는 머문 날마다 통나무로 센다 (장작 기록에서 찍은 발자국은 제외 — 그날은 장작 기록이 센다).
+// 다녀온 곳의 날짜 범위(출발일 ~ 출발일 + n박)는 머문 날마다 통나무로 센다 (옛 장작 기록 발자국(logId)은 제외 — 그날은 장작 기록이 센다).
 // 다녀온 곳은 기록이 아니어서 이미 심은 작물 · 경험치는 바뀌지 않는다 (규칙 3).
 // 지침 신호 · 1년 전 오늘은 코드만 두고 화면에서는 끈다 (src/ui/features.ts).
 
 import { addDays, daysBetween, parseDayKey, weekdayOf, type DayKey } from './day';
 import type { VillageEvent } from './events';
 import { LEISURE_LOW, WORK_OVERHEAT } from './indices';
+import { visitedTag, type RestLog } from './fire';
 import type { DayRecord, Weather } from './types';
 
 // ── 보따리 (가고 싶은 곳 · 다녀온 곳) ───────────────────────────────────
@@ -26,7 +27,7 @@ export type Place = {
   note: string | null;
   /** '날짜 잡기'로 만든 여행 행사 (지금은 꺼 둔 기능) */
   eventId: string | null;
-  /** 장작 던지기에서 '발자국 찍어둘게유'로 만든 곳 — 그 쉼 기록 id (머문 날을 통나무로 세지 않는다) */
+  /** 옛 '발자국 찍어둘게유'(장작 던지기)로 만든 곳 — 그 쉼 기록 id (머문 날을 통나무로 세지 않는다). 새로는 만들지 않는다 */
   logId: string | null;
   /** 다녀온 곳: 출발한 날 */
   visitedDate: DayKey | null;
@@ -70,6 +71,24 @@ export function markVisited(p: Place, visitedDate: DayKey, nights: number, note:
   return { ...p, visited: true, visitedDate, nights: clampNights(nights), note: note?.trim() || null, eventId: null };
 }
 
+// ── 다녀왔슈 (지도 깃발 → 장작 던지기 시트) ─────────────────────────────
+
+/** 시트가 처음 채워 주는 한 줄 */
+export const visitText = (name: string) => `${name} 다녀옴`;
+
+/** 시트가 처음 채워 주는 태그: 그 곳 이름 + "다녀옴" */
+export const visitTags = (p: Place) => [{ kind: 'place' as const, label: p.name }, visitedTag()];
+
+/**
+ * [다녀왔슈] 던지기를 마치면: 깃발은 다녀온 곳이 되고(지도에서 빠진다) 쉼 기록(통나무)이 남는다.
+ * 머문 일수는 깃발의 박 수를 그대로 쓴다 (날짜를 잡은 깃발이면 계획한 박 수, 아니면 당일치기).
+ * 시트에 박수 입력이 없다 — TODO(사용자 확인): 몇 박 다녀왔는지 물을지 정해 주세요.
+ * 다녀온 날은 출발일 ~ +n박이 통나무로 세어지고, 던진 날도 통나무라 같은 날에 겹쳐 세지 않는다 (하루 최대 통나무 하나).
+ */
+export function visitThrow(p: Place, log: RestLog): { log: RestLog; place: Place } {
+  return { log, place: markVisited(p, log.date, p.nights, null) };
+}
+
 // ── 다녀온 곳 ──────────────────────────────────────────────────────────
 
 /** 다녀온 곳: 최근에 다녀온 순 */
@@ -77,43 +96,6 @@ export function visitedList(places: readonly Place[]): Place[] {
   return places
     .filter((p) => p.visited)
     .sort((a, b) => (b.visitedDate ?? '').localeCompare(a.visitedDate ?? '') || b.createdAt - a.createdAt);
-}
-
-/** 같은 장소로 보는 이름 (앞뒤 · 가운데 띄어쓰기 무시) */
-const placeKey = (name: string) => name.replace(/\s+/g, '');
-
-/**
- * 같은 장소를 몇 번 다녀왔나 → 그 장소의 가장 최근 다녀온 곳 카드에만 "n번 감" (2번부터).
- * 결과: 카드 id → 다녀온 횟수
- */
-export function visitCounts(places: readonly Place[]): Map<string, number> {
-  const groups = new Map<string, Place[]>();
-  for (const p of visitedList(places)) {
-    const k = placeKey(p.name);
-    groups.set(k, [...(groups.get(k) ?? []), p]);
-  }
-  const out = new Map<string, number>();
-  for (const list of groups.values()) if (list.length > 1) out.set(list[0].id, list.length);
-  return out;
-}
-
-/** [또 가고 싶슈]: 다녀온 곳을 가고 싶은 곳에 복사. 같은 이름이 이미 가고 싶은 곳에 있으면 null. */
-export function wishAgain(p: Place, places: readonly Place[], id: string, today: DayKey, now: number): Place | null {
-  if (places.some((x) => !x.visited && placeKey(x.name) === placeKey(p.name))) return null;
-  return {
-    id,
-    name: p.name,
-    duration: p.duration,
-    visited: false,
-    memo: p.memo,
-    note: null,
-    eventId: null,
-    logId: null,
-    visitedDate: null,
-    nights: 0,
-    addedDate: today,
-    createdAt: now,
-  };
 }
 
 export const clampNights = (n: number) => Math.max(0, Math.min(PLACE_NIGHTS_MAX, Math.floor(n)));
@@ -194,37 +176,4 @@ export function settleTrips(places: readonly Place[], events: readonly VillageEv
     if (daysBetween(addDays(e.date, p.nights), today) > 0) out.push(markVisited(p, e.date, p.nights, null));
   }
   return out;
-}
-
-/** 장소 이름이 같은지 (띄어쓰기 무시) */
-export const samePlace = (a: string, b: string) => placeKey(a) === placeKey(b);
-
-/**
- * 장작 던지기의 장소 태그 → 지도에 발자국. 가고 싶은 곳(깃발)에 같은 이름이 있으면 그 깃발이 발자국이 되고,
- * 없으면 새 발자국을 만든다. 장작 기록에서 찍은 발자국이라 logId를 단다.
- */
-export function footprintFor(
-  name: string,
-  date: DayKey,
-  logId: string,
-  places: readonly Place[],
-  newId: string,
-  now: number,
-): Place {
-  const flag = places.find((p) => !p.visited && samePlace(p.name, name));
-  if (flag) return { ...markVisited(flag, date, 0, null), logId };
-  return {
-    id: newId,
-    name: name.trim().slice(0, PLACE_NAME_MAX),
-    duration: 'half',
-    visited: true,
-    memo: null,
-    note: null,
-    eventId: null,
-    logId,
-    visitedDate: date,
-    nights: 0,
-    addedDate: date,
-    createdAt: now,
-  };
 }

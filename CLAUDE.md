@@ -19,14 +19,12 @@
 
 ```
 app/                    expo-router 화면
-  (tabs)/               records(장부: 그날그날 / 대소사) · neighbors(이웃) · index(마을, 가운데) · rest(쉼터) · me(나) — 하단 탭 5개. 마을은 전체 화면 장면 + HUD
+  (tabs)/               records(장부: 그날그날 / 대소사) · neighbors(이웃) · index(마을, 가운데) · rest(쉼터: 모닥불 / 보따리 지도 탭, 장작 던지기는 시트) · me(나) — 하단 탭 5개. 마을은 전체 화면 장면 + HUD
   closet.tsx            꾸미기(솔이 옷 + 마을 배경): 탭 없는 전체 화면 (메인 코인 칸 · 솔이 · 나 탭에서 들어옴). 파일 이름은 라우트 때문에 그대로
   record.tsx            오늘 기록 시트 (모달)
   seed-result.tsx       씨앗 결과
   ledger/new.tsx        행사 등록 시트
-  place-new.tsx         쉼터 깃발 · 발자국 담기 · [다녀왔슈] · [날짜 잡기] 시트
-  rest-throw.tsx        장작 던지기 시트 (쉼 기록 입력 두 곳 중 하나)
-  place-map.tsx         보따리 지도
+  place-new.tsx         쉼터 깃발 만들기 · 고치기 · [날짜 잡기] 시트 (다녀온 곳 고치기 · 지우기도). [다녀왔슈]는 쉼터의 장작 던지기 시트에서
   storage.tsx           수확 창고 (창고 / 교환소 탭)
   neighbor-new.tsx      이웃 등록
   morning-news.tsx      밤사이 마을 소식
@@ -37,7 +35,7 @@ src/
     crops.ts            작물 결정 · 성장 단계 · 밭 5칸 · 자동 수확
     indices.ts          지수 4개 계산
     fire.ts             쉼 지수 = 모닥불 (장작 점수 · 불 상태 · 이웃 태그 만남)
-    rest.ts · restTags.ts · restNote.ts · placeMap.ts   보따리(깃발/발자국) · 태그 인식 · 쪽지 제안 · 지도 배치
+    rest.ts · restTags.ts · restNote.ts · placeMap.ts   보따리(깃발 · 다녀온 곳) · 태그 인식 · 쪽지 제안 · 지도 섬 배치(큰 섬 5곳 + 작은 섬 1~2곳)
     weather.ts          컨디션 → 날씨 단계
     village.ts          마을 경험치 · 레벨 · 해금
     harvest.ts          수확 레벨 · 농부 칭호 · 스킨 교환
@@ -62,7 +60,7 @@ src/
       outfits/          옷 아이템 SVG 문자열 25개(28장, 슬롯별 파일) · 칸 썸네일 배치. 합성은 SoliOutfit.tsx
     morning/            마을 보상표 시트 · 해금 아이콘
     scene/              메인 장면: art.ts(그림) · theme.ts(VillageTheme: 마을 배경 7종의 색) · VillageBackdrop.tsx(움직임). 장면 좌표는 layout.ts SCENE_PCT, 솔이 크기는 mainScene.ts SOLI_SCALE
-    components/         BroadcastLine, IndexCard, WalletPill, ClosetStage · ClosetGrid · VillageGrid · VillagePreview(꾸미기), BottomSheet, FieldPlot …
+    components/         BroadcastLine, IndexCard, WalletPill, ClosetStage · ClosetGrid · VillageGrid · VillagePreview(꾸미기), SegTabs(장부 · 쉼터 위쪽 탭), rest/(쉼터: FireParts · ThrowSheet · MapTab), BottomSheet, FieldPlot …
   copy/broadcasts.ko.ts 이장 방송 문구 모음 (코드에 문구 하드코딩 금지)
   notifications/
 design/                 디자인 원본 (수정하지 않음)

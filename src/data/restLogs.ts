@@ -28,10 +28,13 @@ export function parseTags(json: string): RestTag[] {
 
 const toLog = (r: Row): RestLog => ({ id: r.id, date: r.date, text: r.text, tags: parseTags(r.tags), size: r.size, createdAt: r.created_at });
 
-export async function listRestLogs(): Promise<RestLog[]> {
-  const db = await getDb();
+export async function listRestLogsIn(db: Pick<SQLiteDatabase, 'getAllAsync'>): Promise<RestLog[]> {
   const rows = await db.getAllAsync<Row>('SELECT * FROM rest_log ORDER BY date, created_at');
   return rows.map(toLog);
+}
+
+export async function listRestLogs(): Promise<RestLog[]> {
+  return listRestLogsIn(await getDb());
 }
 
 /** 기록 시트 쉼 기록의 id (하루 하나, 다시 저장하면 덮어쓴다) */

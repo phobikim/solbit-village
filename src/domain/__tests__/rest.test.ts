@@ -1,22 +1,22 @@
 import { byDate, rec } from '../__fixtures__/records';
 import type { VillageEvent } from '../events';
+import { fireIndex, isVisitLog, type RestLog } from '../fire';
 import { leisureIndex } from '../indices';
 import {
   clampNights,
-  footprintFor,
   grindStreak,
   keptDays,
   markVisited,
   placeYearAgo,
   restSignal,
-  samePlace,
   scheduledDate,
   settleTrips,
   tripDays,
-  visitCounts,
+  visitText,
+  visitThrow,
+  visitTags,
   visitedList,
   weekStart,
-  wishAgain,
   wishList,
   yearAgo,
   type Place,
@@ -136,22 +136,44 @@ describe('깃발 → 발자국 전환 (날짜 잡은 깃발)', () => {
   });
 });
 
-describe('장작 던지기의 장소 → 발자국', () => {
-  it('보따리에 같은 이름 깃발이 있으면 그 깃발이 발자국이 된다 (띄어쓰기 무시)', () => {
-    const flag = place('한 강', { id: 'f1', createdAt: 3 });
-    const p = footprintFor('한강', '2026-10-20', 'rl_1', [flag], 'new', 9);
-    expect(p).toMatchObject({ id: 'f1', visited: true, visitedDate: '2026-10-20', nights: 0, logId: 'rl_1', createdAt: 3 });
+describe('[다녀왔슈]: 지도 깃발 → 장작 던지기 시트 → 다녀온 곳 + 쉼 기록', () => {
+  const log = (over: Partial<RestLog> = {}): RestLog => ({
+    id: 'rl_1',
+    date: today,
+    text: visitText('속초'),
+    tags: visitTags(place('속초', { name: '속초' })),
+    size: 'log',
+    createdAt: 1,
+    ...over,
   });
-  it('없으면 새 발자국 (당일치기)', () => {
-    const p = footprintFor(' 한강 ', '2026-10-20', 'rl_1', [], 'new', 9);
-    expect(p).toMatchObject({ id: 'new', name: '한강', visited: true, visitedDate: '2026-10-20', nights: 0, logId: 'rl_1', createdAt: 9 });
-    expect(samePlace('한 강', '한강')).toBe(true);
+  it('시트는 이름 한 줄 + 그 곳 이름 태그 + "다녀옴" 태그를 채워 연다', () => {
+    expect(visitText('속초')).toBe('속초 다녀옴');
+    expect(visitTags(place('속초', { name: '속초' }))).toEqual([
+      { kind: 'place', label: '속초' },
+      { kind: 'etc', label: '다녀옴' },
+    ]);
   });
-  it('이미 다녀온 곳이면 새 발자국을 하나 더 (n번 감)', () => {
-    const old = trip('한강', '2026-08-01', 0, { id: 'v1' });
-    const p = footprintFor('한강', '2026-10-20', 'rl_1', [old], 'new', 9);
-    expect(p.id).toBe('new');
-    expect(visitCounts([old, p]).get('new')).toBe(2);
+  it('던지면 깃발이 다녀온 곳이 되고(visited · 날짜), 쉼 기록은 그대로 돌려준다', () => {
+    const flag = place('속초', { name: '속초', createdAt: 5, memo: '회 먹기' });
+    const r = visitThrow(flag, log());
+    expect(r.place).toMatchObject({ id: '속초', visited: true, visitedDate: today, nights: 0, createdAt: 5, memo: '회 먹기', logId: null });
+    expect(r.log.size).toBe('log');
+    expect(wishList([r.place])).toEqual([]); // 지도(가고 싶은 곳)에서 사라진다
+    expect(visitedList([r.place])).toHaveLength(1);
+  });
+  it('머문 일수는 깃발의 박 수를 그대로 쓴다 (날짜를 잡은 깃발은 계획한 박 수) · 행사 연결은 풀린다', () => {
+    const r = visitThrow(place('속초', { eventId: 'ev', nights: 2 }), log());
+    expect(r.place).toMatchObject({ nights: 2, eventId: null });
+  });
+  it('다녀온 날은 통나무 하나로만 센다: 던진 날과 다녀온 날이 겹쳐도 점수가 두 배가 되지 않는다', () => {
+    const r = visitThrow(place('속초', { nights: 1 }), log());
+    const trips = tripDays([r.place]); // 오늘 · 내일
+    expect([...trips]).toEqual([today, '2026-10-23']);
+    expect(fireIndex({ logs: [r.log], trips }, today, () => false)).toBe(35);
+    expect(fireIndex({ logs: [r.log], trips: new Set() }, today, () => false)).toBe(35);
+  });
+  it('쉼 기록에는 "다녀옴" 표시가 남아 이번 주 장작에서 알아볼 수 있다', () => {
+    expect(isVisitLog(visitThrow(place('속초'), log()).log)).toBe(true);
   });
 });
 
@@ -164,14 +186,6 @@ describe('다녀온 곳', () => {
   ];
   it('최신순', () => {
     expect(visitedList(visited).map((p) => p.visitedDate)).toEqual(['2026-09-10', '2026-08-02', '2026-05-01', '2025-10-19']);
-  });
-  it('같은 장소 재방문: 가장 최근 카드에만 n번 감 (띄어쓰기 무시)', () => {
-    expect([...visitCounts(visited)]).toEqual([['제주2', 3]]);
-  });
-  it('[또 가고 싶슈]: 깃발로 복사, 이미 있으면 안 함', () => {
-    const copy = wishAgain(visited[1], visited, 'new', today, 9);
-    expect(copy).toMatchObject({ id: 'new', name: '양평', visited: false, visitedDate: null, note: null, logId: null, addedDate: today });
-    expect(wishAgain(visited[1], [...visited, place('양평')], 'new', today, 9)).toBeNull();
   });
 });
 

@@ -109,9 +109,3 @@ export function refreshTags(
   for (const m of manual) tags = addTag(tags, m);
   return tags;
 }
-
-/** 새 장소 태그가 보따리에 이미 있는 장소인가 (띄어쓰기 무시) */
-export function isKnownPlace(label: string, places: readonly string[]): boolean {
-  const k = stripSpaces(label);
-  return places.some((p) => stripSpaces(p) === k);
-}

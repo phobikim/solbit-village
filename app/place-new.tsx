@@ -1,7 +1,7 @@
 // 쉼터 담기 시트.
 // - 가고 싶은 곳 새로 · 고치기: 이름 · 걸리는 시간 · 메모(선택)
-// - 다녀온 곳 새로(?visited=1) · 고치기: 이름 · 언제 · 며칠 · 한 줄 소감(선택)
-// - [다녀왔슈](?id=…&mode=visit): 언제(처음엔 오늘) · 며칠 · 한 줄 소감 → 다녀온 곳으로 옮긴다
+// - 다녀온 곳 고치기(?id=…): 이름 · 언제 · 며칠 · 한 줄 소감(선택) · 지우기 (다녀온 곳은 모닥불 탭 "다녀온 곳" 줄에서 연다)
+//   [다녀왔슈]는 이 시트가 아니라 쉼터의 장작 던지기 시트(35a)에서 한다. 발자국을 직접 만드는 길은 없다.
 // - [날짜 잡기](?id=…&mode=schedule): 날짜 + 몇 박 → 대소사에 여행 행사를 만들고 깃발에 잇는다 (깃발에 D-day)
 
 import { router, useLocalSearchParams } from 'expo-router';
@@ -15,7 +15,6 @@ import { today as getToday, type DayKey } from '../src/domain/day';
 import { EVENT_NAME_MAX } from '../src/domain/events';
 import {
   clampNights,
-  markVisited,
   PLACE_NAME_MAX,
   PLACE_NIGHTS_MAX,
   PLACE_TEXT_MAX,
@@ -29,7 +28,7 @@ import { RoundButton } from '../src/ui/components/RoundButton';
 import { colors, fonts } from '../src/ui/theme';
 
 export default function PlaceSheet() {
-  const params = useLocalSearchParams<{ id?: string; visited?: string; mode?: string }>();
+  const params = useLocalSearchParams<{ id?: string; mode?: string }>();
   const today = getToday();
   const places = usePlaces((s) => s.places);
   const save = usePlaces((s) => s.save);
@@ -38,11 +37,9 @@ export default function PlaceSheet() {
   const loadLedger = useLedger((s) => s.load);
   const saveEvent = useLedger((s) => s.save);
   const editing = params.id ? places.find((p) => p.id === params.id) : undefined;
-  /** [다녀왔슈]: 가고 싶은 곳 → 다녀온 곳 */
-  const visiting = params.mode === 'visit' && !!editing && !editing.visited;
   /** [날짜 잡기]: 깃발에 날짜 + 몇 박 */
   const scheduling = params.mode === 'schedule' && !!editing && !editing.visited;
-  const visited = visiting || (editing ? editing.visited : params.visited === '1');
+  const visited = !!editing?.visited;
 
   const [name, setName] = useState('');
   const [memo, setMemo] = useState('');
@@ -88,8 +85,6 @@ export default function PlaceSheet() {
           createdAt: ev?.createdAt ?? Date.now(),
         });
         await save({ ...editing, eventId, nights: clampNights(nights) });
-      } else if (visiting && editing) {
-        await save(markVisited(editing, visitedDate, nights, note));
       } else {
         await save({
           id: editing?.id ?? newId('pl'),
@@ -120,7 +115,7 @@ export default function PlaceSheet() {
     close();
   };
 
-  const bubble = scheduling ? restCopy.scheduleNow : visiting ? restCopy.visitNow : editing ? restCopy.placeEdit : visited ? restCopy.visitedNew : restCopy.placeNew;
+  const bubble = scheduling ? restCopy.scheduleNow : editing ? restCopy.placeEdit : restCopy.placeNew;
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
@@ -129,7 +124,7 @@ export default function PlaceSheet() {
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" indicatorStyle="white">
           <IjangBubble text={bubble} />
 
-          {visiting || scheduling ? (
+          {scheduling ? (
             <Text style={styles.placeName}>{editing?.name}</Text>
           ) : (
             <View style={styles.section}>
@@ -193,7 +188,7 @@ export default function PlaceSheet() {
             </>
           )}
 
-          {editing && !visiting && !scheduling && (
+          {editing && !scheduling && (
             <View style={styles.delete}>
               <Text style={styles.deleteBtn} onPress={onDelete} accessibilityRole="button">
                 {confirmDelete ? '네, 지우기' : '지우기'}
@@ -203,7 +198,7 @@ export default function PlaceSheet() {
         </ScrollView>
         <View style={styles.footer}>
           <PrimaryButton
-            label={saving ? '적는 중…' : scheduling ? restCopy.schedule : visiting ? restCopy.visitedBtn : editing ? '고치기' : '남기기'}
+            label={saving ? '적는 중…' : scheduling ? restCopy.schedule : editing ? '고치기' : '남기기'}
             onPress={onSave}
             disabled={!ready || saving}
           />

@@ -1,92 +1,83 @@
-import { MAIN_ISLAND, placeMapSvg, type MapArtPin, type MapArtInput } from '../placeMapArt';
+import { flagIconSvg, mapView, pinFlagSvg, placeMapFxSvg, placeMapSvg, type MapArtFlag, type MapArtInput } from '../placeMapArt';
 import { fireHeight, fireSvg } from '../restIcons';
 
 const bad = /NaN|undefined|\[object/;
 
-const pin = (id: string, name: string, x: number, y: number, over: Partial<MapArtPin> = {}): MapArtPin => ({ id, name, x, y, visited: false, pushed: false, ...over });
-const base = (over: Partial<MapArtInput> = {}): MapArtInput => ({
-  w: 356,
-  h: 400,
-  center: { x: 178, y: 200 },
-  pins: [],
-  trail: [],
-  filter: 'all',
-  selectedId: null,
-  ...over,
-});
-const pins = [
-  pin('a', '한강', 180, 130, { visited: true }),
-  pin('b', '담양', 150, 290, { visited: true }),
-  pin('c', '제주', 70, 340, { visited: true }),
-  pin('d', '사파', 40, 90),
-  pin('e', '속초', 240, 150),
-  pin('f', '교토', 310, 300, { pushed: true }),
-];
-const trail = [{ x: 178, y: 200 }, { x: 70, y: 340 }, { x: 150, y: 290 }, { x: 180, y: 130 }];
+const flag = (id: string, name: string, x: number, y: number, over: Partial<MapArtFlag> = {}): MapArtFlag => ({ id, name, kind: 'want', x, y, ...over });
+const base = (over: Partial<MapArtInput> = {}): MapArtInput => ({ flags: [], islands: [], selectedId: null, ...over });
 
-describe('보따리 지도 그림 (15d 밤바다 위 솔빛 섬)', () => {
-  it('핀이 없어도 그려진다 (섬 · 마을 · 나침반 · 범례)', () => {
+describe('보따리 지도 그림 (TURN 34·35 밤바다 위 솔빛 섬 · 핀 깃발)', () => {
+  it('깃발이 없어도 그려진다 (섬 · 마을 이름표) — 발자국 · 범례의 "다녀옴" · 다녀온 길 점선은 없다', () => {
     const svg = placeMapSvg(base());
     expect(svg).not.toMatch(bad);
-    expect(svg).toContain('viewBox="0 0 356.0 400.0"');
     expect(svg).toContain('솔빛 마을');
-    expect(svg).toContain('다녀옴');
-    expect(svg).toContain('갈 데');
+    expect(svg).not.toContain('다녀옴');
+    expect(svg).not.toContain('stroke-dasharray');
   });
 
-  it('핀 이름이 모두 나온다 · 이름의 &는 이스케이프', () => {
-    const svg = placeMapSvg(base({ pins: [...pins, pin('g', '엄마&아빠', 120, 60)], trail }));
+  it('깃발 이름이 모두 나온다 · 이름의 &는 이스케이프', () => {
+    const svg = placeMapSvg(base({ flags: [flag('a', '사파', 128, 152), flag('b', '엄마&아빠', 248, 146)] }));
     expect(svg).not.toMatch(bad);
-    for (const n of ['한강', '담양', '제주', '사파', '속초', '교토']) expect(svg).toContain(n);
+    expect(svg).toContain('>사파<');
     expect(svg).toContain('엄마&amp;아빠');
   });
 
-  it('필터: 발자국만 / 깃발만', () => {
-    const foot = placeMapSvg(base({ pins, trail, filter: 'foot' }));
-    expect(foot).toContain('한강');
-    expect(foot).not.toContain('>사파<');
-    expect(foot).not.toContain('>교토<');
-    const flag = placeMapSvg(base({ pins, trail, filter: 'flag' }));
-    expect(flag).toContain('>사파<');
-    expect(flag).not.toContain('>한강<');
+  it('핀 깃발 3종: 분홍 / 노랑 / D-day 배지', () => {
+    const want = pinFlagSvg({ name: '사파', kind: 'want' });
+    expect(want).toContain('fill="#FF4FA0"');
+    expect(want).not.toContain('#A8EB5A');
+    const ij = pinFlagSvg({ name: '교토', kind: 'ijang' });
+    expect(ij).toContain('fill="#FFE14D"');
+    const date = pinFlagSvg({ name: '속초', kind: 'date', dday: 'D-3' });
+    expect(date).toContain('>D-3<');
+    expect(date).toContain('#A8EB5A');
+    // 핀 모양: 바닥이 한 점
+    expect(want).toContain('M0 0 C-3 -6 -15 -13 -15 -25 A15 15 0 1 1 15 -25 C15 -13 3 -6 0 0Z');
   });
 
-  it('이장이 미는 깃발은 노란 깃발 + 퍼지는 동그라미, 다른 깃발은 분홍', () => {
-    const svg = placeMapSvg(base({ pins: [pin('f', '교토', 310, 300, { pushed: true })] }));
-    expect(svg).toContain('#FFE14D'); // 노란 깃발
-    expect(svg).toContain('opacity=".55"'); // 퍼지는 동그라미
-    const pink = placeMapSvg(base({ pins: [pin('d', '사파', 40, 90)] }));
-    expect(pink).toContain('#FF4FA0');
-    expect(pink).not.toContain('opacity=".55"');
+  it('고른 깃발에는 선택 표시가 한 번만', () => {
+    const f = [flag('a', '사파', 128, 152), flag('b', '속초', 248, 146)];
+    const sel = placeMapSvg(base({ flags: f, selectedId: 'a' }));
+    expect(sel.match(/fill-opacity="\.14"/g)).toHaveLength(1);
+    expect(placeMapSvg(base({ flags: f })).match(/fill-opacity="\.14"/g)).toBeNull();
   });
 
-  it('같은 입력이면 같은 그림 (섬 모양이 매번 바뀌지 않는다)', () => {
-    expect(placeMapSvg(base({ pins, trail }))).toBe(placeMapSvg(base({ pins, trail })));
+  it('작은 섬은 있는 만큼만 그리고, 퍼지는 동그라미 · 새 섬 반짝임은 따로 그린다', () => {
+    const none = placeMapSvg(base());
+    const two = placeMapSvg(base({ islands: [{ cx: 296, cy: 62, fresh: true }, { cx: 70, cy: 350, fresh: false }] }));
+    expect(two.length).toBeGreaterThan(none.length);
+    expect(placeMapFxSvg(base())).toBeNull();
+    expect(placeMapFxSvg(base({ islands: [{ cx: 296, cy: 62, fresh: false }] }))).toBeNull();
+    const fresh = placeMapFxSvg(base({ islands: [{ cx: 296, cy: 62, fresh: true }] }));
+    expect(fresh).toContain('#FFE14D');
+    const ring = placeMapFxSvg(base({ flags: [flag('f', '교토', 270, 254, { kind: 'ijang' })] }));
+    expect(ring?.match(/<circle/g)).toHaveLength(2);
+    expect(placeMapFxSvg(base({ flags: [flag('f', '교토', 270, 254)] }))).toBeNull();
   });
 
-  it('가운데 섬 밖의 핀 아래에만 작은 섬이 깔린다', () => {
-    const inside = placeMapSvg(base({ pins: [pin('a', '한강', 178, 150, { visited: true })] }));
-    const outside = placeMapSvg(base({ pins: [pin('c', '제주', 40, 360, { visited: true })] }));
-    const count = (s: string) => (s.match(/stroke-width="3.5"/g) ?? []).length;
-    expect(count(outside)).toBeGreaterThan(count(inside));
-    expect(MAIN_ISLAND.rx).toBeGreaterThan(0);
+  it('보이는 구간: 작은 섬이 없으면 위아래 30씩 덜어 내고(366x340), 생기면 넓힌다', () => {
+    expect(mapView(0)).toEqual({ x: 0, y: 30, w: 366, h: 340 });
+    expect(mapView(1)).toEqual({ x: 0, y: 0, w: 366, h: 370 });
+    expect(mapView(2)).toEqual({ x: 0, y: 0, w: 366, h: 400 });
+    expect(mapView(4).h).toBe(400);
+    expect(placeMapSvg(base())).toContain('viewBox="0 30 366 340"');
+    expect(placeMapFxSvg(base({ islands: [{ cx: 296, cy: 62, fresh: true }] }))).toContain('viewBox="0 0 366 370"');
   });
 
-  it('선택한 핀에는 하얀 고리', () => {
-    const on = placeMapSvg(base({ pins, trail, selectedId: 'a' }));
-    const off = placeMapSvg(base({ pins, trail }));
-    expect(on.split('stroke="#FFFFFF"').length).toBeGreaterThan(off.split('stroke="#FFFFFF"').length);
+  it('깃발 카드 아이콘은 이름표 없이 핀만', () => {
+    const icon = flagIconSvg('date', 'D-3');
+    expect(icon).not.toMatch(bad);
+    expect(icon).toContain('>D-3<');
+    expect(icon).not.toContain('<text y="20.5"');
   });
 });
 
-describe('모닥불 그림 (15a)', () => {
-  it('상태마다 그려지고 높이는 불이 작을수록 낮다', () => {
-    for (const band of ['blaze', 'burning', 'dying', 'out', null] as const) {
-      expect(fireSvg(band)).not.toMatch(bad);
+describe('모닥불 그림', () => {
+  it('불 상태마다 그려진다', () => {
+    for (const b of ['blaze', 'burning', 'dying', 'out', null] as const) {
+      expect(fireSvg(b)).not.toMatch(bad);
+      expect(fireHeight(b)).toBeGreaterThan(0);
     }
-    expect(fireHeight('blaze')).toBeGreaterThan(fireHeight('dying'));
-    expect(fireHeight('dying')).toBeGreaterThan(fireHeight('out'));
-    expect(fireHeight('blaze')).toBeLessThanOrEqual(140);
-    expect(fireSvg('dying')).toContain('rotate(7 100 118)'); // 엇갈린 통나무
+    expect(fireHeight('blaze')).toBeGreaterThan(fireHeight('out'));
   });
 });

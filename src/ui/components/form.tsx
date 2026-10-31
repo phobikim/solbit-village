@@ -107,7 +107,7 @@ export function DatePicker({
   );
 }
 
-/** 뒤로 가기 + 제목 + 방송 라인이 있는 하위 화면 틀 (창고 · 보따리). back: 쌓인 화면이 없을 때 돌아갈 곳 */
+/** 뒤로 가기 + 제목 + 방송 라인이 있는 하위 화면 틀 (창고 · 설정). back: 쌓인 화면이 없을 때 돌아갈 곳 */
 export function SubScreen({
   title,
   broadcast,
@@ -115,7 +115,7 @@ export function SubScreen({
   children,
 }: {
   title: string;
-  back?: '/me' | '/rest';
+  back?: '/me';
   broadcast: { message: string; time: string };
   children: ReactNode;
 }) {

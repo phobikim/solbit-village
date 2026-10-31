@@ -58,18 +58,6 @@ export function sizeSvg(size: RestSize, on: boolean): string {
   return `<svg viewBox="0 0 48 32" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
 }
 
-/** 깃발 (viewBox 40x48) */
-export function flagSvg(col: string, old = false): string {
-  const wave = old ? 'M10 6 Q20 2 30 8 Q22 14 30 20 Q20 16 10 20Z' : 'M10 6 H32 L26 13 L32 20 H10Z';
-  return `<svg viewBox="0 0 40 48" xmlns="http://www.w3.org/2000/svg"><path d="M10 4V44" stroke="${L}" stroke-width="3.4" stroke-linecap="round"/><path d="${wave}" fill="${col}" stroke="${L}" stroke-width="2.4" stroke-linejoin="round"/><ellipse cx="10" cy="44" rx="6" ry="2.2" fill="${L}" opacity=".35"/></svg>`;
-}
-
-/** 발자국 (viewBox 40x48) */
-export function footprintSvg(col: string): string {
-  const toe = (x: number, y: number, r: number) => `<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r * 1.2}" fill="${col}" stroke="${L}" stroke-width="2"/>`;
-  return `<svg viewBox="0 0 40 48" xmlns="http://www.w3.org/2000/svg">${toe(11, 14, 3.6)}${toe(19, 9, 3.8)}${toe(28, 11, 3.6)}${toe(34, 19, 3.2)}<path d="M10 28 C10 22 30 22 30 30 C30 40 24 44 19 44 C13 44 10 36 10 28Z" fill="${col}" stroke="${L}" stroke-width="2.4" stroke-linejoin="round"/></svg>`;
-}
-
 /** 지도 가운데 솔빛 마을 (viewBox 60x60) */
 export function villagePinSvg(): string {
   return `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><circle cx="30" cy="30" r="27" fill="#232B60" stroke="${L}" stroke-width="2.6"/><path d="M14 33 L30 18 L46 33 V45 H14Z" fill="#FFE14D" stroke="${L}" stroke-width="2.6" stroke-linejoin="round"/><rect x="25" y="34" width="10" height="11" rx="2" fill="#FF4FA0" stroke="${L}" stroke-width="2"/></svg>`;

@@ -4,7 +4,10 @@ import {
   daysSinceFire,
   fireBand,
   fireIndex,
-  fireWeek,
+  isVisitLog,
+  VISITED_TAG_LABEL,
+  visitedTag,
+  weekLogs,
   lastFireDay,
   logContacts,
   NO_REST,
@@ -85,13 +88,24 @@ describe('불 상태: 활활(70+) / 타오름(40+) / 사그라듦(20+) / 꺼져�
 
 describe('이번 주 7칸 · 장작 안 들어온 지 n일', () => {
   const logs = [log('a', '2026-10-19', 'twig'), log('b', '2026-10-21', 'firewood')];
-  it('월 ~ 일 7칸: 장작이 든 날만 true, 아직 안 온 날은 false', () => {
-    expect(fireWeek(src(logs), '2026-10-19', today)).toEqual([true, false, true, false, false, false, false]);
-    // 아직 안 온 날(미래)에 들어 있어도 칸은 비운다
-    expect(fireWeek(src([log('x', '2026-10-24', 'log')]), '2026-10-19', today).every((v) => !v)).toBe(true);
+  it('이번 주(월 ~ 일) 쉼 기록만, 최신이 위', () => {
+    const list = [
+      log('old', '2026-10-18', 'log'), // 지난주 일요일
+      log('mon', '2026-10-19', 'twig'),
+      log('wed', '2026-10-21', 'firewood', { createdAt: 5 }),
+      log('wed2', '2026-10-21', 'twig', { createdAt: 9 }),
+      log('sun', '2026-10-25', 'log'),
+      log('next', '2026-10-26', 'log'), // 다음 주 월요일
+    ];
+    expect(weekLogs(list, '2026-10-19').map((l) => l.id)).toEqual(['sun', 'wed2', 'wed', 'mon']);
+    expect(weekLogs([], '2026-10-19')).toEqual([]);
   });
-  it('다녀온 날도 칸에 들어온다', () => {
-    expect(fireWeek(src([], ['2026-10-20']), '2026-10-19', today)[1]).toBe(true);
+  it('다녀온 곳에서 온 기록은 "다녀옴" 태그로 알아본다', () => {
+    expect(VISITED_TAG_LABEL).toBe('다녀옴');
+    expect(isVisitLog(log('v', '2026-10-20', 'log', { tags: [{ kind: 'place', label: '속초' }, visitedTag()] }))).toBe(true);
+    expect(isVisitLog(log('n', '2026-10-20', 'log', { tags: [{ kind: 'place', label: '속초' }] }))).toBe(false);
+    // 다른 종류의 같은 이름 태그는 아니다
+    expect(isVisitLog(log('n2', '2026-10-20', 'log', { tags: [{ kind: 'activity', label: '다녀옴' }] }))).toBe(false);
   });
   it('n일 = 마지막 장작(또는 다녀온 날)부터 오늘까지', () => {
     expect(lastFireDay(src(logs), today)).toBe('2026-10-21');

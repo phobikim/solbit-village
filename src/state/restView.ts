@@ -5,14 +5,13 @@ import { useMemo } from 'react';
 import { HEALTH_STATUS, LEISURE_STATUS, WORK_STATUS } from '../copy/labels.ko';
 import { signalLine, signalWork } from '../copy/rest.ko';
 import { addDays, type DayKey } from '../domain/day';
-import { daysSinceFire, fireBand, fireIndex, fireWeek, type FireBand } from '../domain/fire';
+import { daysSinceFire, fireBand, fireIndex, weekLogs, type FireBand } from '../domain/fire';
 import { INDEX_WINDOW_DAYS, workBand, workIndex } from '../domain/indices';
 import {
   grindStreak,
   placeYearAgo,
   restSignal,
   tripDays,
-  visitCounts,
   visitedList,
   weekStart,
   wishList,
@@ -35,14 +34,13 @@ export type RestView = {
   band: FireBand | null;
   /** 불 상태 이름 (활활 …) */
   bandLabel: string;
-  /** 이번 주 월 ~ 일: 장작이 들어온 날 */
-  week: boolean[];
+  /** 이번 주(월 ~ 일) 쉼 기록: 최신이 위 */
+  weekLogs: RestLog[];
   /** 장작 안 들어온 지 n일 (한 번도 없으면 null) */
   sinceFire: number | null;
   wish: Place[];
+  /** 다녀온 곳: 최근에 다녀온 순 */
   visited: Place[];
-  /** 다녀온 곳 카드 id → "n번 감" */
-  visitCounts: Map<string, number>;
   // 꺼 둔 기능 (src/ui/features.ts)
   signal: { work: string; rest: string; health: string; line: string } | null;
   yearAgo: { date: DayKey; place: Place } | null;
@@ -68,11 +66,10 @@ export function useRestView(
       rest: value,
       band,
       bandLabel,
-      week: fireWeek(rest, weekStart(today), today),
+      weekLogs: weekLogs(logs, weekStart(today)),
       sinceFire: daysSinceFire(rest, today),
       wish: wishList(places),
       visited: visitedList(places),
-      visitCounts: visitCounts(places),
       signal:
         restSignal(work, value, weather) && weather && work !== null && band
           ? { work: signalWork(streak, WORK_STATUS[workBand(work)]), rest: bandLabel, health: HEALTH_STATUS[weather], line: signalLine(streak, weather, band) }

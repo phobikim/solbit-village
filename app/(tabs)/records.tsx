@@ -3,7 +3,7 @@
 
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { broadcasts, withPrefix } from '../../src/copy/broadcasts.ko';
 import {
@@ -31,6 +31,7 @@ import { MonthCalendar } from '../../src/ui/components/MonthCalendar';
 import { RecordCard } from '../../src/ui/components/RecordCard';
 import { RoundButton } from '../../src/ui/components/RoundButton';
 import { Screen } from '../../src/ui/components/Screen';
+import { SegTabs } from '../../src/ui/components/SegTabs';
 import { colors, fonts } from '../../src/ui/theme';
 
 const timeLabel = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -118,19 +119,14 @@ export default function LedgerScreen() {
           isPressable={(d) => (byDate[d] ? canEditRecord(d, today) : canCreateRecord(d, today))}
           onDayPress={(d) => router.push({ pathname: '/record', params: { date: d } })}
         />
-        <View style={styles.seg} accessibilityRole="tablist">
-          {(['days', 'events'] as const).map((k) => (
-            <Pressable
-              key={k}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: view === k }}
-              onPress={() => setView(k)}
-              style={[styles.segItem, view === k && styles.segOn]}
-            >
-              <Text style={[styles.segText, view === k && styles.segTextOn]}>{k === 'days' ? '그날그날' : '대소사'}</Text>
-            </Pressable>
-          ))}
-        </View>
+        <SegTabs
+          items={[
+            { key: 'days', label: '그날그날' },
+            { key: 'events', label: '대소사' },
+          ]}
+          value={view}
+          onChange={setView}
+        />
         {view === 'events' ? (
           <LedgerEvents
             today={today}
@@ -182,11 +178,6 @@ const styles = StyleSheet.create({
   nav: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   month: { fontFamily: fonts.number, fontSize: 17, minWidth: 80, textAlign: 'center', color: colors.text },
   content: { padding: 12, gap: 8, paddingBottom: 24 },
-  seg: { flexDirection: 'row', height: 44, borderRadius: 22, backgroundColor: colors.cardSub, padding: 4, gap: 4, marginTop: 2 },
-  segItem: { flex: 1, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  segOn: { backgroundColor: colors.yellow },
-  segText: { fontFamily: fonts.bodyHeavy, fontSize: 14, color: colors.textSub },
-  segTextOn: { color: colors.line },
   empty: {
     fontFamily: fonts.bodyBold,
     fontSize: 14,

@@ -37,6 +37,11 @@ export type RestLog = {
   createdAt: number;
 };
 
+/** 다녀온 곳에서 온 장작 표시 (지도 [다녀왔슈] → 장작 던지기 시트가 채워 준다) */
+export const VISITED_TAG_LABEL = '다녀옴';
+export const visitedTag = (): RestTag => ({ kind: 'etc', label: VISITED_TAG_LABEL });
+export const isVisitLog = (l: RestLog): boolean => l.tags.some((t) => t.kind === 'etc' && t.label === VISITED_TAG_LABEL);
+
 export const REST_TEXT_MAX = 60;
 export const REST_TAGS_MAX = 8;
 export const REST_TAG_LABEL_MAX = 12;
@@ -56,6 +61,14 @@ export function logsByDay(logs: readonly RestLog[]): Map<DayKey, RestLog[]> {
   return out;
 }
 
+/** 이번 주(월 ~ 일) 쉼 기록: 최신이 위 */
+export function weekLogs(logs: readonly RestLog[], mon: DayKey): RestLog[] {
+  const sun = addDays(mon, 6);
+  return logs
+    .filter((l) => l.date >= mon && l.date <= sun)
+    .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt || b.id.localeCompare(a.id));
+}
+
 /** 하루 점수: 그날 장작 점수 합 (최대 35). 다녀온 날은 통나무 = 35. */
 export function dayScore(logs: readonly RestLog[], isTrip: boolean): number {
   if (isTrip) return DAY_SCORE_MAX;
@@ -67,15 +80,6 @@ export function fireDays(src: RestSource): Set<DayKey> {
   const out = new Set<DayKey>(src.trips);
   for (const l of src.logs) out.add(l.date);
   return out;
-}
-
-/** 이번 주 월 ~ 일 7칸: 장작이 들어온 날이면 true (아직 안 온 날은 false) */
-export function fireWeek(src: RestSource, mon: DayKey, today: DayKey): boolean[] {
-  const days = fireDays(src);
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = addDays(mon, i);
-    return daysBetween(d, today) >= 0 && days.has(d);
-  });
 }
 
 /**
