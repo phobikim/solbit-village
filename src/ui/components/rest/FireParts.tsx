@@ -1,6 +1,6 @@
 // 모닥불 탭의 조각 (디자인 15a · 34a): 불 카드 · 이번 주 장작 · 다녀온 곳 줄. 순서와 배치는 app/(tabs)/rest.tsx가 정한다.
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
@@ -9,7 +9,8 @@ import { fireCopy, FIRE_LINE, SIZE_LABEL } from '../../../copy/rest.ko';
 import { parseDayKey, weekdayOf, type DayKey } from '../../../domain/day';
 import { fireMood, isVisitLog, type FireBand, type RestLog, type WeekDay } from '../../../domain/fire';
 import { DAY_WOOD, dayWoodSvg } from '../../characters/restIcons';
-import { restSceneFxSvg, restSceneSvg } from '../../characters/restScene';
+import { REST_SCENE, restSceneFxSvg, restSceneSvg } from '../../characters/restScene';
+import { GuguActor } from './GuguActor';
 import { colors, fonts } from '../../theme';
 
 /** 불 상태 제목 색 (디자인 15a: 사그라들 때 주황) */
@@ -53,6 +54,11 @@ export function RestSceneCard({ band }: { band: FireBand | null }) {
   const key = band === null ? 'none' : mood;
   const xml = useMemo(() => restSceneSvg(mood), [mood]);
   const fx = useMemo(() => restSceneFxSvg(mood), [mood]);
+  const [box, setBox] = useState({ w: 0, h: 0 });
+  // 풍경 그림은 칸을 꽉 채우고(slice) 넘치는 곳은 잘린다 — 구구 할매도 같은 배율 · 자리로 얹는다
+  const s = box.w ? Math.max(box.w / REST_SCENE.w, box.h / REST_SCENE.h) : 0;
+  const ox = (box.w - REST_SCENE.w * s) / 2;
+  const oy = (box.h - REST_SCENE.h * s) / 2;
   const pulse = useRef(new Animated.Value(1)).current;
   useEffect(() => {
     if (!fx) return;
@@ -68,8 +74,13 @@ export function RestSceneCard({ band }: { band: FireBand | null }) {
   return (
     <View style={styles.scene}>
       {/* 칸은 366 x 280 그림을 가로에 맞추고 넘치는 곳은 잘라 낸다 (시안: preserveAspectRatio slice) */}
-      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View style={StyleSheet.absoluteFill} pointerEvents="none" onLayout={(e) => setBox({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}>
         <SvgXml xml={xml} width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
+        {s > 0 && (
+          <View style={{ position: 'absolute', left: ox, top: oy, width: REST_SCENE.w * s, height: REST_SCENE.h * s }}>
+            <GuguActor mood={mood} scale={s} />
+          </View>
+        )}
         {fx && (
           <Animated.View style={[StyleSheet.absoluteFill, { opacity: pulse }]}>
             <SvgXml xml={fx} width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />

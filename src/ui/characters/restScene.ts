@@ -3,7 +3,7 @@
 // react-native-svg는 SMIL을 못 그려서 움직이는 것(불 번짐 · 불티 · 할매 김)은 restSceneFxSvg로 따로 그려 화면이 투명도로 깜빡인다.
 
 import type { FireMood } from '../../domain/fire';
-import { GUGU_VIEWBOX, guguFxInner, guguInner } from './gugu';
+import { GUGU_VIEWBOX, guguFxInner } from './gugu';
 
 export const REST_SCENE = { w: 366, h: 280 } as const;
 
@@ -12,7 +12,8 @@ const H = REST_SCENE.h;
 /** 땅 높이 · 불 자리 · 할매 자리 (시안 scene1) */
 const GY = 206;
 const FIRE_X = 120;
-const GUGU_BOX = { x: 212, y: 86, w: 112, h: 136 } as const;
+/** 구구 할매 자리 (칸 안). 할매는 움직여서 GuguActor가 따로 그린다 — 이 파일은 김(fx)만 같은 자리에 그린다 */
+export const GUGU_BOX = { x: 212, y: 86, w: 112, h: 136 } as const;
 
 const L = '#10142E';
 const n1 = (n: number) => String(Math.round(n * 100) / 100);
@@ -58,7 +59,7 @@ function gugu(inner: string): string {
   return `<g transform="translate(${n1(tx)} ${n1(ty)}) scale(${s.toFixed(4)})">${inner}</g>`;
 }
 
-/** 움직이지 않는 그림 */
+/** 움직이지 않는 그림 (구구 할매는 뺀다 — GuguActor) */
 export function restSceneSvg(mood: FireMood): string {
   const pre =
     mood === 'off'
@@ -75,7 +76,6 @@ export function restSceneSvg(mood: FireMood): string {
     sky() + pre +
     `<ellipse cx="${FIRE_X}" cy="${GY + 18}" rx="70" ry="9" fill="#000" opacity=".3"/>` +
     fire + logs(FIRE_X, GY, mood === 'off') +
-    gugu(guguInner(mood)) +
     '</svg>'
   );
 }

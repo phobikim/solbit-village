@@ -1,4 +1,5 @@
-import { guguFxInner, guguSvg } from '../gugu';
+import { guguBaseInner, guguFxInner, guguHeadInner, guguInner, guguLidsInner, guguSvg } from '../gugu';
+import { guguMotion } from '../guguMotion';
 import { dayWoodSvg } from '../restIcons';
 import { restSceneFxSvg, restSceneSvg } from '../restScene';
 import { TAB_ICONS } from '../tabIcons';
@@ -25,6 +26,46 @@ describe('구구 할매 (쉼터 NPC)', () => {
   });
 });
 
+describe('구구 할매 움직임 (디자인 5 쉼터 v2 개정)', () => {
+  it('몸통 + 고개로 나뉜 그림이 한 장 그림과 같다 (끄덕임은 고개만)', () => {
+    for (const m of MOODS) {
+      expect(guguInner(m)).toBe(guguBaseInner(m) + guguHeadInner(m));
+      expect(guguBaseInner(m)).not.toContain('#FF4FA0'); // 목도리는 고개 쪽
+      expect(guguHeadInner(m)).toContain('#FF4FA0');
+    }
+  });
+  it('눈꺼풀: 뜬 눈(꺼짐 · 보통)만, 웃는 눈(뜨끈)은 없다', () => {
+    expect(guguLidsInner('off')).toContain('#3D6DB8');
+    expect(guguLidsInner('mid')).toContain('#4E5590');
+    expect(guguLidsInner('hot')).toBeNull();
+  });
+  it('꺼짐: 0.25초 떨림 + 깜빡임 / 보통: 둥실 2.6초 + 끄덕 5초 + 깜빡임 / 뜨끈: 흔들 4초 + 기울임 4초', () => {
+    const off = guguMotion('off');
+    expect(off.body).toMatchObject({ kind: 'translateX', track: { duration: 250, output: [0, -2, 2, 0] } });
+    expect(off.head).toBeNull();
+    expect(off.blink?.duration).toBe(4000);
+    const mid = guguMotion('mid');
+    expect(mid.body).toMatchObject({ kind: 'translateY', track: { duration: 2600, output: [0, -3, 0] } });
+    expect(mid.head).toMatchObject({ duration: 5000, output: [0, 0, -6, 0, -6, 0] });
+    const hot = guguMotion('hot');
+    expect(hot.body).toMatchObject({ kind: 'rotate', track: { duration: 4000, output: [0, -3, 0, 3, 0] } });
+    expect(hot.head).toMatchObject({ duration: 4000, output: [0, 4, 0] });
+    expect(hot.blink).toBeNull();
+  });
+  it('모든 키는 입력 0 ~ 1이 오름차순이고 값 개수가 같다', () => {
+    for (const m of MOODS) {
+      const g = guguMotion(m);
+      for (const t of [g.body.track, g.head, g.blink]) {
+        if (!t) continue;
+        expect(t.input).toHaveLength(t.output.length);
+        expect(t.input[0]).toBe(0);
+        expect(t.input[t.input.length - 1]).toBe(1);
+        expect([...t.input]).toEqual([...t.input].sort((a, b) => a - b));
+      }
+    }
+  });
+});
+
 describe('쉼터 풍경 (디자인 1a)', () => {
   it('366 x 280 칸에 밤하늘 · 불 · 구구 할매가 그려진다', () => {
     for (const m of MOODS) {
@@ -32,7 +73,7 @@ describe('쉼터 풍경 (디자인 1a)', () => {
       expect(s).not.toMatch(bad);
       expect(s).toContain('viewBox="0 0 366 280"');
       expect(s).toContain('#0F1636'); // 밤하늘
-      expect(s).toContain('#FF4FA0'); // 할매 목도리
+      expect(s).not.toContain('#FF4FA0'); // 구구 할매는 따로 움직여서 풍경 그림에는 없다
     }
   });
   it('불이 꺼지면 불꽃 대신 연기 · 차가운 통나무, 뜨끈하면 불이 더 크다', () => {

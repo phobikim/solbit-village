@@ -27,8 +27,20 @@ function eye(x: number, y: number, r: number, happy: boolean, look: number): str
   );
 }
 
-/** 움직이지 않는 그림 (좌표계: viewBox 20 -10 190 230) */
-export function guguInner(mood: FireMood): string {
+/** 몸통 · 발 · 날개 (고개 아래). 몸 전체가 움직일 때 같이 움직이고 고개는 따로 끄덕인다 */
+export function guguBaseInner(mood: FireMood): string {
+  const P = PALETTE[mood];
+  return (
+    `<ellipse cx="112" cy="206" rx="70" ry="8" fill="#000" opacity=".18"/>` +
+    `<path d="M78 200 l-6 8 M78 200 l2 9 M78 200 l8 6 M140 200 l-6 8 M140 200 l2 9 M140 200 l8 6" stroke="${P.foot}" stroke-width="5" stroke-linecap="round"/>` +
+    `<path d="M176 150 l20 -14 M178 158 l24 -4 M176 166 l20 8" stroke="${L}" stroke-width="4" stroke-linecap="round"/>` +
+    `<path d="M40 168 C38 128 74 116 112 118 C156 120 186 134 184 170 C182 200 150 204 112 204 C70 204 42 198 40 168Z" fill="${P.belly}" ${o(6)}/>` +
+    `<path d="M138 166 q10 -10 22 -4 M144 178 q10 -10 22 -4" stroke="${P.line}" stroke-width="7" stroke-linecap="round" fill="none"/>`
+  );
+}
+
+/** 고개 쪽: 목 · 목도리 · 더듬이 · 눈 · 부리 · 표정 꾸밈 (회전 중심 = HEAD_PIVOT) */
+export function guguHeadInner(mood: FireMood): string {
   const P = PALETTE[mood];
   const happy = mood === 'hot';
   const extra =
@@ -40,11 +52,6 @@ export function guguInner(mood: FireMood): string {
           `<path d="M54 68 q6 -3 0 -6 M114 68 q-6 -3 0 -6" stroke="#BDEBFF" stroke-width="3.5" stroke-linecap="round" fill="none"/>`
         : '';
   return (
-    `<ellipse cx="112" cy="206" rx="70" ry="8" fill="#000" opacity=".18"/>` +
-    `<path d="M78 200 l-6 8 M78 200 l2 9 M78 200 l8 6 M140 200 l-6 8 M140 200 l2 9 M140 200 l8 6" stroke="${P.foot}" stroke-width="5" stroke-linecap="round"/>` +
-    `<path d="M176 150 l20 -14 M178 158 l24 -4 M176 166 l20 8" stroke="${L}" stroke-width="4" stroke-linecap="round"/>` +
-    `<path d="M40 168 C38 128 74 116 112 118 C156 120 186 134 184 170 C182 200 150 204 112 204 C70 204 42 198 40 168Z" fill="${P.belly}" ${o(6)}/>` +
-    `<path d="M138 166 q10 -10 22 -4 M144 178 q10 -10 22 -4" stroke="${P.line}" stroke-width="7" stroke-linecap="round" fill="none"/>` +
     `<path d="M58 150 L52 46 C50 22 70 12 84 12 C100 12 112 24 110 46 L112 146 Z" fill="${P.body}" ${o(6)}/>` +
     `<path d="M56 140 q7 10 14 0 q7 10 14 0 q7 10 14 0 q7 10 14 0" fill="none" stroke="${L}" stroke-width="4" stroke-linecap="round"/>` +
     `<path d="M54 112 Q84 126 112 112 L112 128 Q84 142 54 128Z" fill="#FF4FA0" ${o(4)}/><path d="M100 124 l10 26 l12 -6 l-8 -22Z" fill="#FF4FA0" ${o(4)}/>` +
@@ -54,6 +61,22 @@ export function guguInner(mood: FireMood): string {
     `<ellipse cx="84" cy="64" rx="6" ry="8" fill="${P.foot}" ${o(3.5)}/>` +
     extra
   );
+}
+
+/** 눈꺼풀 (눈 깜빡임): 뜬 눈일 때만. 웃는 눈(뜨끈)은 깜빡이지 않는다. 몸 색 타원이 눈을 덮는다 */
+export function guguLidsInner(mood: FireMood): string | null {
+  if (mood === 'hot') return null;
+  const lid = (x: number) => `<ellipse cx="${x}" cy="44" rx="12.5" ry="12.5" fill="${PALETTE[mood].body}" stroke="${L}" stroke-width="3"/>`;
+  return lid(68) + lid(98);
+}
+
+/** 고개가 끄덕이는 중심 (viewBox 좌표) · 몸이 흔들리는 중심 */
+export const GUGU_HEAD_PIVOT = { x: 84, y: 140 } as const;
+export const GUGU_BODY_PIVOT = { x: 112, y: 206 } as const;
+
+/** 움직이지 않는 그림 한 장 (좌표계: viewBox 20 -10 190 230) — 몸통 + 고개 */
+export function guguInner(mood: FireMood): string {
+  return guguBaseInner(mood) + guguHeadInner(mood);
 }
 
 /** 깜빡이는 것: 뜨끈할 때 머리에서 오르는 김 세 줄. 없으면 null */
